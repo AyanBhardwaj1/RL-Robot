@@ -27,13 +27,13 @@
 <main id="roles-main">
   <section class="roles-intro">
     <h1>Built for a humanoid team</h1>
-    <p>A humanoid company hires across controls, simulation, learning, perception, embedded, platform, fleet, test and safety. Breakpoint touches each of them with working code and a measured result. Each card names the file, the number it produced, and the next thing I’d build for that team.</p>
+    <p>A humanoid company hires across controls, simulation, learning, perception, embedded, platform, fleet, test, safety, data and systems engineering. Breakpoint touches each of them with working code and a measured result. Each card names the file, the number it produced, and the next thing I’d build for that team.</p>
   </section>
 
   <nav class="role-index" aria-label="Teams">
     <a href="#controls">Controls</a><a href="#sim">Simulation</a><a href="#learning">Robot learning</a><a href="#mlsys">ML systems</a>
     <a href="#perception">Perception</a><a href="#embedded">Real-time and embedded</a><a href="#platform">Platform and dev tools</a>
-    <a href="#fleet">Fleet and integration</a><a href="#test">Test and validation</a><a href="#safety">Safety</a><a href="#data">Data and teleoperation</a>
+    <a href="#fleet">Fleet and integration</a><a href="#test">Test and validation</a><a href="#safety">Safety</a><a href="#data">Data and teleoperation</a><a href="#systems">Hardware and systems</a>
   </nav>
 
   <div class="role-grid">
@@ -183,6 +183,19 @@
       </ul>
       <h3>Next I’d build</h3>
       <p>An episode filter that tags recorded demonstrations whose lag or near-falls would teach a policy the wrong thing.</p>
+    </article>
+
+    <article class="role" id="systems">
+      <h2>Hardware and systems engineering</h2>
+      <p class="does">Actuators, mechanical design and system requirements: deciding which spec is worth the money, mass and schedule.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li><code>breakpoint/design.py</code>: each spec change re-run on the same 750 sampled shifts, so every shift either flips or not, with an exact sign test on the flips.</li>
+        <li>Measured: a 15% faster swing saves 24 shifts and loses none; 10 cm more side-step reach saves 14; 20 ms less latency saves 9. A 25% stronger ankle saves none, because at full strength the foot, not the ankle, limits the centre of pressure.</li>
+        <li>A wider stance helps as many shifts as it hurts (7 and 7): during a swing the loaded foot sits further from the body. A trade-off a single number would hide.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>Cost-weighted levers: attach mass, cost and schedule to each spec and rank changes by robustness bought per kilogram or per dollar, against the real robot’s model.</p>
     </article>
   </div>
 

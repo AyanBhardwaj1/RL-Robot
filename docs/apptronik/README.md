@@ -62,6 +62,7 @@ originals before quoting it**. Items marked *(unverified)* came from a single ag
 | Fleet Connect / integration | gRPC, protobuf, REST, MQTT, Kafka, WMS/ERP integration | stateless HTTP API, deployment profiles |
 | Test / TestOps | HIL and simulation testing, regression, coverage | `regress`, `certify`, shrunk counterexamples |
 | Safety | IEC 61508, ISO 13849, ISO 10218, R15.06/R15.08, HARA, FMEA | failure bounds, evidence-based explanations, biped vs wheeled odds |
+| Hardware / systems engineering | Actuator and mechanical trade-offs, system requirements, design reviews | `design.py`: paired design levers with a sign test (a 15% faster swing saves 24 of 750 shifts and loses none; +25% ankle torque saves none) |
 
 Role sources: [Staff SWE – Humanoid Controls](https://job-boards.greenhouse.io/apptronik/jobs/6142283004),
 [Perception SLAM](https://job-boards.greenhouse.io/apptronik/jobs/6013277004),
