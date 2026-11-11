@@ -15,10 +15,19 @@ python -m breakpoint train   --steps 420000 --out runs/v2/policy_v2.npz --seed 1
 python -m breakpoint harden  --policy runs/v2/policy_v2.npz --out runs/v2field --steps 240000 --hunt-gens 4 \
                              --profile sidewalk,construction --seed 21
 
+# 2b. latency-focused PPO round (did not beat the original; the selection guard keeps it)
+python -m breakpoint harden  --policy runs/v2field/policy_v2field.npz --out runs/v3lat --steps 240000 --hunt-gens 4 \
+                             --profile sidewalk,teleop --seed 33
+
 # 3. side-by-side audits and deployment checks
 python -m breakpoint leaderboard cpg runs/hardened/policy_hardened.npz runs/v2/policy_v2.npz \
                              runs/v2field/policy_v2field.npz --out runs/leaderboard2
-python -m breakpoint deploy  --policy runs/v2field/policy_v2field.npz --trials 60 --out runs/v2field/policy_v2field_deploy.json || true
+python -m breakpoint leaderboard cpg runs/v2field/policy_v2field.npz gated:runs/v2field/policy_v2field.npz \
+                             --out runs/leaderboard3
+for p in cpg runs/hardened/policy_hardened.npz runs/v2/policy_v2.npz runs/v2field/policy_v2field.npz \
+         gated:runs/v2field/policy_v2field.npz; do
+  python -m breakpoint deploy --policy "$p" --trials 60 || true   # non-zero = over the failure budget
+done
 
 # 4. regression gate on the shrunk counterexamples
 python -m breakpoint regress --policy runs/v2field/policy_v2field.npz --suite runs/v2field/suite || true
