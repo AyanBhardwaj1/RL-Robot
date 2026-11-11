@@ -13,8 +13,8 @@
     "rollouts": 2
    },
    {
-    "key": "push_left",
-    "label": "Push from left",
+    "key": "push_right",
+    "label": "Push from right",
     "unit": "N\u00b7s",
     "breaking_point": 0.0,
     "fraction": 0.0,
@@ -31,8 +31,8 @@
     "rollouts": 2
    },
    {
-    "key": "push_right",
-    "label": "Push from right",
+    "key": "push_left",
+    "label": "Push from left",
     "unit": "N\u00b7s",
     "breaking_point": 0.0,
     "fraction": 0.0,
@@ -40,17 +40,8 @@
     "rollouts": 2
    },
    {
-    "key": "push_rear-left",
-    "label": "Push from rear-left",
-    "unit": "N\u00b7s",
-    "breaking_point": 0.0,
-    "fraction": 0.0,
-    "fails_nominal": true,
-    "rollouts": 2
-   },
-   {
-    "key": "push_front-left",
-    "label": "Push from front-left",
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
     "unit": "N\u00b7s",
     "breaking_point": 0.0,
     "fraction": 0.0,
@@ -67,8 +58,17 @@
     "rollouts": 2
    },
    {
-    "key": "push_rear-right",
-    "label": "Push from rear-right",
+    "key": "push_front-left",
+    "label": "Push from front-left",
+    "unit": "N\u00b7s",
+    "breaking_point": 0.0,
+    "fraction": 0.0,
+    "fails_nominal": true,
+    "rollouts": 2
+   },
+   {
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
     "unit": "N\u00b7s",
     "breaking_point": 0.0,
     "fraction": 0.0,
@@ -1331,10 +1331,11 @@
    "mild_failure_modes": 2,
    "weakest_axes": [
     "Push from rear",
-    "Push from left",
+    "Push from right",
     "Push from front"
    ]
-  }
+  },
+  "_dir_fixed": true
  },
  {
   "label": "after",
@@ -1350,8 +1351,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_left",
-    "label": "Push from left",
+    "key": "push_right",
+    "label": "Push from right",
     "unit": "N\u00b7s",
     "breaking_point": 6.875,
     "fraction": 0.1719,
@@ -1368,8 +1369,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_right",
-    "label": "Push from right",
+    "key": "push_left",
+    "label": "Push from left",
     "unit": "N\u00b7s",
     "breaking_point": 8.125,
     "fraction": 0.2031,
@@ -1377,8 +1378,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_rear-left",
-    "label": "Push from rear-left",
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
     "unit": "N\u00b7s",
     "breaking_point": 4.375,
     "fraction": 0.1094,
@@ -1386,8 +1387,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_front-left",
-    "label": "Push from front-left",
+    "key": "push_front-right",
+    "label": "Push from front-right",
     "unit": "N\u00b7s",
     "breaking_point": 8.75,
     "fraction": 0.2188,
@@ -1395,8 +1396,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_front-right",
-    "label": "Push from front-right",
+    "key": "push_front-left",
+    "label": "Push from front-left",
     "unit": "N\u00b7s",
     "breaking_point": 18.75,
     "fraction": 0.4688,
@@ -1404,8 +1405,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_rear-right",
-    "label": "Push from rear-right",
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
     "unit": "N\u00b7s",
     "breaking_point": 6.875,
     "fraction": 0.1719,
@@ -2219,10 +2220,11 @@
    "failure_rate_upper_95": 0.1173,
    "mild_failure_modes": 0,
    "weakest_axes": [
-    "Push from rear-left",
+    "Push from rear-right",
     "Push from rear",
-    "Push from left"
+    "Push from right"
    ]
-  }
+  },
+  "_dir_fixed": true
  }
 ]

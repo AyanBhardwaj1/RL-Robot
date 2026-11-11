@@ -45,11 +45,11 @@ pre{margin:0;font-size:11px;max-height:180px;overflow:auto;white-space:pre-wrap}
     <div class="muted">Shove the robot (0.1 s impulse). Force: <b id="fval">120</b> N</div>
     <input id="force" type="range" min="20" max="400" value="120">
     <div class="pad" style="margin-top:8px">
-      <button data-d="-135" class="ghost">↘</button><button data-d="180" class="ghost">↓ front</button><button data-d="135" class="ghost">↙</button>
-      <button data-d="-90" class="ghost">→ right</button><span></span><button data-d="90" class="ghost">← left</button>
-      <button data-d="-45" class="ghost">↗</button><button data-d="0" class="ghost">↑ rear</button><button data-d="45" class="ghost">↖</button>
+      <button data-d="-135" class="ghost" title="from front-left">↘</button><button data-d="180" class="ghost">↓ from front</button><button data-d="135" class="ghost" title="from front-right">↙</button>
+      <button data-d="-90" class="ghost">from left →</button><span></span><button data-d="90" class="ghost">← from right</button>
+      <button data-d="-45" class="ghost" title="from rear-left">↗</button><button data-d="0" class="ghost">↑ from rear</button><button data-d="45" class="ghost" title="from rear-right">↖</button>
     </div>
-    <p class="muted" style="margin:8px 0 0">Score = total impulse the robot absorbed before falling. Keys: arrows shove.</p>
+    <p class="muted" style="margin:8px 0 0">Robot faces up; arrows show which way it is shoved. Score = total impulse absorbed before falling. Keys: arrows shove.</p>
   </div>
   <div class="card"><div class="muted">Outcome</div><div id="why" style="margin:4px 0 6px;font-weight:600"></div><pre id="out">–</pre></div>
   <div class="card">

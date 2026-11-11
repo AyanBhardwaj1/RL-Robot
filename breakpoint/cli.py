@@ -25,7 +25,7 @@ from .policy import ResidualPolicy, load_policy
 from .ppo import EVAL_WORLDS, PPOConfig, ScenarioSampler, deterministic_score, train
 from .probe import probe
 from .profiles import PROFILES, deployment_check
-from .redteam import boundary_map, interactions, red_team
+from .redteam import boundary_map, compound_pairs, interactions, red_team
 from .report import render_html, scorecard
 from .scenario import Scenario
 
@@ -56,7 +56,7 @@ def audit(spec: str | None, label: str, hunt_gens: int = 5, workers: int = 3) ->
         "boundary": boundary_map(spec, "friction", _weakest_push(pr), n=6, workers=workers),
         "redteam": red_team(spec, pr, workers=workers),
     }
-    card["compound_failures"] = sum(c["compound_failure"] for c in extras["interactions"])
+    card["compound_failures"] = compound_pairs(extras["interactions"])
     card["redteam_failures"] = sum(a["pass_rate"] < 1 for a in extras["redteam"]["attacks"])
     return {"label": label, "policy": spec or "cpg", "probe": pr, "nominal": nom, "hunt": h.to_dict(),
             "card": card, "extras": extras}
@@ -140,7 +140,11 @@ def cmd_audit(a: argparse.Namespace) -> int:
 
 
 def cmd_leaderboard(a: argparse.Namespace) -> int:
-    specs = [None if p == "cpg" else p for p in a.policies][:4]
+    if len(a.policies) > 4:
+        print(f"warning: only the first 4 of {len(a.policies)} policies fit in one report", file=sys.stderr)
+    specs = list(dict.fromkeys(None if p == "cpg" else p for p in a.policies))[:4]  # de-duplicate, keep order
+    for sp in specs:
+        load_policy(sp)  # fail fast on a bad spec, before minutes of auditing
     labels: list[str] = []
     for sp in specs:
         lab = "cpg-baseline" if sp is None else Path(sp).stem
@@ -158,6 +162,14 @@ def cmd_leaderboard(a: argparse.Namespace) -> int:
 
 def cmd_harden(a: argparse.Namespace) -> int:
     out = Path(a.out)
+    # validate inputs up front: the "before" audit takes minutes
+    if a.policy and not a.policy.endswith(".npz"):
+        raise SystemExit("harden needs a residual PPO policy (.npz) to fine-tune; 'cpg' and py: specs can only be audited")
+    unknown = [n for n in (x.strip() for x in (a.profile or "").split(",")) if n and n not in PROFILES]
+    if unknown:
+        raise SystemExit(f"unknown profile(s) {unknown}; choose from {sorted(PROFILES)}")
+    if a.policy:
+        ResidualPolicy.load(a.policy)
     before = audit(a.policy, "before", a.hunt_gens, a.workers)
     suite = save_suite(before["hunt"]["atlas"], a.policy, out / "suite")
     print(f"[harden] {len(suite)} minimal counterexamples saved to {out / 'suite'}", flush=True)
@@ -165,7 +177,7 @@ def cmd_harden(a: argparse.Namespace) -> int:
     pol = ResidualPolicy.load(a.policy) if a.policy else ResidualPolicy(seed=a.seed)
     pol.name = "hardened"
     hardened = out / f"policy_{out.name}.npz"
-    profiles = [PROFILES[n] for n in (a.profile.split(",") if a.profile else [])]
+    profiles = [PROFILES[n.strip()] for n in (a.profile or "").split(",") if n.strip()]
     # Select checkpoints on what hardening is *for*: generic worlds + the counterexamples
     # + (if given) worlds drawn from the target deployment profiles.
     sel_rng = np.random.default_rng(a.seed + 99)

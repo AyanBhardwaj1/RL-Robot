@@ -13,8 +13,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_left",
-    "label": "Push from left",
+    "key": "push_right",
+    "label": "Push from right",
     "unit": "N\u00b7s",
     "breaking_point": 4.375,
     "fraction": 0.1094,
@@ -31,8 +31,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_right",
-    "label": "Push from right",
+    "key": "push_left",
+    "label": "Push from left",
     "unit": "N\u00b7s",
     "breaking_point": 4.375,
     "fraction": 0.1094,
@@ -40,8 +40,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_rear-left",
-    "label": "Push from rear-left",
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
     "unit": "N\u00b7s",
     "breaking_point": 6.25,
     "fraction": 0.1562,
@@ -49,8 +49,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_front-left",
-    "label": "Push from front-left",
+    "key": "push_front-right",
+    "label": "Push from front-right",
     "unit": "N\u00b7s",
     "breaking_point": 8.75,
     "fraction": 0.2188,
@@ -58,8 +58,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_front-right",
-    "label": "Push from front-right",
+    "key": "push_front-left",
+    "label": "Push from front-left",
     "unit": "N\u00b7s",
     "breaking_point": 8.125,
     "fraction": 0.2031,
@@ -67,8 +67,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_rear-right",
-    "label": "Push from rear-right",
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
     "unit": "N\u00b7s",
     "breaking_point": 3.125,
     "fraction": 0.0781,
@@ -1344,17 +1344,17 @@
    "failure_rate_upper_95": 0.1668,
    "mild_failure_modes": 3,
    "weakest_axes": [
-    "Push from rear-right",
-    "Push from left",
-    "Push from right"
+    "Push from rear-left",
+    "Push from right",
+    "Push from left"
    ],
-   "compound_failures": 2,
+   "compound_failures": 1,
    "redteam_failures": 3
   },
   "extras": {
    "interactions": [
     {
-     "a": "Push from rear-right",
+     "a": "Push from rear-left",
      "b": "Payload",
      "fraction": 0.5,
      "settings": {
@@ -1365,7 +1365,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from rear-right",
+     "a": "Push from rear-left",
      "b": "Payload",
      "fraction": 0.75,
      "settings": {
@@ -1376,7 +1376,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from rear-right",
+     "a": "Push from rear-left",
      "b": "Downhill slope",
      "fraction": 0.5,
      "settings": {
@@ -1387,7 +1387,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from rear-right",
+     "a": "Push from rear-left",
      "b": "Downhill slope",
      "fraction": 0.75,
      "settings": {
@@ -1398,7 +1398,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from rear-right",
+     "a": "Push from rear-left",
      "b": "Uphill slope",
      "fraction": 0.5,
      "settings": {
@@ -1409,7 +1409,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from rear-right",
+     "a": "Push from rear-left",
      "b": "Uphill slope",
      "fraction": 0.75,
      "settings": {
@@ -1501,8 +1501,8 @@
      ]
     },
     "y": {
-     "key": "push_rear-right",
-     "label": "Push from rear-right",
+     "key": "push_rear-left",
+     "label": "Push from rear-left",
      "unit": "N\u00b7s",
      "values": [
       0.0,
@@ -1695,7 +1695,8 @@
      }
     ]
    }
-  }
+  },
+  "_dir_fixed": true
  },
  {
   "label": "policy_v1",
@@ -1711,8 +1712,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_left",
-    "label": "Push from left",
+    "key": "push_right",
+    "label": "Push from right",
     "unit": "N\u00b7s",
     "breaking_point": 5.0,
     "fraction": 0.125,
@@ -1729,8 +1730,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_right",
-    "label": "Push from right",
+    "key": "push_left",
+    "label": "Push from left",
     "unit": "N\u00b7s",
     "breaking_point": 6.25,
     "fraction": 0.1562,
@@ -1738,20 +1739,11 @@
     "rollouts": 32
    },
    {
-    "key": "push_rear-left",
-    "label": "Push from rear-left",
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
     "unit": "N\u00b7s",
     "breaking_point": 5.625,
     "fraction": 0.1406,
-    "fails_nominal": false,
-    "rollouts": 32
-   },
-   {
-    "key": "push_front-left",
-    "label": "Push from front-left",
-    "unit": "N\u00b7s",
-    "breaking_point": 6.875,
-    "fraction": 0.1719,
     "fails_nominal": false,
     "rollouts": 32
    },
@@ -1765,8 +1757,17 @@
     "rollouts": 32
    },
    {
-    "key": "push_rear-right",
-    "label": "Push from rear-right",
+    "key": "push_front-left",
+    "label": "Push from front-left",
+    "unit": "N\u00b7s",
+    "breaking_point": 6.875,
+    "fraction": 0.1719,
+    "fails_nominal": false,
+    "rollouts": 32
+   },
+   {
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
     "unit": "N\u00b7s",
     "breaking_point": 9.375,
     "fraction": 0.2344,
@@ -3555,7 +3556,8 @@
      }
     ]
    }
-  }
+  },
+  "_dir_fixed": true
  },
  {
   "label": "policy_hardened",
@@ -3571,8 +3573,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_left",
-    "label": "Push from left",
+    "key": "push_right",
+    "label": "Push from right",
     "unit": "N\u00b7s",
     "breaking_point": 6.25,
     "fraction": 0.1562,
@@ -3589,8 +3591,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_right",
-    "label": "Push from right",
+    "key": "push_left",
+    "label": "Push from left",
     "unit": "N\u00b7s",
     "breaking_point": 8.75,
     "fraction": 0.2188,
@@ -3598,17 +3600,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_rear-left",
-    "label": "Push from rear-left",
-    "unit": "N\u00b7s",
-    "breaking_point": 6.875,
-    "fraction": 0.1719,
-    "fails_nominal": false,
-    "rollouts": 32
-   },
-   {
-    "key": "push_front-left",
-    "label": "Push from front-left",
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
     "unit": "N\u00b7s",
     "breaking_point": 6.875,
     "fraction": 0.1719,
@@ -3619,14 +3612,23 @@
     "key": "push_front-right",
     "label": "Push from front-right",
     "unit": "N\u00b7s",
+    "breaking_point": 6.875,
+    "fraction": 0.1719,
+    "fails_nominal": false,
+    "rollouts": 32
+   },
+   {
+    "key": "push_front-left",
+    "label": "Push from front-left",
+    "unit": "N\u00b7s",
     "breaking_point": 15.0,
     "fraction": 0.375,
     "fails_nominal": false,
     "rollouts": 32
    },
    {
-    "key": "push_rear-right",
-    "label": "Push from rear-right",
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
     "unit": "N\u00b7s",
     "breaking_point": 8.125,
     "fraction": 0.2031,
@@ -4674,9 +4676,9 @@
    "failure_rate_upper_95": 0.1173,
    "mild_failure_modes": 1,
    "weakest_axes": [
-    "Push from left",
-    "Push from rear-left",
-    "Push from front-left"
+    "Push from right",
+    "Push from rear-right",
+    "Push from front-right"
    ],
    "compound_failures": 1,
    "redteam_failures": 2
@@ -4684,7 +4686,7 @@
   "extras": {
    "interactions": [
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Action latency",
      "fraction": 0.5,
      "settings": {
@@ -4695,7 +4697,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Action latency",
      "fraction": 0.75,
      "settings": {
@@ -4706,7 +4708,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Stairs",
      "fraction": 0.5,
      "settings": {
@@ -4717,7 +4719,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Stairs",
      "fraction": 0.75,
      "settings": {
@@ -4728,7 +4730,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Motor weakness",
      "fraction": 0.5,
      "settings": {
@@ -4739,7 +4741,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Motor weakness",
      "fraction": 0.75,
      "settings": {
@@ -4831,8 +4833,8 @@
      ]
     },
     "y": {
-     "key": "push_left",
-     "label": "Push from left",
+     "key": "push_right",
+     "label": "Push from right",
      "unit": "N\u00b7s",
      "values": [
       0.0,
@@ -5025,7 +5027,8 @@
      }
     ]
    }
-  }
+  },
+  "_dir_fixed": true
  },
  {
   "label": "policy_hardened2",
@@ -5041,8 +5044,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_left",
-    "label": "Push from left",
+    "key": "push_right",
+    "label": "Push from right",
     "unit": "N\u00b7s",
     "breaking_point": 6.25,
     "fraction": 0.1562,
@@ -5059,8 +5062,8 @@
     "rollouts": 32
    },
    {
-    "key": "push_right",
-    "label": "Push from right",
+    "key": "push_left",
+    "label": "Push from left",
     "unit": "N\u00b7s",
     "breaking_point": 6.875,
     "fraction": 0.1719,
@@ -5068,20 +5071,11 @@
     "rollouts": 32
    },
    {
-    "key": "push_rear-left",
-    "label": "Push from rear-left",
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
     "unit": "N\u00b7s",
     "breaking_point": 6.875,
     "fraction": 0.1719,
-    "fails_nominal": false,
-    "rollouts": 32
-   },
-   {
-    "key": "push_front-left",
-    "label": "Push from front-left",
-    "unit": "N\u00b7s",
-    "breaking_point": 11.875,
-    "fraction": 0.2969,
     "fails_nominal": false,
     "rollouts": 32
    },
@@ -5089,14 +5083,23 @@
     "key": "push_front-right",
     "label": "Push from front-right",
     "unit": "N\u00b7s",
+    "breaking_point": 11.875,
+    "fraction": 0.2969,
+    "fails_nominal": false,
+    "rollouts": 32
+   },
+   {
+    "key": "push_front-left",
+    "label": "Push from front-left",
+    "unit": "N\u00b7s",
     "breaking_point": 8.75,
     "fraction": 0.2188,
     "fails_nominal": false,
     "rollouts": 32
    },
    {
-    "key": "push_rear-right",
-    "label": "Push from rear-right",
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
     "unit": "N\u00b7s",
     "breaking_point": 12.5,
     "fraction": 0.3125,
@@ -6251,7 +6254,7 @@
    "failure_rate_upper_95": 0.1173,
    "mild_failure_modes": 1,
    "weakest_axes": [
-    "Push from left",
+    "Push from right",
     "Action latency",
     "Push from rear"
    ],
@@ -6261,7 +6264,7 @@
   "extras": {
    "interactions": [
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Action latency",
      "fraction": 0.5,
      "settings": {
@@ -6272,7 +6275,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Action latency",
      "fraction": 0.75,
      "settings": {
@@ -6283,7 +6286,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Stairs",
      "fraction": 0.5,
      "settings": {
@@ -6294,7 +6297,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Stairs",
      "fraction": 0.75,
      "settings": {
@@ -6305,7 +6308,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Payload",
      "fraction": 0.5,
      "settings": {
@@ -6316,7 +6319,7 @@
      "compound_failure": false
     },
     {
-     "a": "Push from left",
+     "a": "Push from right",
      "b": "Payload",
      "fraction": 0.75,
      "settings": {
@@ -6408,8 +6411,8 @@
      ]
     },
     "y": {
-     "key": "push_left",
-     "label": "Push from left",
+     "key": "push_right",
+     "label": "Push from right",
      "unit": "N\u00b7s",
      "values": [
       0.0,
@@ -6602,6 +6605,7 @@
      }
     ]
    }
-  }
+  },
+  "_dir_fixed": true
  }
 ]

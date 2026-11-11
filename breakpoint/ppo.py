@@ -111,7 +111,8 @@ def deterministic_score(policy: ResidualPolicy, seeds: tuple[int, ...] = (0, 1),
         for sd in seeds:
             out, _ = rollout(policy, scn, seed=sd)
             expected = scn.target_speed * scn.duration_s
-            total += float(out.passed) + 0.25 * float(np.clip(out.distance / expected, 0.0, 1.0))
+            progress = 1.0 if expected < 0.05 else float(np.clip(out.distance / expected, 0.0, 1.0))
+            total += float(out.passed) + 0.25 * progress
             n += 1
     return total / n
 

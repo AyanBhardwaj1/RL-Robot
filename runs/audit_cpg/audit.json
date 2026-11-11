@@ -13,8 +13,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_left",
-    "label": "Push from left",
+    "key": "push_right",
+    "label": "Push from right",
     "unit": "N\u00b7s",
     "breaking_point": 5.625,
     "fraction": 0.1406,
@@ -31,8 +31,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_right",
-    "label": "Push from right",
+    "key": "push_left",
+    "label": "Push from left",
     "unit": "N\u00b7s",
     "breaking_point": 5.0,
     "fraction": 0.125,
@@ -40,8 +40,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_rear-left",
-    "label": "Push from rear-left",
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
     "unit": "N\u00b7s",
     "breaking_point": 4.375,
     "fraction": 0.1094,
@@ -49,8 +49,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_front-left",
-    "label": "Push from front-left",
+    "key": "push_front-right",
+    "label": "Push from front-right",
     "unit": "N\u00b7s",
     "breaking_point": 10.625,
     "fraction": 0.2656,
@@ -58,8 +58,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_front-right",
-    "label": "Push from front-right",
+    "key": "push_front-left",
+    "label": "Push from front-left",
     "unit": "N\u00b7s",
     "breaking_point": 9.375,
     "fraction": 0.2344,
@@ -67,8 +67,8 @@
     "rollouts": 16
    },
    {
-    "key": "push_rear-right",
-    "label": "Push from rear-right",
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
     "unit": "N\u00b7s",
     "breaking_point": 6.875,
     "fraction": 0.1719,
@@ -1149,10 +1149,11 @@
    "failure_rate_upper_95": 0.1668,
    "mild_failure_modes": 0,
    "weakest_axes": [
-    "Push from rear-left",
-    "Push from right",
-    "Push from left"
+    "Push from rear-right",
+    "Push from left",
+    "Push from right"
    ]
-  }
+  },
+  "_dir_fixed": true
  }
 ]

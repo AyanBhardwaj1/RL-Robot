@@ -75,86 +75,67 @@ export BREAKPOINT_LLM_MODEL=<model id>
 **`runs/v2field/policy_v2field.npz` scores 82.6 (SUPERVISED).** The CPG gait alone scores 66.8 in
 the same audit (`runs/leaderboard2/`). The best policy has zero compound failures and these
 margins: uphill 20° (the top of the tested range), payload 8 kg (also the top), stairs 9.4 cm,
-latency 60 ms, and side shoves of 6.9 / 5.6 N·s at the worst gait phase.
+latency 60 ms, and shoves from the left / right of 5.6 / 6.9 N·s at the worst gait phase.
 
 How it was built: v2 was PPO-trained from scratch with the corrected learner (bootstrapping on
 time-limit truncation, 16 terrain variants, deterministic best-checkpoint selection) for 420k
 steps, about 4 minutes on one CPU core. It then had one **deployment-aware** hardening round
 toward the sidewalk and construction profiles.
 
-| Policy (leaderboard v2) | Readiness | Margin | Uphill | Payload | Stairs | Latency | Side push L/R | Compound | Red team |
+| Policy (leaderboard v2) | Readiness | Margin | Uphill | Payload | Stairs | Latency | Shove from L / R | Compound pairs | Red team fails |
 |---|---|---|---|---|---|---|---|---|---|
-| CPG gait alone | 66.8 | 0.50 | 9.1° | 3.3 kg | 5.6 cm | 120 ms | 4.4 / 4.4 | 2 | 3/5 |
-| v1 + hardening round 1 | 77.2 | 0.56 | 16.3° | 6.3 kg | 7.0 cm | 40 ms | 6.3 / 8.8 | 1 | 2/5 |
-| v2 (fixed PPO, no hardening) | 73.5 | 0.54 | 9.7° | 8.0 kg | 7.5 cm | 40 ms | 5.0 / 4.4 | 1 | 5/5 |
-| **v2 + deployment-aware hardening** | **82.6** | **0.61** | **20°** | **8.0 kg** | **9.4 cm** | **60 ms** | **6.9 / 5.6** | **0** | **2/5** |
-
-Deployment check (60 sampled worlds per profile, same worlds for each policy):
-
-| Profile | v2 | v2 + deployment-aware hardening |
-|---|---|---|
-| warehouse | 0.0% (UB 4.9%) | 0.0% (UB 4.9%) |
-| home | 0.0% (UB 4.9%) | 0.0% (UB 4.9%) |
-| sidewalk | 10.0% (UB 18.2%) | **5.0% (UB 11.9%)** |
-| construction | **10.0% (UB 18.2%)** | 16.7% (UB 26.0%) |
-
-The hardening round halved sidewalk failures, the profile whose dominant cause was latency, but
-construction got worse, mainly from low friction. At 60 trials neither change is statistically
-significant (the bounds overlap), and the tool reports bounds so nobody over-reads them. Next
-round: more trials and a construction-focused profile mix.
-
-## Results: first leaderboard (v1 lineage, committed in `runs/leaderboard/`)
-
-All four policies were audited in one run with the same code, seeds and search budget
-(`python -m breakpoint leaderboard cpg runs/policy_v1.npz runs/hardened/policy_hardened.npz runs/hardened2/policy_hardened2.npz`).
-
-| Policy | Readiness | Grade | Margin index | Nominal pass | Uphill | Payload | Side push L/R (worst gait phase) | Compound fails | Red-team fails (of 5) |
-|---|---|---|---|---|---|---|---|---|---|
-| CPG gait alone | 66.8 | LAB-ONLY | 0.50 | 96% | 9.1° | 3.3 kg | 4.4 / 4.4 N·s | 2 | 3 |
-| Residual PPO v1 (4 min training) | 50.9 | LAB-ONLY | 0.15 | 96% | 0° | 0 kg | 5.0 / 6.3 N·s | 0 | 4 |
-| **v1 + hardening round 1** | **77.2** | **SUPERVISED** | **0.56** | **100%** | **16.3°** | **6.3 kg** | **6.3 / 8.8 N·s** | **1** | **2** |
-| v1 + hardening rounds 1+2 | 76.6 | SUPERVISED | 0.55 | 100% | 13.4° | 5.3 kg | 6.3 / 6.9 N·s | 1 | 5 |
+| CPG gait alone | 66.8 | 0.50 | 9.1° | 3.3 kg | 5.6 cm | 120 ms | 4.4 / 4.4 N·s | 1 | 3/5 |
+| v1 + hardening round 1 | 77.2 | 0.56 | 16.3° | 6.3 kg | 7.0 cm | 40 ms | 8.8 / 6.3 N·s | 1 | 2/5 |
+| v2 (fixed PPO, no hardening) | 73.5 | 0.54 | 9.7° | 8.0 kg | 7.5 cm | 40 ms | 4.4 / 5.0 N·s | 1 | 5/5 |
+| **v2 + deployment-aware hardening** | **82.6** | **0.61** | **20°** | **8.0 kg** | **9.4 cm** | **60 ms** | **5.6 / 6.9 N·s** | **0** | **2/5** |
 
 ![report](docs/report.png)
 
+### Deployment check: "if we ship it there, how often does it fall?"
+
+`python -m breakpoint deploy --policy <p> --trials 60` samples 60 independent worlds from each
+deployment profile (a distribution over terrain, friction, payload, latency, noise and pushes).
+Every world gets its own seed. The command reports the failure rate with a 95% upper bound and
+the dominant causes. It exits non-zero if the bound exceeds `--max-fail`, so it can gate a release.
+
+| Profile | CPG gait | v1 + hardening | v2 | **v2 + deployment-aware hardening** |
+|---|---|---|---|---|
+| warehouse | 6.7% (UB 14.0%) | 6.7% (UB 14.0%) | 1.7% (UB 7.1%) | **0.0% (UB 4.9%)** |
+| home | 6.7% (UB 14.0%) | 18.3% (UB 27.9%) | 1.7% (UB 7.1%) | **0.0% (UB 4.9%)** |
+| sidewalk | 6.7% (UB 14.0%) | 8.3% (UB 16.2%) | 8.3% (UB 16.2%) | 10.0% (UB 18.2%) |
+| construction | 31.7% (UB 42.1%) | 18.3% (UB 27.9%) | 15.0% (UB 24.1%) | **13.3% (UB 22.1%)** |
+
 What the lab found:
 
-- **v1 looked fine in training but wasn't.** It walked under stochastic training noise but
-  stalled when run deterministically. The audit scored it below the bare gait it was built on.
-- **One hardening round fixed it.** Round 1 replayed 15 shrunk counterexamples (sensor noise,
-  payload, terrain, latency, weak motors, low friction) for 100k PPO steps. Afterwards 10 of the
-  15 pass on both seeds, and the policy beats the CPG baseline on every summary metric.
-- **Round 2 overfit.** It trained 200k more steps on 11 new counterexamples but fixed only 2 of
-  them. Its uphill and payload margins shrank, and red-team failures rose from 2 to 5. Its own
-  before/after report showed a small gain (77.3 → 77.8); the leaderboard's fresh adversarial
-  search did not. **Ship round 1.**
-- **Compound fragility is real.** For the hardened policy, *stairs + payload*, each at 75% of its
-  own breaking point, fails on every seed, while each passes alone.
-- **The failure-boundary map shows a counter-intuitive pocket.** At friction 0.05 the robot survives
-  a 16 N·s side shove that topples it on concrete, because it slides instead of tripping. On that ice
-  it also can't make forward progress at all, so it still fails the cell with no push.
+- **Margins and deployment risk disagree, and both matter.** v1 + hardening has strong push
+  margins but fails 18% of *home* worlds, all from low friction. The leaderboard's
+  single-axis friction margin (0.23) hinted at this; the deployment check measures the cost.
+- **Latency is the residual policies' blind spot.** Most sidewalk failures of the best policy are
+  latency-dominated. The open-loop CPG ignores observations, so delay can't hurt it, while a
+  closed-loop residual reacts to stale state. That's why the bare gait is still competitive on
+  sidewalks. Next hardening round: latency.
+- **v1 looked fine in training but wasn't.** It walked under stochastic training noise but stalled
+  when run deterministically, scoring below the bare gait it was built on. That motivated the
+  deterministic best-checkpoint selection now built into `train` and `harden`.
+- **More hardening isn't always better.** v1's second round (`runs/hardened2`) fixed only 2 of its
+  11 counterexamples, and its red-team failures rose from 2 to 5 (76.6 vs 77.2 in
+  `runs/leaderboard/`). Its own before/after report showed a small gain; the leaderboard's fresh
+  search did not.
+- **Compound fragility is real.** Pairs of stressors that each pass alone, at 50–75% of their own
+  breaking points, fail together, for example *stairs + payload*. Single-axis reports miss these.
+- **The failure boundary has a counter-intuitive pocket.** At friction 0.05 a robot can survive a
+  side shove that topples it on concrete, because it slides instead of tripping. On that ice it
+  also can't make forward progress at all.
 
 ![compound stress](docs/report_compound.png)
 
-### Deployment check: "if we ship it there, how often does it fall?"
+### Conventions
 
-`python -m breakpoint deploy --policy <p> --trials 60` samples 60 worlds from each deployment
-profile (a distribution over terrain, friction, payload, latency, noise and pushes). It reports
-the failure rate with a 95% upper bound and the dominant causes. It exits non-zero if the bound
-exceeds `--max-fail`, so it can gate a release.
-
-| Profile | CPG gait alone | Hardened PPO (round 1) | Dominant causes (hardened) |
-|---|---|---|---|
-| warehouse | 10.0% (UB 18.2%) | **3.3% (UB 9.6%)** | latency, low friction |
-| construction | 33.3% (UB 43.9%) | **20.0% (UB 29.7%)** | latency, low friction, payload |
-| home | 6.7% (UB 14.0%) | 6.7% (UB 14.0%) | low friction, terrain |
-| sidewalk | **3.3% (UB 9.6%)** | 11.7% (UB 20.2%) | latency, low friction |
-
-The learned policy is better where payloads and shoves dominate, but worse on sidewalks. The
-cause is **latency**: the open-loop gait ignores observations so delay can't hurt it, while the
-closed-loop residual reacts to stale state. Single-axis margins rated the hardened policy at only
-2 steps (40 ms) of latency tolerance. The deployment check shows why that matters, and the next
-hardening round should target latency.
+Push directions are named by the side the shove comes **from**, in the robot's frame. The robot
+faces +x, and its left is +y. `direction_deg` is the force direction: 0 pushes it forward (from the
+rear), +90 pushes it toward its left (from its right). An independent review caught an early
+version that had left and right mirrored; the committed results were migrated and a physical
+regression test now pins the convention.
 
 ## Bring your own policy / library
 

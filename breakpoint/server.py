@@ -9,6 +9,7 @@ import json
 import math
 import os
 import re
+import threading
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -36,6 +37,9 @@ TERRAIN_GRID = 80
 POLICY_NAME = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
 MAX_PLAY_SESSIONS = 4
 MAX_DEPLOY_TRIALS = 60
+MAX_DEPLOY_JOBS = 1  # deployment checks are CPU-heavy (~5 s); refuse rather than queue
+_deploy_slots = threading.BoundedSemaphore(MAX_DEPLOY_JOBS)
+_deploy_cache: dict[tuple[str, str, int], dict] = {}
 _play_slots = asyncio.Semaphore(MAX_PLAY_SESSIONS)
 
 app = FastAPI(title="Breakpoint")
@@ -145,10 +149,20 @@ def api_profiles() -> dict:
 def api_deploy(req: DeployReq) -> dict:
     if req.profile not in PROFILES:
         raise HTTPException(404, f"unknown profile {req.profile}")
-    # sequential: forking worker processes from the threaded server can deadlock
-    r = deployment_check(resolve_policy(req.policy), req.profile, trials=req.trials, workers=1)
+    spec = resolve_policy(req.policy)
+    key = (req.policy, req.profile, req.trials)
+    if key in _deploy_cache:  # deterministic (fixed seed), so cache is exact
+        return _deploy_cache[key]
+    if not _deploy_slots.acquire(blocking=False):
+        raise HTTPException(503, "a deployment check is already running; try again in a few seconds")
+    try:
+        # sequential: forking worker processes from the threaded server can deadlock
+        r = deployment_check(spec, req.profile, trials=req.trials, workers=1)
+    finally:
+        _deploy_slots.release()
     r["worst"] = [{"name": w["scenario"]["name"], "stressor": Scenario.from_dict(w["scenario"]).dominant_stressor(),
                    "outcome": w["outcome"]} for w in r["worst"]]
+    _deploy_cache[key] = r
     return r
 
 

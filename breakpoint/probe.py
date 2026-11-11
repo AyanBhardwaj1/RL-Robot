@@ -34,8 +34,10 @@ class Axis:
     integer: bool = False
 
 
-PUSH_DIRS = {"rear": 0.0, "left": 90.0, "front": 180.0, "right": -90.0,
-             "rear-left": 45.0, "front-left": 135.0, "front-right": -135.0, "rear-right": -45.0}
+# Name = the side the shove comes FROM. direction_deg is the force direction in the robot frame
+# (0 = forward, +90 = toward the robot's left), so a shove from the left pushes toward -90.
+PUSH_DIRS = {"rear": 0.0, "left": -90.0, "front": 180.0, "right": 90.0,
+             "rear-left": -45.0, "front-left": -135.0, "front-right": 135.0, "rear-right": 45.0}
 
 AXES: tuple[Axis, ...] = (
     *(Axis(f"push_{n}", f"Push from {n}", "N·s", 0.0, 40.0) for n in PUSH_DIRS),

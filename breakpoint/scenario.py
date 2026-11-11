@@ -34,7 +34,7 @@ BOUNDS: dict[str, tuple[float, float, float]] = {
 PUSH_BOUNDS: dict[str, tuple[float, float, float]] = {
     "t": (0.0, 30.0, 2.0),  # seconds after start
     "force": (0.0, 400.0, 0.0),  # newtons, applied to the torso
-    "direction_deg": (-180.0, 180.0, 90.0),  # 0 = from behind (pushes +x), 90 = pushes +y
+    "direction_deg": (-180.0, 180.0, -90.0),  # force direction: 0 = forward (from behind), 90 = toward its left
     "duration": (0.02, 0.5, 0.1),  # seconds
 }
 MAX_PUSHES = 8

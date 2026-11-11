@@ -8,16 +8,15 @@ from __future__ import annotations
 
 from .scenario import BOUNDS, Scenario
 
-DIRECTION_NAMES = ((-157.5, "the front"), (-112.5, "the front-right"), (-67.5, "the right"), (-22.5, "the rear-right"),
-                   (22.5, "the rear"), (67.5, "the rear-left"), (112.5, "the left"), (157.5, "the front-left"))
-
 
 def direction_name(deg: float) -> str:
-    """Where a push comes *from*, in the robot frame (0° pushes it forward = from the rear)."""
-    for upper, name in DIRECTION_NAMES:
-        if deg < upper:
-            return name
-    return "the front"
+    """Where a push comes *from*, given its force direction (0 = forward, +90 = toward the robot's left)."""
+    from .probe import PUSH_DIRS
+
+    def gap(a: float) -> float:
+        return abs((deg - a + 180.0) % 360.0 - 180.0)
+
+    return "the " + min(PUSH_DIRS, key=lambda n: gap(PUSH_DIRS[n]))
 
 
 def contributing_factors(scn: Scenario) -> list[str]:

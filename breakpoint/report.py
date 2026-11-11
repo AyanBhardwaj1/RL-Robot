@@ -52,7 +52,8 @@ def _polar(series: dict[str, dict[str, float]], size: int = 300, vmax: float | N
     for name in order:
         ang = math.radians(PUSH_DIRS[name])
         # screen: robot faces up. A push *from* the front comes from the top.
-        sx, sy = -math.sin(ang), -math.cos(ang)
+        # robot faces up; a shove from the left is drawn on the left (source = -force direction)
+        sx, sy = math.sin(ang), -math.cos(ang)
         parts.append(f'<line x1="{c}" y1="{c}" x2="{c + rad * sx:.1f}" y2="{c - rad * sy:.1f}" class="grid"/>')
         parts.append(f'<text x="{c + (rad + 18) * sx:.1f}" y="{c - (rad + 18) * sy + 4:.1f}" class="lbl" text-anchor="middle">{name}</text>')
     for i, (label, vals) in enumerate(series.items()):
@@ -60,7 +61,7 @@ def _polar(series: dict[str, dict[str, float]], size: int = 300, vmax: float | N
         for name in order:
             ang = math.radians(PUSH_DIRS[name])
             r = rad * min(1.0, vals.get(name, 0.0) / vmax)
-            pts.append(f"{c - r * math.sin(ang):.1f},{c + r * math.cos(ang):.1f}")
+            pts.append(f"{c + r * math.sin(ang):.1f},{c + r * math.cos(ang):.1f}")
         parts.append(f'<polygon points="{" ".join(pts)}" class="s{i}"><title>{html.escape(label)}</title></polygon>')
     parts.append("</svg>")
     return "".join(parts)

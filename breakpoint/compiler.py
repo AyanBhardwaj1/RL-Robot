@@ -123,9 +123,9 @@ def compile_rules(text: str) -> Compiled:
     pushes = []
     for m in re.finditer(r"\b(kick\w*|push\w*|shove\w*|bump\w*|hit|gust\w*|knock\w*|collid\w*)\b", t):
         window = t[m.start(): m.start() + 80]
-        direction = 90.0
+        direction = -90.0  # default: a shove from the robot's left (pushes it toward its right)
         if re.search(r"\bright\b", window):
-            direction = -90.0
+            direction = 90.0
         elif re.search(r"\b(front|ahead|face)\b", window):
             direction = 180.0
         elif re.search(r"\b(behind|back|rear)\b", window):
@@ -136,7 +136,7 @@ def compile_rules(text: str) -> Compiled:
         when = _num_near(window, r"(?:at|after)\s*" + NUM + r"\s*s", 2.0 + 1.5 * len(pushes))
         pushes.append({"t": when, "force": force, "direction_deg": direction, "duration": 0.1})
     if re.search(r"\b(wind|windy|storm)\b", t) and not pushes:
-        pushes = [{"t": 2.0 + i * 1.5, "force": 40.0, "direction_deg": 90.0, "duration": 0.4} for i in range(3)]
+        pushes = [{"t": 2.0 + i * 1.5, "force": 40.0, "direction_deg": -90.0, "duration": 0.4} for i in range(3)]
     if pushes:
         d["pushes"] = pushes
         hit("pushes")

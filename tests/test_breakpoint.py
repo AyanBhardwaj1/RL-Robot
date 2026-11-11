@@ -54,7 +54,7 @@ def test_rules_parse_compound_description():
     c = compile_rules("carrying a 4kg box across an icy lot, kicked from the right at 3s with 120 N")
     s = c.scenario
     assert s.payload_kg == 4.0 and s.friction < 0.2
-    assert s.pushes[0].direction_deg == -90.0 and s.pushes[0].force == 120.0 and s.pushes[0].t == 3.0
+    assert s.pushes[0].direction_deg == 90.0 and s.pushes[0].force == 120.0 and s.pushes[0].t == 3.0
 
 
 def test_rules_parse_slope_motor_latency():
@@ -426,8 +426,10 @@ def test_deploy_endpoint_validates_and_runs():
 def test_explain_cites_push_direction_and_factors():
     from breakpoint.explain import direction_name, explain
 
-    assert direction_name(90) == "the left" and direction_name(0) == "the rear" and direction_name(180) == "the front"
-    scn = Scenario(friction=0.2, payload_kg=3.0).with_(pushes=[{"t": 2.0, "force": 120, "direction_deg": -90, "duration": 0.1}])
+    # force toward the robot's left (+90) means the shove comes from its right
+    assert direction_name(90) == "the right" and direction_name(-90) == "the left"
+    assert direction_name(0) == "the rear" and direction_name(180) == "the front" and direction_name(-45) == "the rear-left"
+    scn = Scenario(friction=0.2, payload_kg=3.0).with_(pushes=[{"t": 2.0, "force": 120, "direction_deg": 90, "duration": 0.1}])
     out, _ = rollout(CPGPolicy(), scn, seed=0)
     text = explain(scn, out.to_dict())
     if out.fell:
@@ -534,3 +536,53 @@ def test_compile_image_vision_llm_and_caption_merge(monkeypatch):
     merged = compile_image(_png([0.2, 0.6, 0.2], 0.05), caption="carrying 3kg, kicked from the left")
     assert merged.source == "image-heuristic"
     assert merged.scenario.friction == 0.6 and merged.scenario.payload_kg == 3.0 and merged.scenario.pushes
+
+
+
+def test_side_push_from_left_moves_robot_to_its_right():
+    """Physical check of the convention: robot faces +x, so its left is +y."""
+    from breakpoint.probe import PUSH_DIRS, apply_axis
+
+    env = QuadrupedEnv(Scenario())
+    scn = apply_axis(Scenario(duration_s=2.6), "push_left", 8.0)
+    assert scn.pushes[0].direction_deg == PUSH_DIRS["left"] == -90.0
+    env.reset(scn, seed=0)
+    for _ in range(130):
+        env.step(np.zeros(12))
+    assert env.data.qpos[1] < -0.02  # displaced toward -y = the robot's right
+
+
+def test_interactions_skip_unrepresentable_integer_fractions():
+    from breakpoint.redteam import _value_at, compound_pairs
+
+    assert _value_at("latency_steps", 1.0, 0.5) is None
+    assert _value_at("latency_steps", 4.0, 0.75) == 3.0
+    cases = [{"a": "A", "b": "B", "compound_failure": True}, {"a": "A", "b": "B", "compound_failure": True},
+             {"a": "A", "b": "C", "compound_failure": False}]
+    assert compound_pairs(cases) == 1
+
+
+def test_deploy_endpoint_caches_and_refuses_concurrent_runs(monkeypatch):
+    from breakpoint import server
+
+    c = TestClient(server.app)
+    server._deploy_cache.clear()
+    assert server._deploy_slots.acquire(blocking=False)
+    try:
+        assert c.post("/api/deploy", json={"profile": "home", "trials": 4}).status_code == 503
+    finally:
+        server._deploy_slots.release()
+    first = c.post("/api/deploy", json={"profile": "home", "trials": 4}).json()
+    monkeypatch.setattr(server, "deployment_check", lambda *a, **k: pytest.fail("should be cached"))
+    assert c.post("/api/deploy", json={"profile": "home", "trials": 4}).json() == first
+
+
+def test_leaderboard_and_harden_validate_inputs_early():
+    from breakpoint.cli import main
+
+    with pytest.raises(SystemExit):
+        main(["harden", "--policy", "cpg"])
+    with pytest.raises(SystemExit):
+        main(["harden", "--profile", "moon"])
+    with pytest.raises(FileNotFoundError):
+        main(["leaderboard", "cpg", "missing.npz"])

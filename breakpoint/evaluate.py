@@ -88,9 +88,14 @@ def _job(args: tuple[str | None, dict, int]) -> dict:
 
 
 def evaluate_many(policy_spec: str | None, scenarios: list[Scenario], seeds: list[int],
-                  workers: int = 3) -> list[list[dict]]:
-    """Evaluate every scenario under every seed. Returns [scenario][seed] -> outcome dict."""
-    jobs = [(policy_spec, s.to_dict(), sd) for s in scenarios for sd in seeds]
+                  workers: int = 3, distinct_seeds: bool = False) -> list[list[dict]]:
+    """Evaluate every scenario under every seed. Returns [scenario][seed] -> outcome dict.
+
+    With ``distinct_seeds`` scenario i uses seeds ``[s + i for s in seeds]`` so independent
+    samples (e.g. a deployment profile) don't share gait phase / noise / terrain draws.
+    """
+    jobs = [(policy_spec, s.to_dict(), sd + (i if distinct_seeds else 0))
+            for i, s in enumerate(scenarios) for sd in seeds]
     if workers <= 1 or len(jobs) < 4:
         flat = [_job(j) for j in jobs]
     else:

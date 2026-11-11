@@ -41,10 +41,19 @@ def _compose(base: Scenario, settings: dict[str, float]) -> Scenario:
     return scn.with_(pushes=pushes) if pushes else scn
 
 
-def _value_at(axis_key: str, breaking_point: float, frac: float) -> float:
+def _value_at(axis_key: str, breaking_point: float, frac: float) -> float | None:
+    """Stress level at ``frac`` of an axis' own breaking point, or None if not representable.
+
+    Integer axes (latency steps) are floored; if that lands on the benign end (0) the
+    stressor would silently vanish, so the case is skipped instead of mis-reported.
+    """
     ax = AXIS_BY_KEY[axis_key]
     v = ax.lo + frac * (breaking_point - ax.lo)
-    return float(round(v)) if ax.integer else float(v)
+    if ax.integer:
+        v = float(np.floor(v + 1e-9))
+        if v <= ax.lo:
+            return None
+    return float(v)
 
 
 def _pass_job(args: tuple[str | None, dict, list[int]]) -> float:
@@ -73,8 +82,10 @@ def interactions(spec: str | None, probe_results: list[dict], top_k: int = 4, se
     cases, jobs = [], []
     for a, b in itertools.combinations(weakest, 2):
         for frac in INTERACTION_FRACTIONS:
-            settings = {a["key"]: _value_at(a["key"], a["breaking_point"], frac),
-                        b["key"]: _value_at(b["key"], b["breaking_point"], frac)}
+            va, vb = _value_at(a["key"], a["breaking_point"], frac), _value_at(b["key"], b["breaking_point"], frac)
+            if va is None or vb is None:
+                continue
+            settings = {a["key"]: va, b["key"]: vb}
             cases.append({"a": a["label"], "b": b["label"], "fraction": frac, "settings": settings})
             jobs.append((spec, _compose(base, settings).to_dict(), seeds))
     rates = _run(jobs, workers)
@@ -82,6 +93,11 @@ def interactions(spec: str | None, probe_results: list[dict], top_k: int = 4, se
         c["pass_rate"] = r
         c["compound_failure"] = r < 1.0
     return cases
+
+
+def compound_pairs(cases: list[dict]) -> int:
+    """Distinct stressor pairs with any compound failure (a pair failing at 50% and 75% counts once)."""
+    return len({(c["a"], c["b"]) for c in cases if c["compound_failure"]})
 
 
 def boundary_map(spec: str | None, x_key: str, y_key: str, n: int = 6, seeds: list[int] | None = None,
@@ -114,7 +130,7 @@ def _templates(weak: list[dict], n: int) -> list[dict]:
     keys = {r["key"] for r in weak}
     lib = [
         ({"friction", "push_left", "push_right"}, {"name": "wet warehouse aisle, forklift brushes past",
-          "friction": 0.35, "pushes": [{"t": 2.5, "force": 70, "direction_deg": 90, "duration": 0.1}]}),
+          "friction": 0.35, "pushes": [{"t": 2.5, "force": 70, "direction_deg": -90, "duration": 0.1}]}),
         ({"payload_kg", "slope_up"}, {"name": "delivery up a loading ramp", "terrain": "slope", "slope_deg": 8,
           "payload_kg": 3.0}),
         ({"latency_steps", "roughness"}, {"name": "gravel yard on congested wifi", "terrain": "rough",
@@ -126,7 +142,7 @@ def _templates(weak: list[dict], n: int) -> list[dict]:
         ({"friction", "slope_down"}, {"name": "icy driveway, downhill", "terrain": "slope", "slope_deg": -6,
           "friction": 0.25}),
         ({"payload_kg", "push_left", "push_right", "push_rear-left"}, {"name": "carrying groceries, child grabs it",
-          "payload_kg": 2.5, "payload_offset_x": 0.08, "pushes": [{"t": 2.0, "force": 60, "direction_deg": -90, "duration": 0.15}]}),
+          "payload_kg": 2.5, "payload_offset_x": 0.08, "pushes": [{"t": 2.0, "force": 60, "direction_deg": 90, "duration": 0.15}]}),
     ]
     ranked = sorted(lib, key=lambda t: -len(t[0] & keys))
     return [dict(d) for _, d in ranked[:n]]

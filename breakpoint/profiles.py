@@ -86,7 +86,7 @@ def deployment_check(policy_spec: str | None, profile: str, trials: int = 60, se
     prof = PROFILES[profile]
     rng = np.random.default_rng(seed)
     worlds = [prof.sample(rng) for _ in range(trials)]
-    results = [r[0] for r in evaluate_many(policy_spec, worlds, seeds=[seed], workers=workers)]
+    results = [r[0] for r in evaluate_many(policy_spec, worlds, seeds=[seed], workers=workers, distinct_seeds=True)]
     fails = [(w, r) for w, r in zip(worlds, results) if not r["passed"]]
     rate = len(fails) / trials
     by_cause: dict[str, int] = {}
