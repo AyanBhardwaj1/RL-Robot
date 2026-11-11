@@ -101,9 +101,9 @@ def hazard_log(trials: int = 150, seed: int = 0) -> list[dict]:
 
 def to_markdown(rows: list[dict], trials: int) -> str:
     lines = ["# Hazard log (generated)", "",
-             f"Frequencies are measured: {trials} sampled shifts per job and body in the humanoid lab, with a 95% upper "
-             "bound. Severity is assigned per hazard class and must be reviewed by a safety engineer. Hazards with "
-             "no recorded events are not listed; that is evidence of rarity within the budget, not proof of absence.", "",
+             (f"Frequencies are measured: {trials} sampled shifts per job and body in the humanoid lab, with a 95% upper "
+              "bound. Severity is assigned per hazard class and must be reviewed by a safety engineer. Hazards with "
+              "no recorded events are not listed; that is evidence of rarity within the budget, not proof of absence."), "",
              "| Risk | ID | Hazard | Job | Body | Events | Rate (≤ 95%) | Severity | Mitigation | Verify |",
              "|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
