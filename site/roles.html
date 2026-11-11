@@ -41,6 +41,7 @@
         <li><code>breakpoint/humanoid.py</code>: linear-inverted-pendulum balance with capture-point stepping, bounded by ankle torque, friction, swing time, leg reach and lateral reach, with slope compensation by leaning.</li>
         <li>Measured: the biped survives 93 N·s from the front and 77 N·s from the side; 150 ms of lag cuts that roughly in half. A 20 kg tote held in front drops forward pushes from 93 to 78 N·s.</li>
         <li>Wheeled-base model that drives under its capture point: 146 N·s from the front, but blocked by any curb over 2.5 cm.</li>
+        <li>A live capturability map, built from 1,369 simulations per redraw, colours every shove by the steps it needs. It exposed a bug in my own latency model that bisection could not see; the fix is in all three implementations.</li>
       </ul>
       <h3>Next I’d build</h3>
       <p>A QP whole-body controller on a MuJoCo humanoid that tracks the same capture-point steps, so the reduced model can be checked against full dynamics.</p>
