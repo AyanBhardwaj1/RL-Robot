@@ -172,7 +172,7 @@ def _chat(messages: list[dict]) -> str:
 
 
 def _parse_json(text: str) -> dict:
-    m = re.search(r"\{.*\}", text, re.S)
+    m = re.search(r"\{.*\}", text, re.DOTALL)
     if not m:
         raise ValueError("model reply contained no JSON object")
     return json.loads(m.group(0))

@@ -8,8 +8,8 @@ research recommendation of ~50% randomisation / 30% replayed failures / 20% wide
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 import numpy as np
 
@@ -91,7 +91,7 @@ def train(policy: ResidualPolicy, sampler: ScenarioSampler, cfg: PPOConfig = PPO
     vf_opt = Adam(policy.vf.params(), lr=cfg.lr * 3)
     history: list[dict] = []
     steps = 0
-    ep_ret, ep_len, ep_x = 0.0, 0, 0.0
+    ep_ret, ep_len = 0.0, 0
     finished: list[tuple[float, int, float, bool]] = []
     t0 = time.time()
     while steps < cfg.total_steps:

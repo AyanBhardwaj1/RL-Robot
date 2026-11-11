@@ -1,0 +1,159 @@
+"""Readiness scorecard + self-contained HTML report (inline SVG, no external assets)."""
+
+from __future__ import annotations
+
+import html
+import math
+from datetime import datetime, timezone
+
+from .evaluate import failure_upper_bound
+from .probe import PUSH_DIRS
+
+GRADES = ((85, "FIELD-READY", "Cleared for unsupervised field trials in the tested envelope."),
+          (70, "SUPERVISED", "Cleared for supervised trials with a spotter and kill switch."),
+          (50, "LAB-ONLY", "Keep on the tether: known failure modes inside plausible conditions."),
+          (0, "NOT READY", "Fails under mild, realistic stress. Harden before any hardware time."))
+
+
+def scorecard(probe: list[dict], nominal: list[dict], atlas: dict[str, dict] | None) -> dict:
+    push = [r["fraction"] for r in probe if r["key"].startswith("push_")]
+    other = [r["fraction"] for r in probe if not r["key"].startswith("push_")]
+    margin = 0.4 * (sum(push) / len(push) if push else 0) + 0.6 * (sum(other) / len(other) if other else 0)
+    n = len(nominal)
+    fails = sum(1 for r in nominal if not r["passed"])
+    pass_rate = (n - fails) / n if n else 0.0
+    mild = [c for c in (atlas or {}).values() if c["severity"] <= 0.5]
+    adversarial = 1.0 - min(1.0, len(mild) / 5.0)
+    score = round(100 * (0.45 * margin + 0.4 * pass_rate + 0.15 * adversarial), 1)
+    grade = next(g for g in GRADES if score >= g[0])
+    return {
+        "score": score, "grade": grade[1], "verdict": grade[2],
+        "margin_index": round(margin, 3), "nominal_pass_rate": round(pass_rate, 3),
+        "nominal_trials": n, "nominal_failures": fails,
+        "failure_rate_upper_95": round(failure_upper_bound(n, fails), 4),
+        "mild_failure_modes": len(mild),
+        "weakest_axes": [r["label"] for r in sorted(probe, key=lambda r: r["fraction"])[:3]],
+    }
+
+
+# ------------------------------------------------------------------ svg
+def _polar(series: dict[str, dict[str, float]], size: int = 300, vmax: float = 40.0) -> str:
+    c = size / 2
+    rad = c - 34
+    order = ["front", "front-left", "left", "rear-left", "rear", "rear-right", "right", "front-right"]
+    parts = [f'<svg viewBox="0 0 {size} {size}" class="chart" role="img" aria-label="Push recovery by direction">']
+    for frac in (0.25, 0.5, 0.75, 1.0):
+        parts.append(f'<circle cx="{c}" cy="{c}" r="{rad * frac:.1f}" class="grid"/>')
+        parts.append(f'<text x="{c + 3}" y="{c - rad * frac + 11:.1f}" class="tick">{vmax * frac:.0f}</text>')
+    for name in order:
+        ang = math.radians(PUSH_DIRS[name])
+        # screen: robot faces up. A push *from* the front comes from the top.
+        sx, sy = -math.sin(ang), math.cos(ang)
+        parts.append(f'<line x1="{c}" y1="{c}" x2="{c + rad * sx:.1f}" y2="{c - rad * sy:.1f}" class="grid"/>')
+        parts.append(f'<text x="{c + (rad + 18) * sx:.1f}" y="{c - (rad + 18) * sy + 4:.1f}" class="lbl" text-anchor="middle">{name}</text>')
+    for i, (label, vals) in enumerate(series.items()):
+        pts = []
+        for name in order:
+            ang = math.radians(PUSH_DIRS[name])
+            r = rad * min(1.0, vals.get(name, 0.0) / vmax)
+            pts.append(f"{c - r * math.sin(ang):.1f},{c - r * math.cos(ang):.1f}")
+        parts.append(f'<polygon points="{" ".join(pts)}" class="s{i}"><title>{html.escape(label)}</title></polygon>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def _bars(probes: dict[str, list[dict]]) -> str:
+    labels = [r for r in next(iter(probes.values())) if not r["key"].startswith("push_")]
+    row_h, w, lw = 30, 640, 150
+    h = row_h * len(labels) + 10
+    out = [f'<svg viewBox="0 0 {w} {h}" class="chart wide" role="img" aria-label="Breaking points">']
+    k = len(probes)
+    for j, r in enumerate(labels):
+        y = 6 + j * row_h
+        out.append(f'<text x="{lw - 8}" y="{y + 15}" class="lbl" text-anchor="end">{html.escape(r["label"])}</text>')
+        out.append(f'<rect x="{lw}" y="{y + 2}" width="{w - lw - 90}" height="{row_h - 8}" class="track"/>')
+        for i, (name, res) in enumerate(probes.items()):
+            rr = next(x for x in res if x["key"] == r["key"])
+            bw = (w - lw - 90) * rr["fraction"]
+            bh = (row_h - 8) / k
+            out.append(f'<rect x="{lw}" y="{y + 2 + i * bh:.1f}" width="{bw:.1f}" height="{bh - 1:.1f}" class="s{i}">'
+                       f'<title>{html.escape(name)}: {rr["breaking_point"]} {html.escape(rr["unit"])}</title></rect>')
+        last = probes[list(probes)[-1]]
+        rr = next(x for x in last if x["key"] == r["key"])
+        out.append(f'<text x="{w - 84}" y="{y + 15}" class="val">{rr["breaking_point"]:g} {html.escape(rr["unit"])}</text>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+CSS = """
+:root{--bg:#f6f5f1;--fg:#1d1d1f;--muted:#6b6b70;--card:#fff;--line:#e3e1da;--s0:#9aa0a6;--s1:#e8590c;--ok:#2b8a3e;--warn:#e67700;--bad:#c92a2a}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#121214;--fg:#ececf0;--muted:#9a9aa3;--card:#1c1c20;--line:#2c2c33;--s0:#6c7178;--s1:#ff7a2e}}
+:root[data-theme=dark]{--bg:#121214;--fg:#ececf0;--muted:#9a9aa3;--card:#1c1c20;--line:#2c2c33;--s0:#6c7178;--s1:#ff7a2e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:980px;margin:0 auto;padding:32px 16px 64px}h1{font-size:28px;margin:0 0 4px}h2{font-size:18px;margin:32px 0 12px}
+.muted{color:var(--muted)}.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.score{font-size:56px;font-weight:700;line-height:1}.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:600;font-size:13px;color:#fff}
+.chart{width:100%;height:auto}.chart .grid{fill:none;stroke:var(--line)}.chart .tick,.chart .lbl,.chart .val{fill:var(--muted);font-size:11px}
+.chart .val{fill:var(--fg)}.chart .track{fill:var(--line);opacity:.5}.s0{fill:var(--s0);fill-opacity:.35;stroke:var(--s0);stroke-width:2}
+.s1{fill:var(--s1);fill-opacity:.35;stroke:var(--s1);stroke-width:2}rect.s0,rect.s1{fill-opacity:.9;stroke:none}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+.key{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}code{font-size:12px}
+.tablewrap{overflow-x:auto}
+"""
+
+
+def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]],
+                atlas: dict[str, dict] | None, hunt_meta: dict | None, notes: list[str] | None = None) -> str:
+    names = list(probes)
+    final = cards[names[-1]]
+    color = {"FIELD-READY": "var(--ok)", "SUPERVISED": "var(--ok)", "LAB-ONLY": "var(--warn)"}.get(final["grade"], "var(--bad)")
+    legend = "".join(f'<span class="muted" style="margin-right:14px"><span class="key s{i}" '
+                     f'style="background:var(--s{i})"></span>{html.escape(n)}</span>' for i, n in enumerate(names))
+    rows = []
+    for n in names:
+        c = cards[n]
+        rows.append(f"<tr><td>{html.escape(n)}</td><td><b>{c['score']}</b></td><td>{c['grade']}</td>"
+                    f"<td>{c['margin_index']}</td><td>{c['nominal_pass_rate']:.0%} ({c['nominal_trials']} runs)</td>"
+                    f"<td>≤ {c['failure_rate_upper_95']:.1%}</td><td>{c['mild_failure_modes']}</td></tr>")
+    atlas_rows = []
+    for cell in sorted((atlas or {}).values(), key=lambda c: c["severity"]):
+        s = cell["scenario"]
+        push = s["pushes"][0] if s["pushes"] else None
+        desc = [f"μ={s['friction']:.2f}", f"payload {s['payload_kg']:.1f} kg", f"motors ×{s['motor_strength']:.2f}",
+                f"lag {int(s['latency_steps']) * 20} ms", f"noise σ {s['obs_noise']:.2f}", f"slope {s['slope_deg']:.0f}°",
+                f"rough {s['roughness'] * 100:.1f} cm"]
+        if push:
+            desc.append(f"push {push['force'] * push['duration']:.1f} N·s @ {push['direction_deg']:.0f}°")
+        o = cell["outcome"]
+        atlas_rows.append(f"<tr><td>{html.escape(cell['stressor'])}</td><td>{cell['severity']:.2f}</td>"
+                          f"<td>{'fell' if o['fell'] else 'stalled'} at {o['time_s']:.1f}s</td>"
+                          f"<td><code>{html.escape(', '.join(desc))}</code></td></tr>")
+    budget = ""
+    if hunt_meta:
+        budget = (f"<p class='muted'>Search budget: {hunt_meta['evaluations']} adversarial rollouts, "
+                  f"{hunt_meta['failures_found']} failures, {len(atlas or {})} distinct cells. "
+                  "No failure found in a cell does not prove absence; it bounds what this budget could find.</p>")
+    notes_html = "".join(f"<li>{html.escape(n)}</li>" for n in (notes or []))
+    polar = _polar({n: {r["key"][5:]: r["breaking_point"] for r in probes[n] if r["key"].startswith("push_")} for n in names})
+    return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{html.escape(title)}</title><style>{CSS}</style></head><body><main>
+<p class="muted">Breakpoint readiness report · {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}</p>
+<h1>{html.escape(title)}</h1>
+<div class="grid2" style="margin-top:20px">
+ <div class="card"><div class="muted">Readiness score · {html.escape(names[-1])}</div>
+  <div class="score">{final['score']}</div>
+  <p><span class="badge" style="background:{color}">{final['grade']}</span></p><p>{html.escape(final['verdict'])}</p></div>
+ <div class="card"><div class="muted">Weakest axes</div><ol>{''.join(f'<li>{html.escape(a)}</li>' for a in final['weakest_axes'])}</ol>
+  <div class="muted">Nominal failure rate (95% upper bound)</div><div style="font-size:24px;font-weight:600">≤ {final['failure_rate_upper_95']:.1%}</div></div>
+</div>
+<h2>Scorecard</h2><div class="card tablewrap"><table><tr><th>Policy</th><th>Score</th><th>Grade</th><th>Margin index</th><th>Nominal pass</th><th>Fail-rate UB</th><th>Mild failure modes</th></tr>{''.join(rows)}</table></div>
+<h2>Push recovery envelope</h2><p class="muted">Largest recoverable 0.1 s torso impulse per direction (N·s), bisected over gait phases. {legend}</p>
+<div class="grid2"><div class="card">{polar}</div><div class="card"><p class="muted">How to read: the robot faces up. A dent in the shape is a direction where a shove topples it. Side pushes are usually the weakest because a trotting quadruped has a narrow support polygon laterally.</p></div></div>
+<h2>Breaking points</h2><p class="muted">Bar = fraction of the tested range survived on every seed. {legend}</p><div class="card">{_bars(probes)}</div>
+<h2>Failure atlas</h2>{budget}<div class="card tablewrap"><table><tr><th>Mode</th><th>Severity</th><th>Outcome</th><th>Mildest world that breaks it</th></tr>{''.join(atlas_rows) or '<tr><td colspan=4>No failures found.</td></tr>'}</table></div>
+<h2>Method</h2><div class="card"><ul>
+<li>Score = 45% margin index (push envelope 40%, other stressors 60%) + 40% nominal pass rate under domain-randomised conditions + 15% adversarial (penalises failure modes found at severity ≤ 0.5).</li>
+<li>Pass = no fall (tilt &gt; 65° or body clearance &lt; 11 cm) and ≥ 35% of commanded distance covered.</li>
+<li>Failure-rate bound: exact binomial with zero failures (≈3/n), Wilson score otherwise.</li>{notes_html}</ul></div>
+</main></body></html>"""
