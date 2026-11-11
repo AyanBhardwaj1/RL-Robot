@@ -112,9 +112,19 @@ def build_xml(scn: Scenario, seed: int = 0) -> tuple[str, np.ndarray]:
     return xml, data
 
 
+def height_at(h: np.ndarray, x: float, y: float) -> float:
+    """Conservative ground height (m) under (x, y): max over the enclosing grid cell.
+
+    Taking the cell max (not the lower corner) means a torso resting on a stair edge
+    is measured against the *upper* step, so such falls are not missed.
+    """
+    fi = float(np.clip((y + HFIELD_HALF_Y) / (2 * HFIELD_HALF_Y) * (HFIELD_N - 1), 0, HFIELD_N - 1))
+    fj = float(np.clip((x + HFIELD_HALF_X) / (2 * HFIELD_HALF_X) * (HFIELD_N - 1), 0, HFIELD_N - 1))
+    i0, j0 = int(fi), int(fj)
+    i1, j1 = min(i0 + 1, HFIELD_N - 1), min(j0 + 1, HFIELD_N - 1)
+    return float(max(h[i0, j0], h[i0, j1], h[i1, j0], h[i1, j1])) + BASE_HEIGHT
+
+
 def ground_height(scn: Scenario, x: float, y: float, seed: int = 0) -> float:
     """Terrain height (m) at world (x, y), used to measure body clearance."""
-    h = heightfield(scn, seed)
-    i = int(np.clip((y + HFIELD_HALF_Y) / (2 * HFIELD_HALF_Y) * (HFIELD_N - 1), 0, HFIELD_N - 1))
-    j = int(np.clip((x + HFIELD_HALF_X) / (2 * HFIELD_HALF_X) * (HFIELD_N - 1), 0, HFIELD_N - 1))
-    return float(h[i, j]) + BASE_HEIGHT
+    return height_at(heightfield(scn, seed), x, y)

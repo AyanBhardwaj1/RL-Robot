@@ -19,6 +19,8 @@ import os
 import re
 import urllib.error
 import urllib.request
+import warnings
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from io import BytesIO
 
@@ -27,6 +29,7 @@ import numpy as np
 from .scenario import Scenario, json_schema
 
 LLM_TIMEOUT_S = 20
+MAX_IMAGE_PIXELS = 4096 * 4096
 NUM = r"(\d+(?:\.\d+)?)"
 
 
@@ -147,13 +150,20 @@ SYSTEM_PROMPT = (
 
 
 def _llm_config() -> tuple[str, str, str] | None:
+    """LLM settings from the environment, or None (offline) if unset or unsafe.
+
+    The API key is only ever sent over https, or plain http to the local machine.
+    """
     base = os.environ.get("BREAKPOINT_LLM_BASE_URL", "").rstrip("/")
     key = os.environ.get("BREAKPOINT_LLM_API_KEY", "")
     model = os.environ.get("BREAKPOINT_LLM_MODEL", "")
     if not (base and key and model):
         return None
-    if not base.startswith("https://") and not base.startswith("http://localhost"):
-        raise ValueError("BREAKPOINT_LLM_BASE_URL must be https (or http://localhost)")
+    u = urlparse(base)
+    local = u.scheme == "http" and u.hostname in {"localhost", "127.0.0.1"}
+    if not (u.scheme == "https" or local):
+        warnings.warn("BREAKPOINT_LLM_BASE_URL must be https (or http://localhost); LLM disabled", stacklevel=2)
+        return None
     return base, key, model
 
 
@@ -191,7 +201,7 @@ def compile_text(text: str, use_llm: bool = True) -> Compiled:
             ])
             scn = Scenario.from_dict(_parse_json(reply))
             return Compiled(scn.with_(notes=text[:500]), "llm", ("llm",))
-        except (urllib.error.URLError, TimeoutError, ValueError, KeyError, RuntimeError, json.JSONDecodeError):
+        except (urllib.error.URLError, TimeoutError, ValueError, KeyError, IndexError, TypeError, AttributeError, RuntimeError):
             pass  # deterministic fallback below; rules never fail
     return compile_rules(text)
 
@@ -201,8 +211,12 @@ def image_features(img_bytes: bytes) -> dict[str, float]:
     """Cheap, explainable surface cues from a photo of the ground."""
     from PIL import Image
 
-    im = Image.open(BytesIO(img_bytes)).convert("RGB")
+    im = Image.open(BytesIO(img_bytes))
+    if im.width * im.height > MAX_IMAGE_PIXELS:
+        raise ValueError(f"image too large ({im.width}x{im.height}); max {MAX_IMAGE_PIXELS} pixels")
+    im.draft("RGB", (512, 512))  # JPEG: decode at reduced scale
     im.thumbnail((256, 256))
+    im = im.convert("RGB")
     a = np.asarray(im, dtype=np.float64) / 255.0
     gray = a.mean(axis=2)
     gx = np.abs(np.diff(gray, axis=1)).mean()
@@ -229,7 +243,7 @@ def compile_image(img_bytes: bytes, caption: str = "", use_llm: bool = True) -> 
                 ]},
             ])
             return Compiled(Scenario.from_dict(_parse_json(reply)), "llm-vision", ("llm-vision",))
-        except (urllib.error.URLError, TimeoutError, ValueError, KeyError, RuntimeError, json.JSONDecodeError):
+        except (urllib.error.URLError, TimeoutError, ValueError, KeyError, IndexError, TypeError, AttributeError, RuntimeError):
             pass
     f = image_features(img_bytes)
     d: dict = {"name": "from photo" + (f": {caption[:40]}" if caption else ""), "terrain": "flat",

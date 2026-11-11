@@ -9,7 +9,11 @@ import json
 import re
 from pathlib import Path
 
+import math
+from urllib.parse import urlparse
+
 import numpy as np
+from PIL import Image
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -28,6 +32,8 @@ STATIC = Path(__file__).resolve().parent / "static"
 MAX_IMAGE_BYTES = 6_000_000
 TERRAIN_GRID = 80
 POLICY_NAME = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
+MAX_PLAY_SESSIONS = 4
+_play_slots = asyncio.Semaphore(MAX_PLAY_SESSIONS)
 
 app = FastAPI(title="Breakpoint")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
@@ -49,8 +55,8 @@ def resolve_policy(name: str) -> str | None:
     return pol[name]
 
 
-def terrain_payload(scn: Scenario) -> dict:
-    h = heightfield(scn) + BASE_HEIGHT
+def terrain_payload(scn: Scenario, seed: int = 0) -> dict:
+    h = heightfield(scn, seed) + BASE_HEIGHT
     idx_r = np.linspace(0, h.shape[0] - 1, TERRAIN_GRID).astype(int)
     idx_c = np.linspace(0, h.shape[1] - 1, TERRAIN_GRID * 2).astype(int)
     sub = h[np.ix_(idx_r, idx_c)]
@@ -114,8 +120,8 @@ def api_compile_image(req: ImageReq) -> dict:
         raise HTTPException(413, "image too large")
     try:
         c = compile_image(raw, caption=req.caption)
-    except OSError as e:
-        raise HTTPException(400, "could not decode image") from e
+    except (OSError, ValueError, Image.DecompressionBombError) as e:
+        raise HTTPException(400, f"could not use image: {str(e)[:120]}") from e
     return {"source": c.source, "matched": list(c.matched), "scenario": c.scenario.to_dict()}
 
 
@@ -129,13 +135,29 @@ def api_simulate(req: SimReq) -> dict:
     env = QuadrupedEnv(scn, seed=req.seed)
     out, frames = rollout(load_policy(spec), scn, seed=req.seed, record=True, env=env)
     return {"outcome": out.to_dict(), "specs": env.geom_specs(), "frames": frames[::2], "dt": CONTROL_DT * 2,
-            "terrain": terrain_payload(scn), "scenario": scn.to_dict()}
+            "terrain": terrain_payload(scn, req.seed), "scenario": scn.to_dict()}
 
 
 @app.websocket("/ws/play")
 async def play(ws: WebSocket) -> None:
-    """Interactive mode: the client sends shoves, the server streams poses at 25 Hz."""
-    await ws.accept()
+    """Interactive mode: the client sends shoves, the server streams poses at 25 Hz.
+
+    Same-origin only (blocks drive-by pages from opening sessions) and capped at
+    MAX_PLAY_SESSIONS concurrent games so physics cannot starve the event loop.
+    """
+    origin = ws.headers.get("origin")
+    if origin and urlparse(origin).netloc != ws.headers.get("host"):
+        await ws.close(code=1008)
+        return
+    if _play_slots.locked():
+        await ws.close(code=1013)  # try again later
+        return
+    async with _play_slots:
+        await ws.accept()
+        await _play_session(ws)
+
+
+async def _play_session(ws: WebSocket) -> None:
     try:
         init = json.loads(await ws.receive_text())
         scn = Scenario.from_dict(init.get("scenario") or {}).with_(duration_s=30.0, pushes=[])
@@ -151,14 +173,16 @@ async def play(ws: WebSocket) -> None:
                 msg = json.loads(await asyncio.wait_for(ws.receive_text(), timeout=0.001))
             except asyncio.TimeoutError:
                 msg = None
-            if msg and msg.get("type") == "shove":
-                force = float(np.clip(float(msg.get("force", 80)), 0, 400))
-                direction = float(np.clip(float(msg.get("direction_deg", 90)), -180, 180))
+            if isinstance(msg, dict) and msg.get("type") == "shove":
+                force, direction = float(msg.get("force", 80)), float(msg.get("direction_deg", 90))
+                if not (math.isfinite(force) and math.isfinite(direction)):
+                    continue
+                force, direction = float(np.clip(force, 0, 400)), float(np.clip(direction, -180, 180))
                 p = Push(t=env.t + 0.001, force=force, direction_deg=direction, duration=0.1)
                 env.scenario = env.scenario.with_(pushes=[*[q.__dict__ for q in env.scenario.pushes], p.__dict__][-8:])
                 shoves += 1
                 total += p.impulse
-            obs, _, done, info = env.step(policy.act(obs))
+            obs, _, done, info = await asyncio.to_thread(env.step, policy.act(obs))
             tick += 1
             if tick % 2 == 0:
                 await ws.send_text(json.dumps({"type": "frame", "poses": env.body_poses(), "t": round(env.t, 2),
@@ -172,6 +196,6 @@ async def play(ws: WebSocket) -> None:
         return
     except HTTPException as e:
         await ws.send_text(json.dumps({"type": "error", "message": str(e.detail)[:200]}))
-    except (ValueError, KeyError, json.JSONDecodeError) as e:
+    except (ValueError, KeyError, TypeError, AttributeError) as e:
         await ws.send_text(json.dumps({"type": "error", "message": str(e)[:200]}))
     await ws.close()

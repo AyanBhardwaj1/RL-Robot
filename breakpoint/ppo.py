@@ -19,6 +19,7 @@ from .policy import ResidualPolicy
 from .scenario import Push, Scenario
 
 LOG2PI = np.log(2 * np.pi)
+TERRAIN_VARIANTS = 16  # distinct random heightfields seen during training
 
 
 @dataclass(frozen=True)
@@ -116,9 +117,13 @@ def train(policy: ResidualPolicy, sampler: ScenarioSampler, cfg: PPOConfig = PPO
             ep_ret += r
             ep_len += 1
             if done:
+                if not info.fell:
+                    # time-limit truncation is not a real terminal: bootstrap from V(s_T)
+                    R[i] += cfg.gamma * float(policy.vf(policy.norm(obs)[None])[0, 0])
                 finished.append((ep_ret, ep_len, info.x, info.fell))
                 ep_ret, ep_len = 0.0, 0
-                obs = env.reset(sampler.sample(cfg.episode_s), seed=int(rng.integers(1 << 30)))
+                obs = env.reset(sampler.sample(cfg.episode_s), seed=int(rng.integers(1 << 30)),
+                                terrain_seed=int(rng.integers(TERRAIN_VARIANTS)))
         V[n] = policy.vf(policy.norm(obs)[None])[0, 0]
         policy.norm.update(raw_obs)
         steps += n

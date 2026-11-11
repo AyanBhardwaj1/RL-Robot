@@ -21,7 +21,8 @@ from .world import (
     NOMINAL,
     TORQUE_LIMIT,
     build_xml,
-    ground_height,
+    heightfield,
+    height_at,
 )
 
 CONTROL_DT = 0.02
@@ -90,20 +91,25 @@ class QuadrupedEnv:
         lo = np.array([JOINT_RANGE[j][0] for _ in LEGS for j in JOINTS_PER_LEG])
         hi = np.array([JOINT_RANGE[j][1] for _ in LEGS for j in JOINTS_PER_LEG])
         self.q_lo, self.q_hi = lo, hi
-        self._ground_cache: dict[tuple[int, int], float] = {}
+        self._hfield = heightfield(scn, self.seed)  # cached: clearance is checked every step
 
-    def reset(self, scenario: Scenario | None = None, seed: int | None = None) -> np.ndarray:
+    def reset(self, scenario: Scenario | None = None, seed: int | None = None,
+              terrain_seed: int | None = None) -> np.ndarray:
         if seed is not None:
             self.rng = np.random.default_rng(seed)
-        if scenario is not None and scenario != self.scenario:
-            self.scenario = scenario
-            self._build(scenario)
+        rebuild = scenario is not None and scenario != self.scenario
+        if terrain_seed is not None and terrain_seed != self.seed:
+            self.seed = terrain_seed
+            rebuild = True
+        if rebuild:
+            self.scenario = scenario or self.scenario
+            self._build(self.scenario)
         mujoco.mj_resetData(self.model, self.data)
         nominal = np.array([NOMINAL[j] for _ in LEGS for j in JOINTS_PER_LEG])
         self.data.qpos[self.qadr] = nominal
         self.data.qpos[0] = 0.0
         self.data.qpos[3:7] = [0.0, 0.0, 0.0, 1.0]  # body faces world +x (gait runs along body -x)
-        self.data.qpos[2] = ground_height(self.scenario, 0.0, 0.0, self.seed) + 0.28
+        self.data.qpos[2] = height_at(self._hfield, 0.0, 0.0) + 0.28
         mujoco.mj_forward(self.model, self.data)
         self.t = 0.0
         rand_phase = float(self.rng.uniform(0, 2 * np.pi))  # always draw: keeps seeds reproducible
@@ -173,7 +179,7 @@ class QuadrupedEnv:
 
         R, lin, ang, grav = self._torso_state()
         x, y, z = self.data.qpos[0:3]
-        clearance = float(z - ground_height(self.scenario, float(x), float(y), self.seed))
+        clearance = float(z - height_at(self._hfield, float(x), float(y)))
         upright = float(R[2, 2])
         fell = bool(upright < FALL_TILT_COS or clearance < FALL_CLEARANCE or not np.isfinite(z))
 

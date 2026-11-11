@@ -85,12 +85,48 @@ def test_compile_text_uses_llm_and_clamps(monkeypatch):
     assert c.source == "llm" and c.scenario.terrain == "rough" and c.scenario.friction == 2.0
 
 
-def test_llm_base_url_must_be_https(monkeypatch):
-    monkeypatch.setenv("BREAKPOINT_LLM_BASE_URL", "http://evil.example/v1")
+@pytest.mark.parametrize("url", ["http://evil.example/v1", "http://localhost.evil.com/v1", "ftp://x"])
+def test_insecure_llm_url_disables_llm_and_falls_back(monkeypatch, url):
+    monkeypatch.setenv("BREAKPOINT_LLM_BASE_URL", url)
     monkeypatch.setenv("BREAKPOINT_LLM_API_KEY", "k")
     monkeypatch.setenv("BREAKPOINT_LLM_MODEL", "m")
+    called = []
+    monkeypatch.setattr("breakpoint.compiler._chat", lambda msgs: called.append(1) or "{}")
+    with pytest.warns(UserWarning):
+        c = compile_text("icy floor")
+    assert c.source == "rules" and not called
+
+
+@pytest.mark.parametrize("reply_exc", [IndexError, TypeError])
+def test_malformed_llm_reply_falls_back(monkeypatch, reply_exc):
+    monkeypatch.setenv("BREAKPOINT_LLM_BASE_URL", "https://example.invalid/v1")
+    monkeypatch.setenv("BREAKPOINT_LLM_API_KEY", "k")
+    monkeypatch.setenv("BREAKPOINT_LLM_MODEL", "m")
+
+    def boom(msgs):
+        raise reply_exc("bad shape")
+
+    monkeypatch.setattr("breakpoint.compiler._chat", boom)
+    assert compile_text("icy floor").source == "rules"
+
+
+def test_oversized_image_is_rejected_before_decoding():
+    from io import BytesIO
+
+    from PIL import Image
+
+    buf = BytesIO()
+    Image.new("1", (5000, 4000)).save(buf, format="PNG")
     with pytest.raises(ValueError):
-        compile_text("icy floor")
+        compile_image(buf.getvalue(), use_llm=False)
+
+
+def test_stair_clearance_uses_upper_step():
+    from breakpoint.world import ground_height
+
+    scn = Scenario(terrain="stairs", step_height=0.1)
+    # just past a riser at x = 0.6 + 0.35 the ground must read as the upper step
+    assert ground_height(scn, 0.6 + 0.35 + 0.01, 0.0) >= 0.06 + 0.1 - 1e-6
 
 
 def _png(color, noise=0.0):
@@ -233,6 +269,25 @@ def test_websocket_shove_game():
             if msg["type"] == "over":
                 break
         assert msg["type"] == "over" and msg["fell"] and msg["shoves"] >= 1
+
+
+def test_websocket_ignores_nan_shoves_and_rejects_foreign_origin():
+    from starlette.websockets import WebSocketDisconnect
+
+    from breakpoint.server import app
+
+    c = TestClient(app)
+    with c.websocket_connect("/ws/play") as ws:
+        ws.send_text(json.dumps({"scenario": {}, "policy": "cpg"}))
+        ws.receive_text()
+        ws.send_text('{"type": "shove", "force": NaN, "direction_deg": 90}')
+        ws.send_text("1")
+        for _ in range(5):
+            frame = json.loads(ws.receive_text())
+        assert frame["type"] == "frame" and frame["shoves"] == 0 and frame["impulse"] == 0.0
+    with pytest.raises(WebSocketDisconnect):
+        with c.websocket_connect("/ws/play", headers={"origin": "https://evil.example"}) as ws:
+            ws.receive_text()
 
 
 # ---------------------------------------------------------------- red team
