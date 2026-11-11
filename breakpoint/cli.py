@@ -14,13 +14,15 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+
+import numpy as np
 from pathlib import Path
 
 from .compiler import compile_image, compile_text
 from .evaluate import evaluate_many, rollout
 from .hunt import hunt, shrink
 from .policy import ResidualPolicy, load_policy
-from .ppo import PPOConfig, ScenarioSampler, deterministic_score, train
+from .ppo import EVAL_WORLDS, PPOConfig, ScenarioSampler, deterministic_score, train
 from .probe import probe
 from .profiles import PROFILES, deployment_check
 from .redteam import boundary_map, interactions, red_team
@@ -163,16 +165,26 @@ def cmd_harden(a: argparse.Namespace) -> int:
     pol = ResidualPolicy.load(a.policy) if a.policy else ResidualPolicy(seed=a.seed)
     pol.name = "hardened"
     hardened = out / f"policy_{out.name}.npz"
-    start = deterministic_score(pol)
+    profiles = [PROFILES[n] for n in (a.profile.split(",") if a.profile else [])]
+    # Select checkpoints on what hardening is *for*: generic worlds + the counterexamples
+    # + (if given) worlds drawn from the target deployment profiles.
+    sel_rng = np.random.default_rng(a.seed + 99)
+    selection = [*EVAL_WORLDS, *failures[:8], *[p.sample(sel_rng) for p in profiles for _ in range(6)]]
+
+    def score(policy: ResidualPolicy) -> float:
+        return deterministic_score(policy, seeds=(0,), worlds=selection)
+
+    start = score(pol)
     best = {"score": start}
     pol.save(hardened)  # the starting point is a valid candidate: never ship something worse
 
     def keep_best(policy: ResidualPolicy, row: dict) -> None:
-        if row["det_score"] > best["score"]:
-            best["score"] = row["det_score"]
+        sc = score(policy)
+        row["selection_score"] = round(sc, 4)
+        if sc > best["score"]:
+            best["score"] = sc
             policy.save(hardened)
 
-    profiles = [PROFILES[n] for n in (a.profile.split(",") if a.profile else [])]
     sampler = ScenarioSampler(failures=failures, seed=a.seed + 1, profiles=profiles,
                               widen_frac=0.35 if profiles else 0.2)
     train(pol, sampler, PPOConfig(total_steps=a.steps, lr=2e-4),

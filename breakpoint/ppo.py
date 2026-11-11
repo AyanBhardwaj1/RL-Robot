@@ -96,7 +96,8 @@ EVAL_WORLDS = (
 )
 
 
-def deterministic_score(policy: ResidualPolicy, seeds: tuple[int, ...] = (0, 1)) -> float:
+def deterministic_score(policy: ResidualPolicy, seeds: tuple[int, ...] = (0, 1),
+                        worlds: tuple[Scenario, ...] | list[Scenario] = EVAL_WORLDS) -> float:
     """Model-selection score with the *deterministic* policy (what actually ships).
 
     Training curves use stochastic actions, which can hide a mean policy that stalls;
@@ -106,7 +107,7 @@ def deterministic_score(policy: ResidualPolicy, seeds: tuple[int, ...] = (0, 1))
 
     total = 0.0
     n = 0
-    for scn in EVAL_WORLDS:
+    for scn in worlds:
         for sd in seeds:
             out, _ = rollout(policy, scn, seed=sd)
             expected = scn.target_speed * scn.duration_s
