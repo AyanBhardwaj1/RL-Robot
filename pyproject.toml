@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "breakpoint"
 version = "0.1.0"
@@ -6,10 +10,17 @@ requires-python = ">=3.10"
 dependencies = ["numpy>=1.26", "mujoco>=3.1", "fastapi>=0.110", "uvicorn>=0.29", "pydantic>=2", "pillow>=10"]
 
 [project.optional-dependencies]
-dev = ["pytest", "httpx", "ruff"]
+gym = ["gymnasium>=1.0"]
+dev = ["pytest", "httpx", "ruff", "gymnasium>=1.0"]
 
 [project.scripts]
 breakpoint = "breakpoint.cli:main"
+
+[tool.setuptools]
+packages = ["breakpoint"]
+
+[tool.setuptools.package-data]
+breakpoint = ["static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

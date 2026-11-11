@@ -7,6 +7,7 @@ import base64
 import binascii
 import json
 import math
+import os
 import re
 from pathlib import Path
 from urllib.parse import urlparse
@@ -27,8 +28,8 @@ from .profiles import PROFILES, deployment_check
 from .scenario import Push, Scenario
 from .world import BASE_HEIGHT, HFIELD_HALF_X, HFIELD_HALF_Y, heightfield
 
-ROOT = Path(__file__).resolve().parent.parent
-RUNS = ROOT / "runs"
+# Policies and reports live in ./runs (or $BREAKPOINT_RUNS), not inside the installed package.
+RUNS = Path(os.environ.get("BREAKPOINT_RUNS", Path.cwd() / "runs"))
 STATIC = Path(__file__).resolve().parent / "static"
 MAX_IMAGE_BYTES = 6_000_000
 TERRAIN_GRID = 80
