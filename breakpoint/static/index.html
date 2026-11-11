@@ -52,6 +52,11 @@ pre{margin:0;font-size:11px;max-height:180px;overflow:auto;white-space:pre-wrap}
     <p class="muted" style="margin:8px 0 0">Score = total impulse the robot absorbed before falling. Keys: arrows shove.</p>
   </div>
   <div class="card"><div class="muted">Outcome</div><pre id="out">–</pre></div>
+  <div class="card">
+    <div class="muted">Deployment check: how often does it fall there?</div>
+    <div class="row" style="margin-top:6px"><select id="profile"></select><button id="deploy" class="ghost">Run 30 worlds</button></div>
+    <div id="deployres" class="muted" style="margin-top:8px"></div>
+  </div>
 </aside>
 <div id="view"><div id="hud">t = 0.0 s · x = 0.00 m</div><div id="banner"></div></div>
 </div>
@@ -155,6 +160,21 @@ $("sim").onclick = async () => {
   } catch (e) { $("out").textContent = "error: " + e.message; }
   $("sim").disabled = false;
 };
+$("deploy").onclick = async () => {
+  const box = $("deployres"); box.textContent = "sampling 30 worlds…"; $("deploy").disabled = true;
+  try {
+    const d = await post("/api/deploy", { policy: $("policy").value, profile: $("profile").value, trials: 30 });
+    box.replaceChildren();
+    const head = document.createElement("div");
+    head.style.color = d.failure_rate_upper_95 <= 0.1 ? "var(--ok)" : "var(--bad)"; head.style.fontWeight = "600";
+    head.textContent = `${d.failures}/${d.trials} fell or stalled (${(100 * d.failure_rate).toFixed(1)}%, 95% upper bound ${(100 * d.failure_rate_upper_95).toFixed(1)}%)`;
+    const causes = document.createElement("div");
+    causes.textContent = "causes: " + (Object.entries(d.failures_by_dominant_stressor).map(([k, v]) => `${k} ×${v}`).join(", ") || "none");
+    const desc = document.createElement("div"); desc.textContent = d.description;
+    box.append(head, causes, desc);
+  } catch (e) { box.textContent = "error: " + e.message; }
+  $("deploy").disabled = false;
+};
 $("force").oninput = () => $("fval").textContent = $("force").value;
 function shove(d) { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type: "shove", force: +$("force").value, direction_deg: d })); }
 document.querySelectorAll(".pad button").forEach((b) => b.onclick = () => shove(+b.dataset.d));
@@ -183,6 +203,8 @@ $("play").onclick = async () => {
   const p = await (await fetch("/api/policies")).json();
   for (const n of p.policies) { for (const sel of ["policy", "ghost"]) { const o = document.createElement("option"); o.value = o.textContent = n; $(sel).appendChild(o); } }
   $("policy").value = p.policies[p.policies.length - 1];
+  const pr = await (await fetch("/api/profiles")).json();
+  for (const x of pr.profiles) { const o = document.createElement("option"); o.value = x.name; o.textContent = x.name; o.title = x.description; $("profile").appendChild(o); }
   const r = await (await fetch("/api/reports")).json();
   if (r.reports.length) { $("reportlink").textContent = "readiness report →"; $("reportlink").href = "/reports/" + r.reports[r.reports.length - 1]; }
   compile();

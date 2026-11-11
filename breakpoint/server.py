@@ -23,6 +23,7 @@ from .compiler import compile_image, compile_text
 from .env import CONTROL_DT, QuadrupedEnv
 from .evaluate import rollout
 from .policy import load_policy
+from .profiles import PROFILES, deployment_check
 from .scenario import Push, Scenario
 from .world import BASE_HEIGHT, HFIELD_HALF_X, HFIELD_HALF_Y, heightfield
 
@@ -33,6 +34,7 @@ MAX_IMAGE_BYTES = 6_000_000
 TERRAIN_GRID = 80
 POLICY_NAME = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
 MAX_PLAY_SESSIONS = 4
+MAX_DEPLOY_TRIALS = 60
 _play_slots = asyncio.Semaphore(MAX_PLAY_SESSIONS)
 
 app = FastAPI(title="Breakpoint")
@@ -71,6 +73,12 @@ class CompileReq(BaseModel):
 class ImageReq(BaseModel):
     image_b64: str = Field(..., max_length=MAX_IMAGE_BYTES * 2)
     caption: str = Field("", max_length=500)
+
+
+class DeployReq(BaseModel):
+    policy: str = "cpg"
+    profile: str = Field("warehouse", max_length=32)
+    trials: int = Field(30, ge=4, le=MAX_DEPLOY_TRIALS)
 
 
 class SimReq(BaseModel):
@@ -123,6 +131,22 @@ def api_compile_image(req: ImageReq) -> dict:
     except (OSError, ValueError, Image.DecompressionBombError) as e:
         raise HTTPException(400, f"could not use image: {str(e)[:120]}") from e
     return {"source": c.source, "matched": list(c.matched), "scenario": c.scenario.to_dict()}
+
+
+@app.get("/api/profiles")
+def api_profiles() -> dict:
+    return {"profiles": [{"name": p.name, "description": p.description} for p in PROFILES.values()]}
+
+
+@app.post("/api/deploy")
+def api_deploy(req: DeployReq) -> dict:
+    if req.profile not in PROFILES:
+        raise HTTPException(404, f"unknown profile {req.profile}")
+    # sequential: forking worker processes from the threaded server can deadlock
+    r = deployment_check(resolve_policy(req.policy), req.profile, trials=req.trials, workers=1)
+    r["worst"] = [{"name": w["scenario"]["name"], "stressor": Scenario.from_dict(w["scenario"]).dominant_stressor(),
+                   "outcome": w["outcome"]} for w in r["worst"]]
+    return r
 
 
 @app.post("/api/simulate")

@@ -411,3 +411,14 @@ def test_sampler_draws_from_deployment_profiles():
     s = ScenarioSampler(seed=0, profiles=[PROFILES["construction"]], widen_frac=1.0)
     worlds = [s.sample(6.0) for _ in range(20)]
     assert all(w.name == "construction sample" for w in worlds)
+
+
+def test_deploy_endpoint_validates_and_runs():
+    from breakpoint.server import app
+
+    c = TestClient(app)
+    assert {p["name"] for p in c.get("/api/profiles").json()["profiles"]} >= {"warehouse", "home"}
+    assert c.post("/api/deploy", json={"profile": "moon"}).status_code == 404
+    assert c.post("/api/deploy", json={"profile": "home", "trials": 10_000}).status_code == 422
+    r = c.post("/api/deploy", json={"profile": "home", "trials": 4, "policy": "cpg"}).json()
+    assert r["trials"] == 4 and "failures_by_dominant_stressor" in r
