@@ -111,6 +111,12 @@ because the attacks are proposed from each run's own measured weak spots.)
 
 ![report](docs/report.png)
 
+The final leaderboard (`runs/final/report.html`) re-audits CPG, v2, v2field and gated v2field in
+one run. It confirms the scores above (66.8 / 73.5 / 82.6 / 84.1) and adds a deployment-risk
+table, with 30 worlds per profile:
+
+![deployment risk](docs/report_deploy.png)
+
 ### Deployment check: "if we ship it there, how often does it fall?"
 
 `python -m breakpoint deploy --policy <p> --trials 60` samples 60 independent worlds from each
