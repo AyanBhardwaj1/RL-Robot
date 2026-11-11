@@ -56,8 +56,8 @@ originals before quoting it**. Items marked *(unverified)* came from a single ag
 | Robot learning / foundation models | RL, imitation learning, VLAs, transformers | numpy PPO, hardening loop, honest training results |
 | ML systems / ML Ops | Profiling, quantizing, distilling RL and VLA policies for onboard compute; ONNX, TensorRT | `quantize.py`: INT8 is 3.6× smaller with no readiness loss |
 | Perception | Detection, SLAM, sensor fusion, ROS 2, edge GPUs | photo-to-scenario, sensor-noise axis |
-| Embedded / firmware | Motor control (FOC), EtherCAT, CAN, embedded Linux | latency and actuator-strength axes and budgets |
-| Platform / dev tools | Bazel, CI/CD, developer experience, AI coding agents | CI, 81 tests, browser and Python agreement tests, CLI |
+| Embedded / firmware | Motor control (FOC), EtherCAT, CAN, embedded Linux | latency and actuator-strength axes; C++17 controller and real-time loop benchmark |
+| Platform / dev tools | Bazel, CI/CD, developer experience, AI coding agents | CI, 90 tests, three implementations (Python, JS, C++) held equal by tests, CLI |
 | Fleet Connect / integration | gRPC, protobuf, REST, MQTT, Kafka, WMS/ERP integration | stateless HTTP API, deployment profiles |
 | Test / TestOps | HIL and simulation testing, regression, coverage | `regress`, `certify`, shrunk counterexamples |
 | Safety | IEC 61508, ISO 13849, ISO 10218, R15.06/R15.08, HARA, FMEA | failure bounds, evidence-based explanations, biped vs wheeled odds |
@@ -75,7 +75,7 @@ A third-party count put open roles at about 86 in Oct 2026 *(unverified)*.
 |---|---|---|
 | **SWE Intern – Developer Experience** ([Built In](https://builtin.com/job/software-engineering-intern-developer-experience/8766589)) | C++, Python or TypeScript; CI/CD, Docker; using coding agents | CLI, CI, tests, the serverless site, and how an AI agent was used and then checked by reviews |
 | **SWE Intern – ML Systems / ML Ops** ([Greenhouse](https://job-boards.greenhouse.io/apptronik/jobs/6128057004)) | Profile, quantize and distill RL/VLA policies; PyTorch, ONNX, TensorRT | `python -m breakpoint quantize`: compression measured by robustness, not only by action error |
-| **Robotics Software Intern – Real-Time Controls** ([Greenhouse](https://job-boards.greenhouse.io/apptronik/jobs/5985132004)) | Real-time C++, unit tests, actuators, encoders, IMUs | latency budgets, actuator-strength axis, capture-point controller |
+| **Robotics Software Intern – Real-Time Controls** ([Greenhouse](https://job-boards.greenhouse.io/apptronik/jobs/5985132004)) | Real-time C++, unit tests, actuators, encoders, IMUs | `cpp/capture_point.hpp`: an allocation-free 2 ms controller step, parity tests against Python, a 500 Hz benchmark (0.8 µs step, 4.9 ms worst wake-up jitter on a stock kernel) |
 | **Autonomy Software Intern** ([Built In](https://builtin.com/job/autonomy-software-intern-humanoid-robotics/8601758)) | Behaviour execution in sim and on hardware; ROS 2, MuJoCo, Pinocchio | scenario-driven evaluation, job profiles |
 | **Motion Control and Planning Intern** ([Built In](https://www.builtinaustin.com/job/motion-control-and-planning-intern/8816589)) | RL, robot dynamics, PyTorch or JAX, MuJoCo or Drake | LIP and capture point, PPO from scratch |
 | **Perception Software Intern** ([Built In](https://builtin.com/job/perception-software-intern-humanoid-robotics/8376319)) | OpenCV, ROS 2, 3D vision | photo-to-scenario |
@@ -104,7 +104,9 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
    - A latency gate took teleop failures from 10% to 0%.
    - Say: “The tool caught my own mistakes.”
 4. **Ship it (60 s).** Run `python -m breakpoint quantize --policy runs/v2field/policy_v2field.npz --gated`: INT8 is 3.6× smaller with the same readiness score. Then run `certify`: a certificate with hash and versions that fails CI below a bar.
-5. **Close (30 s).** Open `/roles`: each Apptronik team, the file that touches it, and what I’d build next with them.
+5. **Real time (optional, 30 s).** Run `./build-cpp/breakpoint_cp bench 2`. The step takes about 1 µs; the
+   scheduler's wake-up jitter reaches about 5 ms. Say: “The math is free; the kernel is the risk.”
+6. **Close (30 s).** Open `/roles`: each Apptronik team, the file that touches it, and what I’d build next with them.
 
 ## 5. Talking points and honest limits
 

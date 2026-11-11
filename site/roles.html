@@ -105,9 +105,11 @@
         <li>Control latency is modelled at the step level: 20 ms per control tick in the quadruped, continuous in the humanoid.</li>
         <li>Measured latency budgets: the gated policy tolerates 120 ms; ungated learned policies fail above 40–60 ms.</li>
         <li>Actuator strength is an axis: the best quadruped policy keeps walking at 21% of nominal torque.</li>
+        <li><code>cpp/capture_point.hpp</code>: a header-only C++17 controller with an allocation-free 2 ms <code>step()</code>, matching Python to 0.01 N·s on all 16 breaking points (tested in CI with <code>-Werror</code>).</li>
+        <li>500 Hz benchmark: the step costs 0.8 µs (p50) to 1.7 µs (p99), but wake-up jitter on a stock kernel reaches 4.9 ms, more than two missed periods. The case for PREEMPT_RT, measured.</li>
       </ul>
       <h3>Next I’d build</h3>
-      <p>A C++ port of the capture-point controller with a fixed-rate loop and jitter injection, benchmarked against the Python reference.</p>
+      <p>The same loop on a PREEMPT_RT kernel with an isolated core and SCHED_FIFO, with jitter fed back into the humanoid lab as a latency distribution.</p>
     </article>
 
     <article class="role" id="platform">
@@ -115,7 +117,7 @@
       <p class="does">Build systems, CI/CD, developer experience, internal tools, AI-assisted workflows.</p>
       <h3>In Breakpoint</h3>
       <ul>
-        <li>81 tests, lint-clean, CI on every push; the browser port is tested against the Python model so the two cannot drift.</li>
+        <li>90 tests, lint-clean, CI on every push; the browser (JavaScript) and C++ ports are both tested against the Python model so none of the three can drift.</li>
         <li>A CLI with 13 commands, a local and a serverless web lab, reproducible scripts for every committed result.</li>
         <li>Built with an AI coding agent, then reviewed twice by independent reviewers; 17 findings fixed with regression tests.</li>
       </ul>
