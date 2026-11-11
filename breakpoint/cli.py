@@ -396,6 +396,22 @@ def cmd_design(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_episodes(a: argparse.Namespace) -> int:
+    from .episodes import filter_episodes, read_episodes, synthetic_episodes, to_text
+
+    eps = read_episodes(a.log) if a.log else synthetic_episodes(a.demo, seed=a.seed)
+    if a.write_demo and not a.log:
+        Path(a.write_demo).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.write_demo).write_text("".join(json.dumps(e) + "\n" for e in eps))
+    report = filter_episodes(eps)
+    print(to_text(report))
+    if a.out:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(json.dumps(report, indent=1))
+        print(f"\nwrote {a.out}")
+    return 0
+
+
 def cmd_hazards(a: argparse.Namespace) -> int:
     from .hazards import hazard_log, to_markdown
 
@@ -537,6 +553,15 @@ def main(argv: list[str] | None = None) -> int:
     de.add_argument("--seed", type=int, default=0)
     de.add_argument("--out", default="runs/humanoid/levers.json")
     de.set_defaults(fn=cmd_design)
+
+    ep = sub.add_parser("episodes", help="tag teleop demonstrations: clean, lag, near-fall or fall")
+    eps_src = ep.add_mutually_exclusive_group(required=True)
+    eps_src.add_argument("--log", help="JSON Lines file, one episode per line")
+    eps_src.add_argument("--demo", type=int, help="generate this many synthetic teleop episodes")
+    ep.add_argument("--seed", type=int, default=0)
+    ep.add_argument("--write-demo", help="also save the synthetic episodes here")
+    ep.add_argument("--out")
+    ep.set_defaults(fn=cmd_episodes)
 
     hz = sub.add_parser("hazards", help="hazard log with measured frequencies from the humanoid lab")
     hz.add_argument("--trials", type=int, default=150)

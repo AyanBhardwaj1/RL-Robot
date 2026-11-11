@@ -150,6 +150,7 @@ hand-written backprop, and that backprop is checked against finite differences i
 | `humanoid.py` | Humanoid push recovery: linear inverted pendulum, capture-point stepping, wheeled-base model, job odds. Ported to `site/assets/humanoid.js` and `cpp/capture_point.hpp` with parity tests. |
 | `fleet.py` | Fits a site's deployment profile from per-shift telemetry (JSON Lines) with robust quantiles, then re-runs humanoid odds. |
 | `design.py` | Design levers: re-runs every job on the same sampled shifts with one spec improved (swing time, reach, torque, latency, grip…) and reports shifts fixed vs broken with a sign test. |
+| `episodes.py` | Teleop demonstration filter: replays each recorded contact through the humanoid model at the latency measured at that moment and tags the episode clean, lag (a stall or a blind link), near-fall (25% harder would fall) or fall. |
 | `hazards.py` | Hazard log with measured frequencies, 95% bounds, a risk matrix, mitigations and verify commands. |
 | `quantize.py` | FP16 and INT8 policy compression, profiled and re-audited for robustness. |
 | `cli.py` | `compile`, `run`, `train`, `audit`, `harden`, `regress`, `deploy`, `redteam`, `leaderboard`, `serve`, and `certify`. `certify` writes a traceable readiness certificate (policy SHA-256, toolchain versions, git commit, scorecard, margins, deployment risk, search budget) and exits non-zero below `--min-score`. |
@@ -172,6 +173,7 @@ python -m breakpoint certify --policy gated:runs/v2field/policy_v2field.npz --mi
 python -m breakpoint humanoid --latency-ms 150     # humanoid: biped vs wheeled envelopes and job odds
 python -m breakpoint design                        # which spec change buys the most robustness (paired)
 python -m breakpoint hazards                       # hazard log with measured frequencies
+python -m breakpoint episodes --demo 200           # tag teleop demonstrations: clean, lag, near-fall, fall
 python -m breakpoint fleet --demo "tote handling"  # fit a site profile from shift telemetry, re-run odds
 python -m breakpoint quantize --policy runs/v2field/policy_v2field.npz --gated   # INT8 with a robustness check
 cmake -S cpp -B build-cpp && cmake --build build-cpp && ./build-cpp/breakpoint_cp bench 2   # C++ controller

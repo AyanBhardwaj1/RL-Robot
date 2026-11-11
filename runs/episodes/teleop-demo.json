@@ -1,0 +1,1755 @@
+{
+ "episodes": 200,
+ "counts": {
+  "clean": 105,
+  "lag": 63,
+  "near-fall": 10,
+  "fall": 22
+ },
+ "keep_share": 0.525,
+ "drop": [
+  "ep-0005",
+  "ep-0007",
+  "ep-0019",
+  "ep-0021",
+  "ep-0033",
+  "ep-0034",
+  "ep-0037",
+  "ep-0044",
+  "ep-0055",
+  "ep-0057",
+  "ep-0083",
+  "ep-0097",
+  "ep-0114",
+  "ep-0129",
+  "ep-0139",
+  "ep-0143",
+  "ep-0148",
+  "ep-0156",
+  "ep-0161",
+  "ep-0163",
+  "ep-0183",
+  "ep-0186"
+ ],
+ "flag": [
+  {
+   "episode": "ep-0035",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 17.1 s: 45 N\u00b7s shove recovered in 2 step(s), 25% harder would fall",
+    "lag: median 184 ms, peak 587 ms"
+   ]
+  },
+  {
+   "episode": "ep-0045",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 24.0 s: 39 N\u00b7s shove recovered in 2 step(s), 25% harder would fall",
+    "lag: median 66 ms, peak 327 ms"
+   ]
+  },
+  {
+   "episode": "ep-0061",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 18.3 s: 38 N\u00b7s shove recovered in 3 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0074",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 13.7 s: 49 N\u00b7s shove recovered in 2 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0109",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 25.3 s: 42 N\u00b7s shove recovered in 3 step(s), 25% harder would fall",
+    "lag: median 248 ms, peak 261 ms"
+   ]
+  },
+  {
+   "episode": "ep-0123",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 7.3 s: 48 N\u00b7s shove recovered in 2 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0138",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 18.1 s: 27 N\u00b7s shove recovered in 3 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0149",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 25.1 s: 38 N\u00b7s shove recovered in 2 step(s), 25% harder would fall",
+    "lag: median 210 ms, peak 232 ms"
+   ]
+  },
+  {
+   "episode": "ep-0150",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 7.5 s: 50 N\u00b7s shove recovered in 2 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0170",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 4.7 s: 38 N\u00b7s shove recovered in 2 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0002",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 209 ms, peak 354 ms"
+   ]
+  },
+  {
+   "episode": "ep-0003",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 102 ms, peak 346 ms"
+   ]
+  },
+  {
+   "episode": "ep-0010",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 248 ms, peak 265 ms"
+   ]
+  },
+  {
+   "episode": "ep-0013",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 204 ms, peak 218 ms"
+   ]
+  },
+  {
+   "episode": "ep-0017",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 229 ms, peak 241 ms"
+   ]
+  },
+  {
+   "episode": "ep-0023",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 216 ms, peak 238 ms"
+   ]
+  },
+  {
+   "episode": "ep-0024",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 212 ms, peak 221 ms"
+   ]
+  },
+  {
+   "episode": "ep-0026",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 184 ms, peak 546 ms"
+   ]
+  },
+  {
+   "episode": "ep-0031",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 246 ms, peak 268 ms"
+   ]
+  },
+  {
+   "episode": "ep-0032",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 250 ms, peak 267 ms"
+   ]
+  },
+  {
+   "episode": "ep-0036",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 139 ms, peak 515 ms"
+   ]
+  },
+  {
+   "episode": "ep-0040",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 203 ms, peak 222 ms"
+   ]
+  },
+  {
+   "episode": "ep-0041",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 207 ms, peak 224 ms"
+   ]
+  },
+  {
+   "episode": "ep-0043",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 230 ms, peak 243 ms"
+   ]
+  },
+  {
+   "episode": "ep-0048",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 243 ms, peak 260 ms"
+   ]
+  },
+  {
+   "episode": "ep-0049",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 77 ms, peak 455 ms"
+   ]
+  },
+  {
+   "episode": "ep-0050",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 63 ms, peak 313 ms"
+   ]
+  },
+  {
+   "episode": "ep-0051",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 224 ms, peak 238 ms"
+   ]
+  },
+  {
+   "episode": "ep-0053",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 65 ms, peak 266 ms"
+   ]
+  },
+  {
+   "episode": "ep-0058",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 247 ms, peak 620 ms"
+   ]
+  },
+  {
+   "episode": "ep-0062",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 124 ms, peak 312 ms"
+   ]
+  },
+  {
+   "episode": "ep-0063",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 93 ms, peak 372 ms"
+   ]
+  },
+  {
+   "episode": "ep-0066",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 105 ms, peak 293 ms"
+   ]
+  },
+  {
+   "episode": "ep-0070",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 171 ms, peak 517 ms"
+   ]
+  },
+  {
+   "episode": "ep-0081",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 208 ms, peak 330 ms"
+   ]
+  },
+  {
+   "episode": "ep-0084",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 84 ms, peak 492 ms"
+   ]
+  },
+  {
+   "episode": "ep-0086",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 71 ms, peak 233 ms"
+   ]
+  },
+  {
+   "episode": "ep-0090",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 205 ms, peak 218 ms"
+   ]
+  },
+  {
+   "episode": "ep-0092",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 203 ms, peak 497 ms"
+   ]
+  },
+  {
+   "episode": "ep-0095",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 196 ms, peak 471 ms"
+   ]
+  },
+  {
+   "episode": "ep-0096",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 155 ms, peak 522 ms"
+   ]
+  },
+  {
+   "episode": "ep-0102",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 233 ms, peak 255 ms"
+   ]
+  },
+  {
+   "episode": "ep-0103",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 216 ms, peak 231 ms"
+   ]
+  },
+  {
+   "episode": "ep-0106",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 145 ms, peak 435 ms"
+   ]
+  },
+  {
+   "episode": "ep-0112",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 218 ms, peak 234 ms"
+   ]
+  },
+  {
+   "episode": "ep-0115",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 216 ms, peak 231 ms"
+   ]
+  },
+  {
+   "episode": "ep-0116",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 239 ms, peak 254 ms"
+   ]
+  },
+  {
+   "episode": "ep-0118",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 53 ms, peak 189 ms"
+   ]
+  },
+  {
+   "episode": "ep-0120",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 208 ms, peak 224 ms"
+   ]
+  },
+  {
+   "episode": "ep-0122",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 246 ms, peak 261 ms"
+   ]
+  },
+  {
+   "episode": "ep-0124",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 217 ms, peak 237 ms"
+   ]
+  },
+  {
+   "episode": "ep-0125",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 224 ms, peak 242 ms"
+   ]
+  },
+  {
+   "episode": "ep-0127",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 151 ms, peak 369 ms"
+   ]
+  },
+  {
+   "episode": "ep-0128",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 225 ms, peak 239 ms"
+   ]
+  },
+  {
+   "episode": "ep-0133",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 227 ms, peak 243 ms"
+   ]
+  },
+  {
+   "episode": "ep-0140",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 234 ms, peak 250 ms"
+   ]
+  },
+  {
+   "episode": "ep-0144",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 100 ms, peak 252 ms"
+   ]
+  },
+  {
+   "episode": "ep-0147",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 186 ms, peak 419 ms"
+   ]
+  },
+  {
+   "episode": "ep-0151",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 242 ms, peak 262 ms"
+   ]
+  },
+  {
+   "episode": "ep-0152",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 201 ms, peak 218 ms"
+   ]
+  },
+  {
+   "episode": "ep-0158",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 115 ms, peak 464 ms"
+   ]
+  },
+  {
+   "episode": "ep-0166",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 236 ms, peak 251 ms"
+   ]
+  },
+  {
+   "episode": "ep-0168",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 235 ms, peak 421 ms"
+   ]
+  },
+  {
+   "episode": "ep-0175",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 206 ms, peak 233 ms"
+   ]
+  },
+  {
+   "episode": "ep-0180",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 237 ms, peak 256 ms"
+   ]
+  },
+  {
+   "episode": "ep-0187",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 237 ms, peak 255 ms"
+   ]
+  },
+  {
+   "episode": "ep-0188",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 229 ms, peak 245 ms"
+   ]
+  },
+  {
+   "episode": "ep-0189",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 240 ms, peak 255 ms"
+   ]
+  },
+  {
+   "episode": "ep-0193",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 245 ms, peak 264 ms"
+   ]
+  },
+  {
+   "episode": "ep-0195",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 250 ms, peak 267 ms"
+   ]
+  },
+  {
+   "episode": "ep-0197",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 206 ms, peak 438 ms"
+   ]
+  },
+  {
+   "episode": "ep-0198",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 211 ms, peak 221 ms"
+   ]
+  },
+  {
+   "episode": "ep-0199",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 63 ms, peak 356 ms"
+   ]
+  }
+ ],
+ "verdicts": [
+  {
+   "episode": "ep-0000",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0001",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0002",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 209 ms, peak 354 ms"
+   ]
+  },
+  {
+   "episode": "ep-0003",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 102 ms, peak 346 ms"
+   ]
+  },
+  {
+   "episode": "ep-0004",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0005",
+   "tag": "fall",
+   "reasons": [
+    "fall at 28.0 s: 30 N\u00b7s shove, needed more than 3 steps"
+   ]
+  },
+  {
+   "episode": "ep-0006",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0007",
+   "tag": "fall",
+   "reasons": [
+    "fall at 26.2 s: 41 N\u00b7s shove, needed more than 3 steps",
+    "lag: median 222 ms, peak 233 ms"
+   ]
+  },
+  {
+   "episode": "ep-0008",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0009",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0010",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 248 ms, peak 265 ms"
+   ]
+  },
+  {
+   "episode": "ep-0011",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0012",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0013",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 204 ms, peak 218 ms"
+   ]
+  },
+  {
+   "episode": "ep-0014",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0015",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0016",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0017",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 229 ms, peak 241 ms"
+   ]
+  },
+  {
+   "episode": "ep-0018",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0019",
+   "tag": "fall",
+   "reasons": [
+    "fall at 3.1 s: 34 N\u00b7s shove, needed more than 3 steps",
+    "lag: median 207 ms, peak 225 ms"
+   ]
+  },
+  {
+   "episode": "ep-0020",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0021",
+   "tag": "fall",
+   "reasons": [
+    "fall at 17.2 s: 37 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0022",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0023",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 216 ms, peak 238 ms"
+   ]
+  },
+  {
+   "episode": "ep-0024",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 212 ms, peak 221 ms"
+   ]
+  },
+  {
+   "episode": "ep-0025",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0026",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 184 ms, peak 546 ms"
+   ]
+  },
+  {
+   "episode": "ep-0027",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0028",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0029",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0030",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0031",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 246 ms, peak 268 ms"
+   ]
+  },
+  {
+   "episode": "ep-0032",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 250 ms, peak 267 ms"
+   ]
+  },
+  {
+   "episode": "ep-0033",
+   "tag": "fall",
+   "reasons": [
+    "fall at 8.4 s: 50 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0034",
+   "tag": "fall",
+   "reasons": [
+    "fall at 12.4 s: 40 N\u00b7s shove, capture point ran away beyond leg reach",
+    "lag: median 228 ms, peak 242 ms"
+   ]
+  },
+  {
+   "episode": "ep-0035",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 17.1 s: 45 N\u00b7s shove recovered in 2 step(s), 25% harder would fall",
+    "lag: median 184 ms, peak 587 ms"
+   ]
+  },
+  {
+   "episode": "ep-0036",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 139 ms, peak 515 ms"
+   ]
+  },
+  {
+   "episode": "ep-0037",
+   "tag": "fall",
+   "reasons": [
+    "fall at 1.1 s: 49 N\u00b7s shove, capture point ran away beyond leg reach",
+    "lag: median 212 ms, peak 222 ms"
+   ]
+  },
+  {
+   "episode": "ep-0038",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0039",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0040",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 203 ms, peak 222 ms"
+   ]
+  },
+  {
+   "episode": "ep-0041",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 207 ms, peak 224 ms"
+   ]
+  },
+  {
+   "episode": "ep-0042",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0043",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 230 ms, peak 243 ms"
+   ]
+  },
+  {
+   "episode": "ep-0044",
+   "tag": "fall",
+   "reasons": [
+    "fall at 1.5 s: 43 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0045",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 24.0 s: 39 N\u00b7s shove recovered in 2 step(s), 25% harder would fall",
+    "lag: median 66 ms, peak 327 ms"
+   ]
+  },
+  {
+   "episode": "ep-0046",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0047",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0048",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 243 ms, peak 260 ms"
+   ]
+  },
+  {
+   "episode": "ep-0049",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 77 ms, peak 455 ms"
+   ]
+  },
+  {
+   "episode": "ep-0050",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 63 ms, peak 313 ms"
+   ]
+  },
+  {
+   "episode": "ep-0051",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 224 ms, peak 238 ms"
+   ]
+  },
+  {
+   "episode": "ep-0052",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0053",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 65 ms, peak 266 ms"
+   ]
+  },
+  {
+   "episode": "ep-0054",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0055",
+   "tag": "fall",
+   "reasons": [
+    "fall at 11.3 s: 50 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0056",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0057",
+   "tag": "fall",
+   "reasons": [
+    "fall at 17.2 s: 49 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0058",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 247 ms, peak 620 ms"
+   ]
+  },
+  {
+   "episode": "ep-0059",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0060",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0061",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 18.3 s: 38 N\u00b7s shove recovered in 3 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0062",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 124 ms, peak 312 ms"
+   ]
+  },
+  {
+   "episode": "ep-0063",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 93 ms, peak 372 ms"
+   ]
+  },
+  {
+   "episode": "ep-0064",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0065",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0066",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 105 ms, peak 293 ms"
+   ]
+  },
+  {
+   "episode": "ep-0067",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0068",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0069",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0070",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 171 ms, peak 517 ms"
+   ]
+  },
+  {
+   "episode": "ep-0071",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0072",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0073",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0074",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 13.7 s: 49 N\u00b7s shove recovered in 2 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0075",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0076",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0077",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0078",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0079",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0080",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0081",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 208 ms, peak 330 ms"
+   ]
+  },
+  {
+   "episode": "ep-0082",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0083",
+   "tag": "fall",
+   "reasons": [
+    "fall at 26.5 s: 49 N\u00b7s shove, needed more than 3 steps"
+   ]
+  },
+  {
+   "episode": "ep-0084",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 84 ms, peak 492 ms"
+   ]
+  },
+  {
+   "episode": "ep-0085",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0086",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 71 ms, peak 233 ms"
+   ]
+  },
+  {
+   "episode": "ep-0087",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0088",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0089",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0090",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 205 ms, peak 218 ms"
+   ]
+  },
+  {
+   "episode": "ep-0091",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0092",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 203 ms, peak 497 ms"
+   ]
+  },
+  {
+   "episode": "ep-0093",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0094",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0095",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 196 ms, peak 471 ms"
+   ]
+  },
+  {
+   "episode": "ep-0096",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 155 ms, peak 522 ms"
+   ]
+  },
+  {
+   "episode": "ep-0097",
+   "tag": "fall",
+   "reasons": [
+    "fall at 8.3 s: 42 N\u00b7s shove, needed more than 3 steps"
+   ]
+  },
+  {
+   "episode": "ep-0098",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0099",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0100",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0101",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0102",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 233 ms, peak 255 ms"
+   ]
+  },
+  {
+   "episode": "ep-0103",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 216 ms, peak 231 ms"
+   ]
+  },
+  {
+   "episode": "ep-0104",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0105",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0106",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 145 ms, peak 435 ms"
+   ]
+  },
+  {
+   "episode": "ep-0107",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0108",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0109",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 25.3 s: 42 N\u00b7s shove recovered in 3 step(s), 25% harder would fall",
+    "lag: median 248 ms, peak 261 ms"
+   ]
+  },
+  {
+   "episode": "ep-0110",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0111",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0112",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 218 ms, peak 234 ms"
+   ]
+  },
+  {
+   "episode": "ep-0113",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0114",
+   "tag": "fall",
+   "reasons": [
+    "fall at 20.4 s: 31 N\u00b7s shove, capture point ran away beyond leg reach",
+    "lag: median 209 ms, peak 222 ms"
+   ]
+  },
+  {
+   "episode": "ep-0115",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 216 ms, peak 231 ms"
+   ]
+  },
+  {
+   "episode": "ep-0116",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 239 ms, peak 254 ms"
+   ]
+  },
+  {
+   "episode": "ep-0117",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0118",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 53 ms, peak 189 ms"
+   ]
+  },
+  {
+   "episode": "ep-0119",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0120",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 208 ms, peak 224 ms"
+   ]
+  },
+  {
+   "episode": "ep-0121",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0122",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 246 ms, peak 261 ms"
+   ]
+  },
+  {
+   "episode": "ep-0123",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 7.3 s: 48 N\u00b7s shove recovered in 2 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0124",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 217 ms, peak 237 ms"
+   ]
+  },
+  {
+   "episode": "ep-0125",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 224 ms, peak 242 ms"
+   ]
+  },
+  {
+   "episode": "ep-0126",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0127",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 151 ms, peak 369 ms"
+   ]
+  },
+  {
+   "episode": "ep-0128",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 225 ms, peak 239 ms"
+   ]
+  },
+  {
+   "episode": "ep-0129",
+   "tag": "fall",
+   "reasons": [
+    "fall at 12.7 s: 33 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0130",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0131",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0132",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0133",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 227 ms, peak 243 ms"
+   ]
+  },
+  {
+   "episode": "ep-0134",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0135",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0136",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0137",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0138",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 18.1 s: 27 N\u00b7s shove recovered in 3 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0139",
+   "tag": "fall",
+   "reasons": [
+    "fall at 15.1 s: 50 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0140",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 234 ms, peak 250 ms"
+   ]
+  },
+  {
+   "episode": "ep-0141",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0142",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0143",
+   "tag": "fall",
+   "reasons": [
+    "fall at 19.0 s: 33 N\u00b7s shove, needed more than 3 steps"
+   ]
+  },
+  {
+   "episode": "ep-0144",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 100 ms, peak 252 ms"
+   ]
+  },
+  {
+   "episode": "ep-0145",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0146",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0147",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 186 ms, peak 419 ms"
+   ]
+  },
+  {
+   "episode": "ep-0148",
+   "tag": "fall",
+   "reasons": [
+    "fall at 3.5 s: 46 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0149",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 25.1 s: 38 N\u00b7s shove recovered in 2 step(s), 25% harder would fall",
+    "lag: median 210 ms, peak 232 ms"
+   ]
+  },
+  {
+   "episode": "ep-0150",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 7.5 s: 50 N\u00b7s shove recovered in 2 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0151",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 242 ms, peak 262 ms"
+   ]
+  },
+  {
+   "episode": "ep-0152",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 201 ms, peak 218 ms"
+   ]
+  },
+  {
+   "episode": "ep-0153",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0154",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0155",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0156",
+   "tag": "fall",
+   "reasons": [
+    "fall at 8.7 s: 47 N\u00b7s shove, needed more than 3 steps",
+    "lag: median 218 ms, peak 235 ms"
+   ]
+  },
+  {
+   "episode": "ep-0157",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0158",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 115 ms, peak 464 ms"
+   ]
+  },
+  {
+   "episode": "ep-0159",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0160",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0161",
+   "tag": "fall",
+   "reasons": [
+    "fall at 2.9 s: 44 N\u00b7s shove, needed more than 3 steps",
+    "lag: median 52 ms, peak 374 ms"
+   ]
+  },
+  {
+   "episode": "ep-0162",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0163",
+   "tag": "fall",
+   "reasons": [
+    "fall at 13.0 s: 33 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0164",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0165",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0166",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 236 ms, peak 251 ms"
+   ]
+  },
+  {
+   "episode": "ep-0167",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0168",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 235 ms, peak 421 ms"
+   ]
+  },
+  {
+   "episode": "ep-0169",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0170",
+   "tag": "near-fall",
+   "reasons": [
+    "near-fall at 4.7 s: 38 N\u00b7s shove recovered in 2 step(s), 25% harder would fall"
+   ]
+  },
+  {
+   "episode": "ep-0171",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0172",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0173",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0174",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0175",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 206 ms, peak 233 ms"
+   ]
+  },
+  {
+   "episode": "ep-0176",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0177",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0178",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0179",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0180",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 237 ms, peak 256 ms"
+   ]
+  },
+  {
+   "episode": "ep-0181",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0182",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0183",
+   "tag": "fall",
+   "reasons": [
+    "fall at 12.3 s: 23 N\u00b7s shove, needed more than 3 steps",
+    "lag: median 230 ms, peak 448 ms"
+   ]
+  },
+  {
+   "episode": "ep-0184",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0185",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0186",
+   "tag": "fall",
+   "reasons": [
+    "fall at 28.9 s: 41 N\u00b7s shove, capture point ran away beyond leg reach"
+   ]
+  },
+  {
+   "episode": "ep-0187",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 237 ms, peak 255 ms"
+   ]
+  },
+  {
+   "episode": "ep-0188",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 229 ms, peak 245 ms"
+   ]
+  },
+  {
+   "episode": "ep-0189",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 240 ms, peak 255 ms"
+   ]
+  },
+  {
+   "episode": "ep-0190",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0191",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0192",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0193",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 245 ms, peak 264 ms"
+   ]
+  },
+  {
+   "episode": "ep-0194",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0195",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 250 ms, peak 267 ms"
+   ]
+  },
+  {
+   "episode": "ep-0196",
+   "tag": "clean",
+   "reasons": []
+  },
+  {
+   "episode": "ep-0197",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 206 ms, peak 438 ms"
+   ]
+  },
+  {
+   "episode": "ep-0198",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 211 ms, peak 221 ms"
+   ]
+  },
+  {
+   "episode": "ep-0199",
+   "tag": "lag",
+   "reasons": [
+    "lag: median 63 ms, peak 356 ms"
+   ]
+  }
+ ]
+}

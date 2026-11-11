@@ -224,3 +224,30 @@ def test_design_levers_are_paired_and_signed():
     assert rows["swing_time"]["broken"] == 0 and rows["swing_time"]["envelope"]["left"] > t["baseline"]["envelope"]["left"]
     for j in t["jobs"]:
         assert rows["none"]["jobs"][j]["failure_rate"] == t["baseline"]["jobs"][j]["failure_rate"]
+
+
+def test_episode_filter_tags_falls_near_falls_and_lag(tmp_path):
+    import json
+
+    from breakpoint.episodes import filter_episodes, read_episodes, synthetic_episodes, tag_episode
+
+    calm = {"episode": "calm", "latency_ms": [20] * 10, "contacts": []}
+    assert tag_episode(calm).tag == "clean"
+    stall = {"episode": "stall", "latency_ms": [20] * 9 + [300], "contacts": []}
+    assert tag_episode(stall).tag == "lag"
+    steady_slow = {"episode": "slow", "latency_ms": [230] * 10, "contacts": []}
+    assert tag_episode(steady_slow).tag == "lag"
+    shove = lambda j: {"episode": "x", "latency_ms": [20] * 10, "contacts": [{"t_s": 3, "impulse_ns": j, "direction_deg": -90}]}
+    assert tag_episode(shove(200)).tag == "fall"
+    assert tag_episode(shove(10)).tag == "clean"
+    assert tag_episode(shove(40)).tag == "near-fall"  # survives 40 from the side, not 50
+    # the contact uses the latency measured at its time: the same shove during a stall can fall
+    lagged = {"episode": "y", "latency_ms": [20, 20, 20, 250, 20], "contacts": [{"t_s": 3.2, "impulse_ns": 40, "direction_deg": -90}]}
+    assert tag_episode(lagged).tag == "fall"
+
+    eps = synthetic_episodes(30, seed=1)
+    log = tmp_path / "eps.jsonl"
+    log.write_text("".join(json.dumps(e) + "\n" for e in eps))
+    a, b = filter_episodes(eps), filter_episodes(read_episodes(log))
+    assert a["counts"] == b["counts"] and sum(a["counts"].values()) == 30
+    assert set(a["drop"]) == {v["episode"] for v in a["verdicts"] if v["tag"] == "fall"}
