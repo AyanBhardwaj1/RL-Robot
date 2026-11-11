@@ -75,3 +75,19 @@ def test_compile_and_deploy(site):
     assert s["terrain"] == "slope" and s["friction"] < 0.2
     d = c.post("/api/deploy", json={"policy": "cpg", "profile": "home", "trials": 2}).json()
     assert d["trials"] == 2 and 0 <= d["failure_rate_upper_95"] <= 1
+
+
+def test_committed_web_build_is_in_sync_with_sources():
+    """web/ is what gets deployed; it must not drift from site/ and the published results."""
+    web = ROOT / "web"
+    if not web.is_dir():
+        pytest.skip("no committed build")
+    stale = [str(p.relative_to(ROOT)) for p in (ROOT / "site").rglob("*")
+             if p.is_file() and "__pycache__" not in p.parts
+             and (not (web / p.relative_to(ROOT / "site")).is_file()
+                  or (web / p.relative_to(ROOT / "site")).read_bytes() != p.read_bytes())]
+    for src, dst in (("runs/humanoid/baseline.json", "assets/data/humanoid.json"),
+                     ("runs/humanoid/levers.json", "assets/data/levers.json")):
+        if (ROOT / src).is_file() and (web / dst).read_bytes() != (ROOT / src).read_bytes():
+            stale.append(dst)
+    assert not stale, f"run python3 scripts/build_site.py; stale in web/: {stale[:10]}"
