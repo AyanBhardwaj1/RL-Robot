@@ -63,6 +63,21 @@ export BREAKPOINT_LLM_API_KEY=...
 export BREAKPOINT_LLM_MODEL=<model id>
 ```
 
+## Results (CPU, single run, committed in `runs/`)
+
+| Policy | Readiness | Grade | Margin index | Nominal pass | Uphill | Payload | Side push (L/R) |
+|---|---|---|---|---|---|---|---|
+| CPG gait alone | 76.6 | SUPERVISED | 0.52 | 96% | 9.1° | 3.3 kg | 5.6 / 5.0 N·s |
+| Residual PPO v1 (4 min training) | 51.0 | LAB-ONLY | 0.08 | 96% | 0° | 0 kg | 0 / 0 N·s |
+| **v1 after one hardening round** | **80.3** | **SUPERVISED** | **0.56** | **100%** | **16.3°** | **6.3 kg** | **6.9 / 8.1 N·s** |
+
+The audit found that briefly trained v1 walked in stochastic training but stalled when run
+deterministically, so it failed almost every axis. One hardening round fixed this. It replayed 15
+shrunk counterexamples (sensor noise, payload, terrain, latency, weak motors, low friction) for 100k
+PPO steps. Afterwards 10 of the 15 cases pass on both seeds, and the policy beats the CPG baseline
+overall. Reports: `runs/hardened/report.html` (before vs after) and `runs/audit_cpg/report.html`.
+The remaining 5 failing cases stay in `runs/hardened/suite/` as the next round's regression suite.
+
 ## The hardening loop
 
 ```
