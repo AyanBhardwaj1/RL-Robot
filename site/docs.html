@@ -22,7 +22,7 @@
 <div class="docs-wrap">
   <nav class="toc" aria-label="On this page">
     <a href="#install">Install</a><a href="#cli">Command line</a><a href="#policies">Policy specs</a>
-    <a href="#scenarios">Scenarios</a><a href="#api">Web API</a><a href="#scores">How scores work</a><a href="#limits">Limits</a>
+    <a href="#humanoid">Humanoid model</a><a href="#scenarios">Scenarios</a><a href="#api">Web API</a><a href="#scores">How scores work</a><a href="#limits">Limits</a>
   </nav>
   <main id="docs-main" class="docs-main">
     <h1>Docs</h1>
@@ -49,6 +49,9 @@ pytest -q</code></pre>
         <tr><td><code>redteam --policy p</code></td><td>Compound-stress pairs and realistic multi-stressor attacks.</td></tr>
         <tr><td><code>leaderboard cpg a.npz b.npz</code></td><td>Up to 4 policies audited side by side with identical seeds.</td></tr>
         <tr><td><code>certify --policy p --min-score 80</code></td><td>Readiness certificate with policy hash and toolchain versions.</td></tr>
+        <tr><td><code>humanoid --latency-ms 150</code></td><td>Humanoid push envelopes for a walking biped and a wheeled base, plus failure odds by job.</td></tr>
+        <tr><td><code>hazards --fail-on-high</code></td><td>Hazard log from measured humanoid failures: rate, 95% bound, severity, risk, mitigation, verify command.</td></tr>
+        <tr><td><code>quantize --policy p --gated</code></td><td>FP16 and INT8 compression, profiled and re-audited for robustness.</td></tr>
         <tr><td><code>serve</code></td><td>The local lab with live shove mode over a WebSocket.</td></tr>
       </tbody>
     </table>
@@ -63,6 +66,18 @@ pytest -q</code></pre>
         <tr><td><code>py:module:factory</code></td><td>Your own controller: <code>factory()</code> returns a callable from a 47-number observation to 12 joint corrections in [-1, 1].</td></tr>
       </tbody>
     </table>
+
+    <h2 id="humanoid">Humanoid model</h2>
+    <p>The humanoid lab (<a href="/humanoid">/humanoid</a>, <code>breakpoint/humanoid.py</code>) treats a 72 kg humanoid as a linear inverted pendulum, <code>x″ = ω²(x − p)</code> with <code>ω = √(g / z₀)</code>. Its capture point <code>ξ = x + ẋ/ω</code> decides recovery:</p>
+    <ul>
+      <li>ankles move the centre of pressure inside the foot, limited by ankle torque and friction;</li>
+      <li>if the latency-delayed capture point leaves the foot, the robot steps to where ξ will be at touchdown, limited by leg reach, lateral reach and a swing time that grows with payload;</li>
+      <li>more than 3 steps, a slip, or a step taller than it can climb counts as a failure.</li>
+    </ul>
+    <p>The wheeled base drives under the capture point instead, with bounded acceleration, speed and traction. The same model exists three times: Python (reference), JavaScript (the browser lab) and C++17 (<code>cpp/capture_point.hpp</code>, an allocation-free 2 ms step), and tests keep all three equal.</p>
+<pre><code>cmake -S cpp -B build-cpp && cmake --build build-cpp
+./build-cpp/breakpoint_cp envelope 0.2     # breaking points with 200 ms latency
+./build-cpp/breakpoint_cp bench 2          # 500 Hz loop: step cost and wake-up jitter</code></pre>
 
     <h2 id="scenarios">Scenarios</h2>
     <p>Every world, whether typed, photographed, proposed by an LLM or found by the search, passes through one schema that clamps each value to physical bounds.</p>
