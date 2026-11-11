@@ -384,6 +384,19 @@ def cmd_quantize(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_hazards(a: argparse.Namespace) -> int:
+    from .hazards import hazard_log, to_markdown
+
+    rows = hazard_log(trials=a.trials, seed=a.seed)
+    md = to_markdown(rows, a.trials)
+    print(md)
+    if a.out:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(md)
+        Path(a.out).with_suffix(".json").write_text(json.dumps(rows, indent=1))
+    return 1 if any(r["risk"] == "high" for r in rows) and a.fail_on_high else 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     import uvicorn
 
@@ -471,6 +484,13 @@ def main(argv: list[str] | None = None) -> int:
     qz.add_argument("--trials", type=int, default=30)
     qz.add_argument("--workers", type=int, default=3)
     qz.set_defaults(fn=cmd_quantize)
+
+    hz = sub.add_parser("hazards", help="hazard log with measured frequencies from the humanoid lab")
+    hz.add_argument("--trials", type=int, default=150)
+    hz.add_argument("--seed", type=int, default=0)
+    hz.add_argument("--out", default="runs/humanoid/hazards.md")
+    hz.add_argument("--fail-on-high", action="store_true", help="exit 1 if any hazard rates high")
+    hz.set_defaults(fn=cmd_hazards)
 
     hu = sub.add_parser("humanoid", help="humanoid push recovery: biped vs wheeled envelopes and job odds")
     hu.add_argument("--payload", type=float, default=0.0, help="tote held in front (kg)")

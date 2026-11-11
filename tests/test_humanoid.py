@@ -82,3 +82,27 @@ def test_recording_produces_footsteps_and_paths():
     r = recover(60, -90.0, record=True)
     assert r.footsteps and r.com and r.capture
     assert all(math.isfinite(v) for row in r.com for v in row)
+
+
+def test_hazard_classification_and_risk_matrix():
+    from breakpoint.hazards import HAZARDS, RISK, classify, likelihood_band, to_markdown
+
+    assert classify("slipped: needed friction 0.4 > 0.3").hid == "H2"
+    assert classify("blocked: a 10 cm step").hid == "H4"
+    assert classify("needed more than 3 steps").hid == "H1"
+    assert classify("came to rest") is None
+    assert [likelihood_band(x) for x in (0.005, 0.03, 0.1, 0.5)] == [0, 1, 2, 3]
+    assert RISK[4][3] == "high" and RISK[1][0] == "low"
+    assert len({h.hid for h in HAZARDS}) == len(HAZARDS)
+    md = to_markdown([], 10)
+    assert "No failures recorded" in md
+
+
+def test_hazard_log_reports_measured_rates():
+    from breakpoint.hazards import hazard_log
+
+    rows = hazard_log(trials=30, seed=2)
+    assert rows, "the wheeled base should be blocked on some home-care routes"
+    for r in rows:
+        assert 0 <= r["rate"] <= r["rate_upper_95"] <= 1 and r["risk"] in ("low", "medium", "high")
+    assert any(r["hazard"] == "H4" and r["body"] == "wheeled" for r in rows)

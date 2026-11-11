@@ -1,0 +1,50 @@
+[
+ {
+  "hazard": "H4",
+  "title": "Route blocked by a curb, threshold or stair",
+  "job": "home care",
+  "body": "wheeled",
+  "events": 70,
+  "trials": 150,
+  "rate": 0.4666666666666667,
+  "rate_upper_95": 0.5337,
+  "severity": 2,
+  "likelihood": "frequent",
+  "risk": "high",
+  "harm": "Mission failure; tipping if the base tries to climb",
+  "mitigation": "Route survey and ramps, or a legged platform where steps exist",
+  "verify": "python -m breakpoint humanoid  # job table: trailer unloading, home care"
+ },
+ {
+  "hazard": "H4",
+  "title": "Route blocked by a curb, threshold or stair",
+  "job": "trailer unloading",
+  "body": "wheeled",
+  "events": 24,
+  "trials": 150,
+  "rate": 0.16,
+  "rate_upper_95": 0.2152,
+  "severity": 2,
+  "likelihood": "frequent",
+  "risk": "high",
+  "harm": "Mission failure; tipping if the base tries to climb",
+  "mitigation": "Route survey and ramps, or a legged platform where steps exist",
+  "verify": "python -m breakpoint humanoid  # job table: trailer unloading, home care"
+ },
+ {
+  "hazard": "H1",
+  "title": "Fall after a shove the robot cannot step out of",
+  "job": "teleoperated data collection",
+  "body": "biped",
+  "events": 1,
+  "trials": 150,
+  "rate": 0.006666666666666667,
+  "rate_upper_95": 0.0293,
+  "severity": 3,
+  "likelihood": "remote",
+  "risk": "medium",
+  "harm": "Robot falls onto a person, a product or itself",
+  "mitigation": "Speed and separation monitoring near people; controlled-fall behaviour; widen step reach and swing speed",
+  "verify": "python -m breakpoint humanoid  # push envelope per direction"
+ }
+]

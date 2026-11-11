@@ -159,9 +159,10 @@
         <li>Every failure rate carries a 95% upper bound, and every report states its search budget: no failure found is not proof of none.</li>
         <li>Failures are explained from evidence, for example “fell 0.7 s after a 12 N·s shove from the right with slippery ground and a 3 kg payload”.</li>
         <li>Biped versus wheeled odds by job make the stability trade-off explicit.</li>
+        <li><code>hazards.py</code>: every failure class becomes a hazard log entry with a measured frequency and 95% bound, severity, a 4×4 risk rating, mitigation and the command that re-verifies it. Top entry: wheeled base blocked on 47% of home-care routes.</li>
       </ul>
       <h3>Next I’d build</h3>
-      <p>Map each failure class to a hazard log entry with severity and mitigation, so the audit feeds the hazard analysis directly.</p>
+      <p>Trace each hazard to a requirement and a regression scenario, so a code change that raises a hazard’s measured rate fails CI.</p>
     </article>
 
     <article class="role" id="data">
