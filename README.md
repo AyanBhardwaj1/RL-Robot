@@ -39,8 +39,9 @@ hand-written backprop, and that backprop is checked against finite differences i
 | `probe.py` | Breaking-point bisection on 17 axes: 8 push directions, friction, payload, motor weakness, latency, sensor noise, uphill, downhill, stairs and roughness. Every push is tested at 4 gait phases, and a push margin is only as good as its worst phase. |
 | `hunt.py` | Cross-entropy search for the score `margin + λ·severity`, so it finds *cheap* failures. A MAP-Elites atlas keeps the mildest failure per (stressor × severity band) cell. `shrink()` bisects each failure toward nominal, like property-based testing. |
 | `redteam.py` | Compound-stress tests (pairs of the weakest axes at 50%/75% of their breaking points), a 2-D failure-boundary heatmap, and an LLM red team that proposes realistic multi-stressor situations from the measured weak spots. Offline, deterministic templates are used instead. |
-| `profiles.py` | Deployment profiles (warehouse, sidewalk, home, construction) as distributions over conditions. `deploy` estimates the failure probability under each, with a 95% bound and the dominant causes. |
+| `profiles.py` | Deployment profiles (warehouse, sidewalk, home, construction, teleop) as distributions over conditions. `deploy` estimates the failure probability under each, with a 95% bound and the dominant causes. |
 | `report.py` | Readiness score (0–100), a grade (FIELD-READY / SUPERVISED / LAB-ONLY / NOT READY), a push-recovery polar plot, breaking-point bars, the failure atlas, and the search budget. Failure-rate bounds use the exact binomial (rule of three) or Wilson. Self-contained HTML. |
+| `policy.py` | Policy specs: `cpg`, `*.npz` (residual PPO), `gated:<spec>` (latency-adaptive fallback to the gait), `py:module:factory` (bring your own). |
 | `explain.py` | Evidence-based failure explanations, e.g. "Fell 0.7 s after a 12.0 N·s shove from the right: it tipped over with slippery ground (μ=0.20) and a 3.0 kg payload." Every clause is computed from the scenario and outcome. |
 | `gym_env.py` | Gymnasium adapter for external RL libraries. |
 | `server.py`, `static/` | FastAPI and a three.js playground. You can compile a scenario, watch the replay, or use **Shove mode**, where you push the robot live over a WebSocket and score how much impulse it absorbs before it falls. A **ghost** mode replays a second policy as a translucent overlay in the same world. |
@@ -72,22 +73,36 @@ export BREAKPOINT_LLM_MODEL=<model id>
 
 ## Headline: best policy so far
 
-**`runs/v2field/policy_v2field.npz` scores 82.6 (SUPERVISED).** The CPG gait alone scores 66.8 in
-the same audit (`runs/leaderboard2/`). The best policy has zero compound failures and these
-margins: uphill 20° (the top of the tested range), payload 8 kg (also the top), stairs 9.4 cm,
-latency 60 ms, and shoves from the left / right of 5.6 / 6.9 N·s at the worst gait phase.
+**`gated:runs/v2field/policy_v2field.npz` scores 84.1 (SUPERVISED).** The CPG gait alone scores
+66.8 in the same audit (`runs/leaderboard3/`). It keeps the learned policy's margins: uphill 20°
+and payload 8 kg (both the top of the tested range), stairs 9.4 cm, and shoves from the left /
+right of 5.6 / 6.9 N·s at the worst gait phase. It also gets the bare gait's full 120 ms latency
+tolerance. Across the five deployment profiles it is best or tied-best everywhere, at 0% failures
+in warehouse, home and teleop.
 
-How it was built: v2 was PPO-trained from scratch with the corrected learner (bootstrapping on
-time-limit truncation, 16 terrain variants, deterministic best-checkpoint selection) for 420k
-steps, about 4 minutes on one CPU core. It then had one **deployment-aware** hardening round
-toward the sidewalk and construction profiles.
+How it was built, in three steps:
 
-| Policy (leaderboard v2) | Readiness | Margin | Uphill | Payload | Stairs | Latency | Shove from L / R | Compound pairs | Red team fails |
+1. **v2.** PPO trained from scratch with the corrected learner (bootstrapping on time-limit
+   truncation, 16 terrain variants, deterministic best-checkpoint selection) for 420k steps, about
+   4 minutes on one CPU core.
+2. **v2field.** One deployment-aware hardening round toward the sidewalk and construction profiles.
+3. **Latency gate.** The deployment check showed every learned policy failing under control
+   latency, while the open-loop CPG (which never reads observations) was immune. A
+   latency-specific PPO round did not help: the best-checkpoint guard kept the original. An
+   engineering fix did: `gated:` fades the residual out as *measured* link latency rises from 40 ms
+   to 80 ms, falling back to the latency-immune gait.
+
+| Policy | Readiness | Margin | Uphill | Payload | Stairs | Latency | Shove from L / R | Compound pairs | Red team fails |
 |---|---|---|---|---|---|---|---|---|---|
-| CPG gait alone | 66.8 | 0.50 | 9.1° | 3.3 kg | 5.6 cm | 120 ms | 4.4 / 4.4 N·s | 1 | 3/5 |
+| CPG gait alone | 66.8 | 0.50 | 9.1° | 3.3 kg | 5.6 cm | 120 ms | 4.4 / 4.4 N·s | 1 | 2–3/5 |
 | v1 + hardening round 1 | 77.2 | 0.56 | 16.3° | 6.3 kg | 7.0 cm | 40 ms | 8.8 / 6.3 N·s | 1 | 2/5 |
 | v2 (fixed PPO, no hardening) | 73.5 | 0.54 | 9.7° | 8.0 kg | 7.5 cm | 40 ms | 4.4 / 5.0 N·s | 1 | 5/5 |
-| **v2 + deployment-aware hardening** | **82.6** | **0.61** | **20°** | **8.0 kg** | **9.4 cm** | **60 ms** | **5.6 / 6.9 N·s** | **0** | **2/5** |
+| v2 + deployment-aware hardening | 82.6 | 0.61 | 20° | 8.0 kg | 9.4 cm | 60 ms | 5.6 / 6.9 N·s | 0 | 2/5 |
+| **…+ latency gate** | **84.1** | **0.65** | **20°** | **8.0 kg** | **9.4 cm** | **120 ms** | **5.6 / 6.9 N·s** | 1 | **2/5** |
+
+(Rows 1 and 4–5 are from `runs/leaderboard3/`, rows 2–3 from `runs/leaderboard2/`. Each run
+uses identical code, seeds and search budget. Red-team counts for the CPG vary between runs
+because the attacks are proposed from each run's own measured weak spots.)
 
 ![report](docs/report.png)
 
@@ -98,22 +113,23 @@ deployment profile (a distribution over terrain, friction, payload, latency, noi
 Every world gets its own seed. The command reports the failure rate with a 95% upper bound and
 the dominant causes. It exits non-zero if the bound exceeds `--max-fail`, so it can gate a release.
 
-| Profile | CPG gait | v1 + hardening | v2 | **v2 + deployment-aware hardening** |
-|---|---|---|---|---|
-| warehouse | 6.7% (UB 14.0%) | 6.7% (UB 14.0%) | 1.7% (UB 7.1%) | **0.0% (UB 4.9%)** |
-| home | 6.7% (UB 14.0%) | 18.3% (UB 27.9%) | 1.7% (UB 7.1%) | **0.0% (UB 4.9%)** |
-| sidewalk | 6.7% (UB 14.0%) | 8.3% (UB 16.2%) | 8.3% (UB 16.2%) | 10.0% (UB 18.2%) |
-| construction | 31.7% (UB 42.1%) | 18.3% (UB 27.9%) | 15.0% (UB 24.1%) | **13.3% (UB 22.1%)** |
+| Profile | CPG gait | v1 + hardening | v2 | v2field | **gated v2field** |
+|---|---|---|---|---|---|
+| warehouse | 6.7% (UB 14.0%) | 6.7% | 1.7% | 0.0% | **0.0% (UB 4.9%)** |
+| home | 6.7% (UB 14.0%) | 18.3% | 1.7% | 0.0% | **0.0% (UB 4.9%)** |
+| sidewalk | 6.7% (UB 14.0%) | 8.3% | 8.3% | 10.0% | **5.0% (UB 11.9%)** |
+| construction | 31.7% (UB 42.1%) | 18.3% | 15.0% | 13.3% | **13.3% (UB 22.1%)** |
+| teleop (40–100 ms) | **0.0% (UB 4.9%)** | 35.0% | 28.3% | 10.0% | **0.0% (UB 4.9%)** |
 
 What the lab found:
 
 - **Margins and deployment risk disagree, and both matter.** v1 + hardening has strong push
   margins but fails 18% of *home* worlds, all from low friction. The leaderboard's
   single-axis friction margin (0.23) hinted at this; the deployment check measures the cost.
-- **Latency is the residual policies' blind spot.** Most sidewalk failures of the best policy are
-  latency-dominated. The open-loop CPG ignores observations, so delay can't hurt it, while a
-  closed-loop residual reacts to stale state. That's why the bare gait is still competitive on
-  sidewalks. Next hardening round: latency.
+- **Latency is the learned policies' blind spot, and training didn't fix it.** Under teleop
+  latency every residual policy fails 10–35% of worlds, all latency-dominated, while the open-loop
+  CPG fails 0%. A latency-focused PPO round (`runs/v3lat`) didn't improve the selection score, so
+  the guard kept the original. Gating the residual on measured link latency did fix it.
 - **v1 looked fine in training but wasn't.** It walked under stochastic training noise but stalled
   when run deterministically, scoring below the bare gait it was built on. That motivated the
   deterministic best-checkpoint selection now built into `train` and `harden`.

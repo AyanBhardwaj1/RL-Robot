@@ -55,6 +55,8 @@ def rollout(policy: Policy, scn: Scenario, seed: int = 0, record: bool = False,
             env: QuadrupedEnv | None = None) -> tuple[Outcome, list | None]:
     env = env or QuadrupedEnv(scn, seed=seed)
     obs = env.reset(scn, seed=seed)
+    if hasattr(policy, "set_link_latency"):  # the deployment stack measures its own link latency
+        policy.set_link_latency(scn.latency_steps)
     frames: list | None = [] if record else None
     min_clear, min_up = 1e9, 1.0
     done = False

@@ -50,6 +50,7 @@ def available_policies() -> dict[str, str | None]:
     out: dict[str, str | None] = {"cpg": None}
     for p in sorted(RUNS.glob("**/*.npz")):
         out[p.stem] = str(p)
+        out[f"gated-{p.stem}"] = f"gated:{p}"
     return out
 
 
@@ -204,6 +205,8 @@ async def _play_session(ws: WebSocket) -> None:
         scn = Scenario.from_dict(init.get("scenario") or {}).with_(duration_s=30.0, pushes=[])
         spec = resolve_policy(str(init.get("policy", "cpg")))
         policy = load_policy(spec)
+        if hasattr(policy, "set_link_latency"):
+            policy.set_link_latency(scn.latency_steps)
         env = QuadrupedEnv(scn, seed=0)
         obs = env.reset(scn, seed=0)
         await ws.send_text(json.dumps({"type": "init", "specs": env.geom_specs(), "terrain": terrain_payload(scn)}))

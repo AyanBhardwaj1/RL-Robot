@@ -75,6 +75,10 @@ PROFILES: dict[str, Profile] = {
                 {"rough": 0.6, "slope": 0.3, "flat": 0.1}, friction=(0.3, 0.9), roughness=(0.01, 0.05),
                 slope_deg=(-12, 12), payload_kg=(0, 5), latency_steps=(0, 4), obs_noise=(0.0, 0.08),
                 motor_strength=(0.75, 1.0), push_prob=0.2, push_impulse=(2, 8)),
+        Profile("teleop", "Remote-operated over cellular: 40-100 ms control latency, jittery state estimates.",
+                {"flat": 0.6, "rough": 0.25, "slope": 0.15}, friction=(0.5, 1.0), roughness=(0.005, 0.02),
+                slope_deg=(-5, 5), payload_kg=(0, 2), latency_steps=(2, 5), obs_noise=(0.01, 0.06),
+                push_prob=0.2, push_impulse=(2, 5)),
     )
 }
 

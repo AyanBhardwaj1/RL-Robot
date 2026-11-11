@@ -77,16 +77,47 @@ class CallablePolicy(Policy):
         return np.clip(np.asarray(self.fn(obs), dtype=np.float64).reshape(ACT_DIM), -1.0, 1.0)
 
 
+class LatencyGatedPolicy(Policy):
+    """Fades a learned residual out as measured link latency grows.
+
+    The open-loop CPG never reads observations, so control latency cannot hurt it; a
+    closed-loop residual acting on stale state can. Deployment stacks know their link
+    latency (timestamps), so the residual runs at full strength up to ``full_steps`` of
+    delay and falls back linearly to the latency-immune gait by ``zero_steps``.
+    """
+
+    def __init__(self, inner: Policy, full_steps: float = 2.0, zero_steps: float = 4.0):
+        if zero_steps <= full_steps:
+            raise ValueError("zero_steps must exceed full_steps")
+        self.inner, self.full, self.zero = inner, full_steps, zero_steps
+        self.latency_steps = 0.0
+        self.name = f"gated-{getattr(inner, 'name', 'policy')}"
+
+    def set_link_latency(self, steps: float) -> None:
+        self.latency_steps = float(steps)
+
+    @property
+    def gain(self) -> float:
+        return float(np.clip((self.zero - self.latency_steps) / (self.zero - self.full), 0.0, 1.0))
+
+    def act(self, obs: np.ndarray, deterministic: bool = True) -> np.ndarray:
+        g = self.gain
+        return g * self.inner.act(obs) if g > 0 else np.zeros(ACT_DIM)
+
+
 def load_policy(spec: str | None) -> Policy:
     """Resolve a policy spec.
 
     * ``None`` / ``"cpg"``          -> the open-loop CPG baseline
     * ``path/to/policy.npz``        -> a saved residual PPO policy
+    * ``gated:<spec>``              -> that policy behind a latency-adaptive gate
     * ``py:package.module:factory`` -> ``factory()`` returns an ``obs -> action`` callable or a Policy
       (bring your own controller; only for trusted local code, never exposed by the web server)
     """
     if not spec or spec == "cpg":
         return CPGPolicy()
+    if spec.startswith("gated:"):
+        return LatencyGatedPolicy(load_policy(spec[6:]))
     if spec.startswith("py:"):
         import importlib
 

@@ -139,6 +139,17 @@ def cmd_audit(a: argparse.Namespace) -> int:
     return 0
 
 
+def policy_label(spec: str | None) -> str:
+    """Human label for a policy spec: cpg-baseline, policy_v2, gated-policy_v2, my_controller."""
+    if spec is None or spec == "cpg":
+        return "cpg-baseline"
+    if spec.startswith("gated:"):
+        return "gated-" + policy_label(spec[6:])
+    if spec.startswith("py:"):
+        return spec.rsplit(":", 1)[-1]
+    return Path(spec).stem
+
+
 def cmd_leaderboard(a: argparse.Namespace) -> int:
     if len(a.policies) > 4:
         print(f"warning: only the first 4 of {len(a.policies)} policies fit in one report", file=sys.stderr)
@@ -147,8 +158,8 @@ def cmd_leaderboard(a: argparse.Namespace) -> int:
         load_policy(sp)  # fail fast on a bad spec, before minutes of auditing
     labels: list[str] = []
     for sp in specs:
-        lab = "cpg-baseline" if sp is None else Path(sp).stem
-        labels.append(lab if lab not in labels else f"{Path(sp).parent.name}/{lab}")
+        lab = policy_label(sp)
+        labels.append(lab if lab not in labels else f"{Path(sp.split(':')[-1]).parent.name}/{lab}")
     audits = [audit(sp, lab, a.hunt_gens, a.workers) for sp, lab in zip(specs, labels)]
     notes = ["All policies audited in one run with identical code, seeds and search budget."]
     path = _write_report(Path(a.out), a.title, audits, notes)

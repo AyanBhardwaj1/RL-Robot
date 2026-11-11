@@ -586,3 +586,39 @@ def test_leaderboard_and_harden_validate_inputs_early():
         main(["harden", "--profile", "moon"])
     with pytest.raises(FileNotFoundError):
         main(["leaderboard", "cpg", "missing.npz"])
+
+
+def test_latency_gate_fades_residual_and_rollout_reports_latency():
+    from breakpoint.policy import LatencyGatedPolicy, load_policy
+
+    class Const(CPGPolicy):
+        def act(self, obs, deterministic=True):
+            return np.ones(12)
+
+    g = LatencyGatedPolicy(Const(), full_steps=2, zero_steps=4)
+    for lat, gain in ((0, 1.0), (2, 1.0), (3, 0.5), (4, 0.0), (6, 0.0)):
+        g.set_link_latency(lat)
+        assert g.gain == pytest.approx(gain)
+    g.set_link_latency(3)
+    assert np.allclose(g.act(np.zeros(OBS_DIM)), 0.5)
+    rollout(g, Scenario(duration_s=0.5, latency_steps=5), seed=0)
+    assert g.latency_steps == 5.0 and g.gain == 0.0
+    assert isinstance(load_policy("gated:cpg"), LatencyGatedPolicy)
+    with pytest.raises(ValueError):
+        LatencyGatedPolicy(Const(), full_steps=3, zero_steps=3)
+
+
+def test_server_lists_gated_variants():
+    from breakpoint.server import available_policies
+
+    pols = available_policies()
+    npz = [k for k, v in pols.items() if v and v.endswith(".npz") and not v.startswith("gated:")]
+    assert all(f"gated-{k}" in pols for k in npz)
+
+
+def test_policy_labels():
+    from breakpoint.cli import policy_label
+
+    assert policy_label(None) == "cpg-baseline"
+    assert policy_label("gated:runs/v2/policy_v2.npz") == "gated-policy_v2"
+    assert policy_label("py:examples.my_controller:make_policy") == "make_policy"
