@@ -7,6 +7,8 @@ import math
 from datetime import datetime, timezone
 
 from .evaluate import failure_upper_bound
+from .explain import explain
+from .scenario import Scenario
 from .probe import PUSH_DIRS
 
 GRADES = ((85, "FIELD-READY", "Cleared for unsupervised field trials in the tested envelope."),
@@ -205,8 +207,9 @@ def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]
         if push:
             desc.append(f"push {push['force'] * push['duration']:.1f} N·s @ {push['direction_deg']:.0f}°")
         o = cell["outcome"]
+        why = explain(Scenario.from_dict(s), o)
         atlas_rows.append(f"<tr><td>{html.escape(cell['stressor'])}</td><td>{cell['severity']:.2f}</td>"
-                          f"<td>{'fell' if o['fell'] else 'stalled'} at {o['time_s']:.1f}s</td>"
+                          f"<td>{html.escape(why)}</td>"
                           f"<td><code>{html.escape(', '.join(desc))}</code></td></tr>")
     budget = ""
     if hunt_meta:

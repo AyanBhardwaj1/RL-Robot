@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 from .compiler import compile_image, compile_text
 from .env import CONTROL_DT, QuadrupedEnv
 from .evaluate import rollout
+from .explain import explain
 from .policy import load_policy
 from .profiles import PROFILES, deployment_check
 from .scenario import Push, Scenario
@@ -158,7 +159,7 @@ def api_simulate(req: SimReq) -> dict:
     spec = resolve_policy(req.policy)
     env = QuadrupedEnv(scn, seed=req.seed)
     out, frames = rollout(load_policy(spec), scn, seed=req.seed, record=True, env=env)
-    return {"outcome": out.to_dict(), "specs": env.geom_specs(), "frames": frames[::2], "dt": CONTROL_DT * 2,
+    return {"outcome": out.to_dict(), "explanation": explain(scn, out.to_dict()), "specs": env.geom_specs(), "frames": frames[::2], "dt": CONTROL_DT * 2,
             "terrain": terrain_payload(scn, req.seed), "scenario": scn.to_dict()}
 
 

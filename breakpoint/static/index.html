@@ -51,7 +51,7 @@ pre{margin:0;font-size:11px;max-height:180px;overflow:auto;white-space:pre-wrap}
     </div>
     <p class="muted" style="margin:8px 0 0">Score = total impulse the robot absorbed before falling. Keys: arrows shove.</p>
   </div>
-  <div class="card"><div class="muted">Outcome</div><pre id="out">–</pre></div>
+  <div class="card"><div class="muted">Outcome</div><div id="why" style="margin:4px 0 6px;font-weight:600"></div><pre id="out">–</pre></div>
   <div class="card">
     <div class="muted">Deployment check: how often does it fall there?</div>
     <div class="row" style="margin-top:6px"><select id="profile"></select><button id="deploy" class="ghost">Run 30 worlds</button></div>
@@ -147,6 +147,7 @@ $("sim").onclick = async () => {
     const [res, gres] = await Promise.all([post("/api/simulate", { scenario, policy: $("policy").value, seed: 0 }),
       g ? post("/api/simulate", { scenario, policy: g, seed: 0 }) : Promise.resolve(null)]);
     buildWorld(res.specs, res.terrain, gres && gres.specs);
+    $("why").textContent = res.explanation + (gres ? `  Ghost: ${gres.explanation}` : "");
     const verdict = (o) => o.passed ? "PASSED" : (o.fell ? "FELL" : "STALLED");
     $("out").textContent = JSON.stringify(gres ? { [$("policy").value]: res.outcome, ["ghost: " + g]: gres.outcome } : res.outcome, null, 1);
     const n = Math.max(res.frames.length, gres ? gres.frames.length : 0);

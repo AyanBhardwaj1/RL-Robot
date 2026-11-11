@@ -422,3 +422,17 @@ def test_deploy_endpoint_validates_and_runs():
     assert c.post("/api/deploy", json={"profile": "home", "trials": 10_000}).status_code == 422
     r = c.post("/api/deploy", json={"profile": "home", "trials": 4, "policy": "cpg"}).json()
     assert r["trials"] == 4 and "failures_by_dominant_stressor" in r
+
+
+def test_explain_cites_push_direction_and_factors():
+    from breakpoint.explain import direction_name, explain
+
+    assert direction_name(90) == "the left" and direction_name(0) == "the rear" and direction_name(180) == "the front"
+    scn = Scenario(friction=0.2, payload_kg=3.0).with_(pushes=[{"t": 2.0, "force": 120, "direction_deg": -90, "duration": 0.1}])
+    out, _ = rollout(CPGPolicy(), scn, seed=0)
+    text = explain(scn, out.to_dict())
+    if out.fell:
+        assert "shove from the right" in text and "3.0 kg" in text and "μ=0.20" in text
+    assert explain(Scenario(), {"passed": True, "distance": 3.0, "time_s": 6.0}).startswith("Walked 3.0 m")
+    stalled = explain(Scenario(motor_strength=0.3), {"passed": False, "fell": False, "distance": 0.1, "time_s": 8})
+    assert "stalled" in stalled and "too weak" in stalled
