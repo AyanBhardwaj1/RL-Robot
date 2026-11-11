@@ -9,7 +9,10 @@
   const pct = new Intl.NumberFormat("en", { style: "percent", maximumFractionDigits: 1 });
   const canvas = $("#hum-canvas");
   const ctx = canvas.getContext("2d");
-  const SCALE = 260; // px per metre
+  let SCALE = 260; // px per metre; zoomed in on narrow screens so the robot stays legible
+  const fitScale = () => { SCALE = canvas.clientWidth && canvas.clientWidth < 600 ? 380 : 260; };
+  fitScale();
+  window.addEventListener("resize", () => { fitScale(); if (last.result) play(last.result); });
   const COLORS = { ground: "#17161b", grid: "#221f27", foot: "#5d5866", footNew: "#8a8494", com: "#f3eee8", cp: "#f47b25", push: "#f99a55", base: "#3a3641" };
   let anim = null;
   let shownCom = null; // screen position of the drawn centre of mass, for click-to-shove

@@ -16,6 +16,51 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
 
 ![playground](docs/playground.png)
 
+## Humanoid push lab
+
+Breakpoint's method also applies to full-size humanoids (`breakpoint/humanoid.py`, `python -m breakpoint humanoid`,
+and the browser lab at `/humanoid`):
+
+- **Model.** A 72 kg humanoid balances as a linear inverted pendulum. It recovers from shoves by
+  capture-point stepping, bounded by:
+  - ankle torque,
+  - friction (`|x − p| ≤ μz`),
+  - swing time, which grows with payload,
+  - leg reach and lateral reach,
+  - sensing latency.
+
+  It compensates for slopes by leaning. A tote held in front shifts and raises the combined centre of mass.
+- **Biped versus wheeled base.** The wheeled model has a statically stable footprint and drives under its
+  capture point. It survives about 1.6× bigger shoves (146 vs 93 N·s from the front), but it cannot climb
+  anything taller than a 2.5 cm threshold.
+- **Odds by job** (150 sampled shifts each):
+
+  | Job | Biped | Wheeled |
+  |---|---|---|
+  | Line-side kitting, tote handling | 0% | 0% |
+  | Trailer unloading | 0% | 16% |
+  | Home care | 0% | 47% |
+  | Teleoperated data collection | 0.7% | 0% |
+
+- **Browser parity.** The browser version is a line-for-line JavaScript port, and `tests/test_humanoid_js.py`
+  runs it under Node to check it against Python.
+
+## Policy compression with a robustness check
+
+`python -m breakpoint quantize --policy runs/v2field/policy_v2field.npz --gated` compresses the best policy to
+FP16 and per-channel INT8, measures action error, then re-audits it:
+
+| Precision | Weights | Mean action error | Readiness | Teleop failures |
+|---|---|---|---|---|
+| FP32 | 32.3 KB | 0 | 84.1 | 0% |
+| FP16 | 16.4 KB | 0.0001 | 84.8 | 0% |
+| INT8 | 9.1 KB | 0.002 | 84.1 | 0% |
+
+INT8 is 3.6× smaller at no measured robustness cost. The FP16 row also shows the score's noise floor: a
+10⁻⁴ change in actions moved bisection edges by about 0.7 points.
+
+`/roles` maps every specialization a humanoid team hires for to the code and results here.
+
 ## Product site
 
 `web/` is the deployable site: a landing page, the hosted lab (`/app`), docs, readiness reports, and

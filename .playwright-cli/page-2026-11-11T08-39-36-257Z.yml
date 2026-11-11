@@ -1,0 +1,148 @@
+- generic [active] [ref=e1]:
+  - link "Skip to the lab" [ref=e2] [cursor=pointer]:
+    - /url: "#hum-main"
+  - banner [ref=e3]:
+    - link "Breakpoint" [ref=e4] [cursor=pointer]:
+      - /url: /
+    - navigation "Main" [ref=e5]:
+      - link "Quadruped lab" [ref=e6] [cursor=pointer]:
+        - /url: /app
+      - link "Roles" [ref=e7] [cursor=pointer]:
+        - /url: /roles
+      - link "Docs" [ref=e8] [cursor=pointer]:
+        - /url: /docs
+      - link "Source" [ref=e9] [cursor=pointer]:
+        - /url: https://github.com/AyanBhardwaj1/RL-Robot
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - heading "Humanoid push lab" [level=1] [ref=e12]
+      - paragraph [ref=e13]: A full-size humanoid, 72 kg and 0.95 m to its centre of mass, balancing like a linear inverted pendulum. Click anywhere around it to shove it from that side. Watch the capture point (orange) run, and the footsteps chase it.
+    - generic [ref=e14]:
+      - region "Conditions" [ref=e15]:
+        - group "Body" [ref=e16]:
+          - generic [ref=e18] [cursor=pointer]:
+            - radio "Walking biped" [checked] [ref=e19]
+            - text: Walking biped
+          - generic [ref=e20] [cursor=pointer]:
+            - radio "Wheeled base" [ref=e21]
+            - text: Wheeled base
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - text: Shove
+            - status [ref=e24]: 60 N·s
+          - slider "Shove" [ref=e25] [cursor=pointer]: "60"
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - text: Tote held in front
+            - status [ref=e28]: 0 kg
+          - slider "Tote held in front" [ref=e29] [cursor=pointer]: "0"
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - text: Floor friction
+            - status [ref=e32]: μ 0.80
+          - slider "Floor friction" [ref=e33] [cursor=pointer]: "0.8"
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - text: Control latency
+            - status [ref=e36]: 0 ms
+          - slider "Control latency" [ref=e37] [cursor=pointer]: "0"
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - text: Actuator strength
+            - status [ref=e40]: 100%
+          - slider "Actuator strength" [ref=e41] [cursor=pointer]: "1"
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - text: Curb or stair on the route
+            - status [ref=e44]: 0 cm
+          - slider "Curb or stair on the route" [ref=e45] [cursor=pointer]: "0"
+        - group "Shove from a side" [ref=e46]:
+          - button "↘" [ref=e47] [cursor=pointer]
+          - button "From front" [ref=e48] [cursor=pointer]
+          - button "↙" [ref=e49] [cursor=pointer]
+          - button "From left" [ref=e50] [cursor=pointer]
+          - button "From right" [ref=e52] [cursor=pointer]
+          - button "↗" [ref=e53] [cursor=pointer]
+          - button "From rear" [ref=e54] [cursor=pointer]
+          - button "↖" [ref=e55] [cursor=pointer]
+      - region "Top view of the robot" [ref=e56]:
+        - 'img "Top view: robot body, feet, capture point and footsteps. Click to shove from that side." [ref=e57]'
+        - paragraph [ref=e58]: Centre of mass Capture point Feet or base
+      - generic [ref=e62]:
+        - paragraph [ref=e63]: Saved in 1 step
+        - paragraph [ref=e64]: "60 N·s from the left: it stepped where the capture point was heading."
+        - heading "Push envelope, live" [level=2] [ref=e65]
+        - img "Largest survivable shove in 8 directions for the biped and the wheeled base" [ref=e66]:
+          - generic [ref=e69]: front
+          - generic [ref=e70]: right
+          - generic [ref=e71]: rear
+          - generic [ref=e72]: left
+          - generic [ref=e73]: "83"
+          - generic [ref=e74]: "166"
+        - paragraph [ref=e77]: Biped Wheeled · N·s, robot faces up
+        - generic [ref=e80]:
+          - term [ref=e81]: From the front
+          - definition [ref=e82]: 93 / 146 N·s
+          - term [ref=e83]: From the rear
+          - definition [ref=e84]: 93 / 146 N·s
+          - term [ref=e85]: From the left
+          - definition [ref=e86]: 77 / 129 N·s
+          - term [ref=e87]: From the right
+          - definition [ref=e88]: 77 / 129 N·s
+    - region [ref=e89]:
+      - heading "Legs or wheels, by job" [level=2] [ref=e90]
+      - paragraph [ref=e91]:
+        - text: Failure rate over 150 sampled shifts per job from the Python lab (
+        - code [ref=e92]: python -m breakpoint humanoid
+        - text: ). The wheeled base shrugs off bigger shoves; it cannot climb a curb, a trailer lip or a stair.
+      - table [ref=e94]:
+        - rowgroup [ref=e95]:
+          - row [ref=e96]:
+            - columnheader "Job" [ref=e97]
+            - columnheader "Walking biped" [ref=e98]
+            - columnheader "Wheeled base" [ref=e99]
+            - columnheader "What sets the odds" [ref=e100]
+        - rowgroup [ref=e101]:
+          - row [ref=e102]:
+            - cell "Line-side kitting" [ref=e103]
+            - cell "0% (≤ 2%)" [ref=e104]
+            - cell "0% (≤ 2%)" [ref=e105]
+            - cell "Sealed concrete, totes up to 16 kg, people nearby." [ref=e106]
+          - row [ref=e107]:
+            - cell "Tote handling" [ref=e108]
+            - cell "0% (≤ 2%)" [ref=e109]
+            - cell "0% (≤ 2%)" [ref=e110]
+            - cell "Spills down to μ 0.3, totes up to 25 kg." [ref=e111]
+          - row [ref=e112]:
+            - cell "Trailer unloading" [ref=e113]
+            - cell "0% (≤ 2%)" [ref=e114]
+            - cell "16% (≤ 21.5%)" [ref=e115]
+            - cell "Trailer lips and debris up to 6 cm; ramps of ±5°." [ref=e116]
+          - row [ref=e117]:
+            - cell "Home care" [ref=e118]
+            - cell "0% (≤ 2%)" [ref=e119]
+            - cell "46.7% (≤ 53.4%)" [ref=e120]
+            - cell "Thresholds and stairs up to 18 cm on half the routes." [ref=e121]
+          - row [ref=e122]:
+            - cell "Teleoperated data collection" [ref=e123]
+            - cell "0.7% (≤ 2.9%)" [ref=e124]
+            - cell "0% (≤ 2%)" [ref=e125]
+            - cell "40–250 ms of network latency on every command." [ref=e126]
+    - region [ref=e127]:
+      - heading "How it decides where to step" [level=2] [ref=e128]
+      - generic [ref=e129]:
+        - paragraph [ref=e130]:
+          - text: "The centre of mass moves like an inverted pendulum over the centre of pressure p:"
+          - code [ref=e131]: x″ = ω²(x − p)
+          - text: ", with"
+          - code [ref=e132]: ω = √(g / z₀)
+          - text: . Its capture point
+          - code [ref=e133]: ξ = x + ẋ/ω
+          - text: "is where the robot must put its centre of pressure to come to rest, and it runs away from p:"
+          - code [ref=e134]: ξ′ = ω(ξ − p)
+          - text: .
+        - paragraph [ref=e135]:
+          - text: "Ankles first: the centre of pressure goes to the point of the foot nearest ξ, capped by ankle torque and by friction ("
+          - code [ref=e136]: "|x − p| ≤ μz"
+          - text: ). If the capture point, as seen through the control latency, leaves the foot, the robot steps where ξ will be at touchdown, capped by leg reach, lateral reach and swing time. More than 3 steps, or a slip, is a fall.
+        - paragraph [ref=e137]: "The wheeled base has a big footprint and no steps: it drives under the capture point with bounded acceleration and speed, and traction falls with friction. It tips over if ξ escapes faster than it can follow, and is blocked by anything taller than a threshold."

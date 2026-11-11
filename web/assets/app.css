@@ -96,3 +96,8 @@ input[type="range"] { accent-color: var(--orange); }
   .tools { grid-template-columns: 1fr; }
   .app-bar nav { gap: 14px; }
 }
+@media (max-width: 560px) {
+  .app-bar { flex-wrap: wrap; row-gap: 8px; }
+  .app-bar nav { width: 100%; flex-wrap: wrap; gap: 6px 16px; }
+  .app-bar nav a { white-space: nowrap; }
+}
