@@ -343,7 +343,7 @@ def capturability_map(robot: Humanoid | WheeledBase = Humanoid(), cond: Conditio
     Cell values: 0..max_steps = steps taken to recover, -1 = fell or blocked. Row 0 is +v_max forward,
     column 0 is +v_max to the robot's left (screen left), so the grid reads like the top-view lab.
     """
-    z, offset, m = effective(robot, cond) if isinstance(robot, Humanoid) else (None, None, robot.mass_kg + cond.payload_kg)
+    m = robot.mass_kg + cond.payload_kg
     sim = recover_wheeled if isinstance(robot, WheeledBase) else recover
     grid = []
     for i in range(n):
