@@ -32,6 +32,9 @@ done
 # 4. regression gate on the shrunk counterexamples
 python -m breakpoint regress --policy runs/v2field/policy_v2field.npz --suite runs/v2field/suite || true
 
+# 4b. policy compression judged by breaking points
+python -m breakpoint quantize --policy runs/v2field/policy_v2field.npz --gated --out runs/quantize
+
 # 5. humanoid lab: envelopes and job odds, hazard log, design levers, fleet fit, teleop episode filter
 python -m breakpoint humanoid --trials 150 --out runs/humanoid/baseline.json
 python -m breakpoint hazards  --out runs/humanoid/hazards.md
