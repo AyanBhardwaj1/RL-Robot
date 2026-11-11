@@ -10,7 +10,9 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
 2. **hunts for the mildest worlds that make the robot fail**,
 3. **shrinks each failure** to a minimal counterexample and saves it as a regression test,
 4. **retrains the policy** with PPO on those failures,
-5. and writes a **readiness report** comparing the policy before and after retraining.
+5. **estimates failure probability** under deployment profiles (warehouse, sidewalk, home,
+   construction, teleop),
+6. and writes a **readiness report** comparing policies before and after retraining.
 
 ![playground](docs/playground.png)
 
@@ -20,9 +22,10 @@ A locomotion policy that looks fine in a demo usually fails somewhere specific: 
 during the wrong gait phase, a 60 ms Wi-Fi hiccup, a front-heavy backpack on wet tile. Breakpoint
 turns "it looked fine" into numbers you can gate a release on. For example:
 
-- "survives side shoves up to 5.6 N·s"
-- "walks down to friction 0.22"
-- "nominal failure rate ≤ 3.1% at 95% confidence"
+- "survives shoves from the left up to 5.6 N·s at the worst gait phase"
+- "climbs 20° carrying 8 kg"
+- "0 falls in 60 sampled warehouse worlds, so the failure rate is ≤ 4.9% at 95% confidence"
+- "fails 35% of teleop worlds, because of control latency"
 
 It does this with no GPU and no PyTorch. The PPO learner is about 150 lines of numpy with
 hand-written backprop, and that backprop is checked against finite differences in the tests.
@@ -158,8 +161,10 @@ regression test now pins the convention.
 - **Audit any controller.** `--policy py:package.module:factory` loads `factory()`, which returns
   an `obs -> action` callable or a `Policy`. That covers an SB3 model, an ONNX session or a
   hand-written controller. `examples/my_controller.py` is a lateral-balance reflex. Auditing it
-  shows the intuition is only half right: it raises the left-push margin from 4.4 to 5.0 N·s but
-  lowers right push (3.8), rear-left push (3.8) and payload (2.3 kg vs 3.3 kg).
+  shows the intuition is only partly right. Compared with the bare gait, it raises the margin for
+  shoves from the right (4.4 → 5.0 N·s) and from the rear-left (3.1 → 3.8). It lowers the margin for
+  shoves from the left (4.4 → 3.8) and from the rear-right (6.3 → 3.8), and drops payload from
+  3.3 kg to 2.3 kg.
 - **Train with any RL library.** `breakpoint.gym_env.BreakpointEnv` is a Gymnasium env (it passes
   `check_env`). It reports `terminated` for falls and `truncated` for time limits, and can take a
   `ScenarioSampler` for domain randomisation.
