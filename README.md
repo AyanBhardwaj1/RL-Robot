@@ -175,7 +175,7 @@ hand-written backprop, and that backprop is checked against finite differences i
 | `episodes.py` | Teleop demonstration filter: replays each recorded contact through the humanoid model at the latency measured at that moment and tags the episode clean, lag (a stall or a blind link), near-fall (25% harder would fall) or fall. |
 | `hazards.py` | Hazard log with measured frequencies, 95% bounds, a risk matrix, mitigations and verify commands. |
 | `quantize.py` | FP16 and INT8 policy compression, profiled and re-audited for robustness. |
-| `cli.py` | `compile`, `run`, `train`, `audit`, `harden`, `regress`, `deploy`, `redteam`, `leaderboard`, `serve`, and `certify`. `certify` writes a traceable readiness certificate (policy SHA-256, toolchain versions, git commit, scorecard, margins, deployment risk, search budget) and exits non-zero below `--min-score`. |
+| `cli.py` | 17 commands: `compile`, `run`, `train`, `audit`, `harden`, `regress`, `deploy`, `redteam`, `leaderboard`, `serve`, `certify`, `quantize`, and for the humanoid lab `humanoid`, `hazards`, `design`, `fleet` and `episodes`. `certify` writes a traceable readiness certificate (policy SHA-256, toolchain versions, git commit, scorecard, margins, deployment risk, search budget) and exits non-zero below `--min-score`. |
 | `server.py`, `static/` | FastAPI and a three.js playground. You can compile a scenario, watch the replay, or use **Shove mode**, where you push the robot live over a WebSocket and score how much impulse it absorbs before it falls. A **ghost** mode replays a second policy as a translucent overlay in the same world. |
 
 ## Quick start
