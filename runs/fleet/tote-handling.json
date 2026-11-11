@@ -42,8 +42,7 @@
    "failure_rate_upper_95": 0.0839,
    "causes": {
     "needed more than 3 steps": 3,
-    "slipped": 2,
-    "capture point ran away beyond leg reach": 2
+    "capture point ran away beyond leg reach": 4
    }
   },
   "wheeled": {

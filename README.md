@@ -45,7 +45,7 @@ and the browser lab at `/humanoid`):
   |---|---|---|
   | Line-side kitting | 4.7% (hard side shoves) | 0% |
   | Tote handling | 5.3% (hard side shoves) | 0% |
-  | Trailer unloading | 13.3% (mostly slips) | 16.0% (blocked) |
+  | Trailer unloading | 13.3% (heavy cases, ramps) | 16.0% (blocked) |
   | Home care | 0% | 47% |
   | Teleoperated data collection | 10.7% (shoves under lag) | 0% |
 
@@ -62,6 +62,25 @@ and the browser lab at `/humanoid`):
   shoves with no latency at all, and that Python rounded latency differently from the JavaScript and C++
   ports. All three ports were fixed together, each finding has a regression test, and the ports now agree
   on time-to-rest as well as outcome. The job odds above are the honest, less flattering result.
+- **Blaming the right cause.** A falling robot's foot always slips in the end, so "slipped" used to be the
+  most common failure. The controller now respects the friction cone (it pulls the centre of pressure
+  toward the centre of mass, as a balance QP would), and a failure counts as a slip only if the same shove
+  is recovered on a floor with ample grip. In trailer unloading that moved 15 of 16 "slips" to falls.
+- **Design levers** (`python -m breakpoint design`). Each spec change is re-run on the same 750 sampled shifts
+  as the baseline, so every shift either flips or not:
+
+  | Change | Shifts fixed / broken | Sign test p |
+  |---|---|---|
+  | Swing 15% faster | 24 / 0 | < 0.001 |
+  | Side-step reach +10 cm | 14 / 0 | < 0.001 |
+  | 20 ms less control latency | 9 / 0 | 0.004 |
+  | Foot 4 cm longer | 3 / 0 | 0.25 |
+  | Ankle torque +25% | 0 / 0 | 1 |
+  | Stance 3 cm wider | 7 / 7 | 1 |
+
+  Ankle torque buys nothing at full strength because the foot, not the ankle, limits the centre of
+  pressure; a wider stance helps as many shifts as it hurts, because the loaded foot sits further out
+  during the swing.
 
 ![capturability map](docs/capturability.png)
 
@@ -130,6 +149,7 @@ hand-written backprop, and that backprop is checked against finite differences i
 | `gym_env.py` | Gymnasium adapter for external RL libraries. |
 | `humanoid.py` | Humanoid push recovery: linear inverted pendulum, capture-point stepping, wheeled-base model, job odds. Ported to `site/assets/humanoid.js` and `cpp/capture_point.hpp` with parity tests. |
 | `fleet.py` | Fits a site's deployment profile from per-shift telemetry (JSON Lines) with robust quantiles, then re-runs humanoid odds. |
+| `design.py` | Design levers: re-runs every job on the same sampled shifts with one spec improved (swing time, reach, torque, latency, grip…) and reports shifts fixed vs broken with a sign test. |
 | `hazards.py` | Hazard log with measured frequencies, 95% bounds, a risk matrix, mitigations and verify commands. |
 | `quantize.py` | FP16 and INT8 policy compression, profiled and re-audited for robustness. |
 | `cli.py` | `compile`, `run`, `train`, `audit`, `harden`, `regress`, `deploy`, `redteam`, `leaderboard`, `serve`, and `certify`. `certify` writes a traceable readiness certificate (policy SHA-256, toolchain versions, git commit, scorecard, margins, deployment risk, search budget) and exits non-zero below `--min-score`. |
@@ -150,6 +170,7 @@ python -m breakpoint redteam --policy runs/hardened/policy_hardened.npz   # comp
 python -m breakpoint leaderboard cpg runs/policy_v1.npz runs/hardened/policy_hardened.npz
 python -m breakpoint certify --policy gated:runs/v2field/policy_v2field.npz --min-score 80   # release gate
 python -m breakpoint humanoid --latency-ms 150     # humanoid: biped vs wheeled envelopes and job odds
+python -m breakpoint design                        # which spec change buys the most robustness (paired)
 python -m breakpoint hazards                       # hazard log with measured frequencies
 python -m breakpoint fleet --demo "tote handling"  # fit a site profile from shift telemetry, re-run odds
 python -m breakpoint quantize --policy runs/v2field/policy_v2field.npz --gated   # INT8 with a robustness check

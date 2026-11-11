@@ -5,6 +5,7 @@
   "use strict";
   const G = 9.81;
   const DT = 0.002;
+  const GRIPPY = 10; // friction used to ask "would it have recovered with ample grip?" (humanoid.py GRIPPY)
   const DIRECTIONS = { front: 180, "front-left": -135, left: -90, "rear-left": -45, rear: 0, "rear-right": 45, right: 90, "front-right": 135 };
 
   const BIPED = { kind: "biped", mass_kg: 72, com_height: 0.95, foot_half_length: 0.11, foot_half_width: 0.05,
@@ -66,10 +67,27 @@
       const estX = lat ? eN * seen[0] - sumX : seen[0], estY = lat ? eN * seen[1] - sumY : seen[1];
       const hw = dbl ? supportHalfW : robot.foot_half_width;
       const lox = sx - hx, hix = sx + hx, loy = sy - hw, hiy = sy + hw;
-      let px, py;
+      let bx0 = lox, bx1 = hix, by0 = loy, by1 = hiy;
       if (planned !== null && dbl) { // first swing: only the other foot can hold the CoP
-        px = clamp(estX, swX - hx, swX + hx); py = clamp(estY, swY - robot.foot_half_width, swY + robot.foot_half_width);
-      } else { px = clamp(estX, lox, hix); py = clamp(estY, loy, hiy); }
+        bx0 = swX - hx; bx1 = swX + hx; by0 = swY - robot.foot_half_width; by1 = swY + robot.foot_half_width;
+      }
+      let px = clamp(estX, bx0, bx1), py = clamp(estY, by0, by1);
+      // friction cone: pull the CoP toward the CoM until |x - p| <= mu z; slip only if no support point can
+      const qx = clamp(x, bx0, bx1), qy = clamp(y, by0, by1), need = norm(x - qx, y - qy);
+      if (need > maxOff) {
+        reason = `slipped: needed friction ${(need / z).toFixed(2)} > ${cond.friction.toFixed(2)}`;
+        if (cond.friction < GRIPPY) { // a slip only if ample grip would have saved it (see humanoid.py)
+          const g = recoverBiped(impulse, dirDeg, robot, Object.assign({}, cond, { friction: GRIPPY }), false, horizon);
+          if (!g.recovered) reason = g.reason;
+        }
+        finished = true; break;
+      }
+      if (norm(x - px, y - py) > maxOff) {
+        const dx = px - qx, dy = py - qy, fx = qx - x, fy = qy - y;
+        const a2 = dx * dx + dy * dy, b2 = 2 * (fx * dx + fy * dy), c2 = fx * fx + fy * fy - maxOff * maxOff;
+        const sr = Math.min(Math.max((-b2 + Math.sqrt(Math.max(b2 * b2 - 4 * a2 * c2, 0))) / (2 * a2), 0), 1);
+        px = qx + sr * dx; py = qy + sr * dy;
+      }
       if (lat) {
         const j = tick % lat;
         sumX = eDt * sumX + (eDt - 1) * px - eN * (eDt - 1) * ringX[j];
@@ -77,8 +95,6 @@
         ringX[j] = px; ringY[j] = py;
       }
       tick += 1;
-      const dn = norm(x - px, y - py);
-      if (dn > maxOff) { reason = `slipped: needed friction ${(dn / z).toFixed(2)} > ${cond.friction.toFixed(2)}`; finished = true; break; }
       const inside = estX >= lox - 1e-9 && estX <= hix + 1e-9 && estY >= loy - 1e-9 && estY <= hiy + 1e-9;
       if (planned === null && !inside) {
         if (steps >= robot.max_steps) { reason = `needed more than ${robot.max_steps} steps`; finished = true; break; }

@@ -102,11 +102,21 @@ class CapturePointController {
     const double hw = dbl_ ? r_.stance_half_width + r_.foot_half_width : r_.foot_half_width;
     const double hx = hx_, fw = r_.foot_half_width;
     const Vec2 lo{stance_.x - hx, stance_.y - hw}, hi{stance_.x + hx, stance_.y + hw};
-    Vec2 p;
+    Vec2 b0 = lo, b1 = hi;
     if (planned_ && dbl_) {  // first swing: only the other foot can hold the CoP
-      p = {std::clamp(est.x, swing_stance_.x - hx, swing_stance_.x + hx), std::clamp(est.y, swing_stance_.y - fw, swing_stance_.y + fw)};
-    } else {
-      p = {std::clamp(est.x, lo.x, hi.x), std::clamp(est.y, lo.y, hi.y)};
+      b0 = {swing_stance_.x - hx, swing_stance_.y - fw};
+      b1 = {swing_stance_.x + hx, swing_stance_.y + fw};
+    }
+    Vec2 p{std::clamp(est.x, b0.x, b1.x), std::clamp(est.y, b0.y, b1.y)};
+    // friction cone: pull the CoP toward the CoM until |x - p| <= mu z; slip only if no support point can
+    const double r = c_.friction * z_;
+    const Vec2 q{std::clamp(x_.x, b0.x, b1.x), std::clamp(x_.y, b0.y, b1.y)};
+    if ((x_ - q).norm() > r) return finish(false, "slipped");
+    if ((x_ - p).norm() > r) {
+      const Vec2 d = p - q, f = q - x_;
+      const double a = d.x * d.x + d.y * d.y, b = 2 * (f.x * d.x + f.y * d.y), cc = f.x * f.x + f.y * f.y - r * r;
+      const double sr = std::clamp((-b + std::sqrt(std::max(b * b - 4 * a * cc, 0.0))) / (2 * a), 0.0, 1.0);
+      p = q + d * sr;
     }
     if (lat_) {
       const std::size_t j = tick_ % lat_;
@@ -114,8 +124,6 @@ class CapturePointController {
       cop_ring_[j] = p;
     }
     ++tick_;
-    const double dn = (x_ - p).norm();
-    if (dn > c_.friction * z_) return finish(false, "slipped");
     const bool inside = est.x >= lo.x - 1e-9 && est.x <= hi.x + 1e-9 && est.y >= lo.y - 1e-9 && est.y <= hi.y + 1e-9;
     if (!planned_ && !inside) {
       if (steps_ >= r_.max_steps) return finish(false, "needed more than max steps");

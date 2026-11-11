@@ -116,6 +116,9 @@ def main(out: Path | None = None, replays: bool = True) -> int:
     humanoid = ROOT / "runs" / "humanoid" / "baseline.json"
     if humanoid.is_file():
         shutil.copy2(humanoid, data / "humanoid.json")
+    levers = ROOT / "runs" / "humanoid" / "levers.json"
+    if levers.is_file():
+        shutil.copy2(levers, data / "levers.json")
     write_seo(DIST, os.environ.get("SITE_URL"))
     size = sum(p.stat().st_size for p in DIST.rglob("*") if p.is_file())
     print(f"built {DIST} ({size / 1e6:.1f} MB)")

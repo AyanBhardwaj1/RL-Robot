@@ -1,0 +1,411 @@
+{
+ "trials_per_job": 150,
+ "seed": 0,
+ "jobs": [
+  "line-side kitting",
+  "tote handling",
+  "trailer unloading",
+  "home care",
+  "teleoperated data collection"
+ ],
+ "baseline": {
+  "jobs": {
+   "line-side kitting": {
+    "failure_rate": 0.0467,
+    "failures": 7
+   },
+   "tote handling": {
+    "failure_rate": 0.0533,
+    "failures": 8
+   },
+   "trailer unloading": {
+    "failure_rate": 0.1333,
+    "failures": 20
+   },
+   "home care": {
+    "failure_rate": 0.0,
+    "failures": 0
+   },
+   "teleoperated data collection": {
+    "failure_rate": 0.1067,
+    "failures": 16
+   }
+  },
+  "envelope": {
+   "front": 92.38,
+   "left": 44.34,
+   "front-left": 62.7
+  }
+ },
+ "levers": [
+  {
+   "key": "swing_time",
+   "title": "Swing 15% faster",
+   "owner": "Actuators and controls",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0267,
+     "fixed": 3,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.0133,
+     "fixed": 6,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.08,
+     "fixed": 8,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.06,
+     "fixed": 7,
+     "broken": 0
+    }
+   },
+   "fixed": 24,
+   "broken": 0,
+   "net": 24,
+   "p_value": 0.0,
+   "envelope": {
+    "front": 109.23,
+    "left": 58.01,
+    "front-left": 82.03
+   }
+  },
+  {
+   "key": "lateral_reach",
+   "title": "Side-step reach +10 cm",
+   "owner": "Mechanical and controls",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0267,
+     "fixed": 3,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.0333,
+     "fixed": 3,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.1133,
+     "fixed": 3,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.0733,
+     "fixed": 5,
+     "broken": 0
+    }
+   },
+   "fixed": 14,
+   "broken": 0,
+   "net": 14,
+   "p_value": 0.0001,
+   "envelope": {
+    "front": 92.38,
+    "left": 56.54,
+    "front-left": 76.66
+   }
+  },
+  {
+   "key": "latency",
+   "title": "20 ms less control latency",
+   "owner": "Embedded and networking",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0467,
+     "fixed": 0,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.04,
+     "fixed": 2,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.1,
+     "fixed": 5,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.0933,
+     "fixed": 2,
+     "broken": 0
+    }
+   },
+   "fixed": 9,
+   "broken": 0,
+   "net": 9,
+   "p_value": 0.0039,
+   "envelope": {
+    "front": 92.38,
+    "left": 44.34,
+    "front-left": 62.7
+   }
+  },
+  {
+   "key": "foot_length",
+   "title": "Foot 4 cm longer",
+   "owner": "Mechanical",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0467,
+     "fixed": 0,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.0533,
+     "fixed": 0,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.1133,
+     "fixed": 3,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.1067,
+     "fixed": 0,
+     "broken": 0
+    }
+   },
+   "fixed": 3,
+   "broken": 0,
+   "net": 3,
+   "p_value": 0.25,
+   "envelope": {
+    "front": 97.02,
+    "left": 44.34,
+    "front-left": 62.7
+   }
+  },
+  {
+   "key": "extra_step",
+   "title": "Allow a 4th recovery step",
+   "owner": "Controls",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0467,
+     "fixed": 0,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.0533,
+     "fixed": 0,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.1267,
+     "fixed": 1,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.1067,
+     "fixed": 0,
+     "broken": 0
+    }
+   },
+   "fixed": 1,
+   "broken": 0,
+   "net": 1,
+   "p_value": 1.0,
+   "envelope": {
+    "front": 94.43,
+    "left": 45.8,
+    "front-left": 64.79
+   }
+  },
+  {
+   "key": "grip",
+   "title": "Sole grip +15%",
+   "owner": "Mechanical",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0467,
+     "fixed": 0,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.0533,
+     "fixed": 0,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.1267,
+     "fixed": 1,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.1067,
+     "fixed": 0,
+     "broken": 0
+    }
+   },
+   "fixed": 1,
+   "broken": 0,
+   "net": 1,
+   "p_value": 1.0,
+   "envelope": {
+    "front": 92.38,
+    "left": 44.34,
+    "front-left": 62.7
+   }
+  },
+  {
+   "key": "step_reach",
+   "title": "Leg reach +10 cm",
+   "owner": "Mechanical",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0467,
+     "fixed": 0,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.0533,
+     "fixed": 0,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.1333,
+     "fixed": 0,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.1,
+     "fixed": 1,
+     "broken": 0
+    }
+   },
+   "fixed": 1,
+   "broken": 0,
+   "net": 1,
+   "p_value": 1.0,
+   "envelope": {
+    "front": 104.64,
+    "left": 44.34,
+    "front-left": 62.7
+   }
+  },
+  {
+   "key": "ankle_torque",
+   "title": "Ankle torque +25%",
+   "owner": "Actuators",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0467,
+     "fixed": 0,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.0533,
+     "fixed": 0,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.1333,
+     "fixed": 0,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.1067,
+     "fixed": 0,
+     "broken": 0
+    }
+   },
+   "fixed": 0,
+   "broken": 0,
+   "net": 0,
+   "p_value": 1.0,
+   "envelope": {
+    "front": 92.38,
+    "left": 44.34,
+    "front-left": 62.7
+   }
+  },
+  {
+   "key": "stance_width",
+   "title": "Stance 3 cm wider each side",
+   "owner": "Controls",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.04,
+     "fixed": 2,
+     "broken": 1
+    },
+    "tote handling": {
+     "failure_rate": 0.0467,
+     "fixed": 2,
+     "broken": 1
+    },
+    "trailer unloading": {
+     "failure_rate": 0.14,
+     "fixed": 2,
+     "broken": 3
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.1133,
+     "fixed": 1,
+     "broken": 2
+    }
+   },
+   "fixed": 7,
+   "broken": 7,
+   "net": 0,
+   "p_value": 1.0,
+   "envelope": {
+    "front": 91.89,
+    "left": 43.95,
+    "front-left": 56.45
+   }
+  }
+ ]
+}

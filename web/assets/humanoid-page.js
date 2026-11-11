@@ -216,6 +216,30 @@
     });
   }).catch(() => { $("#jobs-table tbody").innerHTML = "<tr><td colspan=4>Run python -m breakpoint humanoid to produce this table.</td></tr>"; });
 
+  // ---------- design levers (from python -m breakpoint design) ----------
+  fetch("/assets/data/levers.json").then((r) => r.json()).then((d) => {
+    const tb = $("#levers-table tbody");
+    const most = Math.max(1, ...d.levers.map((l) => l.fixed + l.broken));
+    const n = (v) => Math.round(v);
+    d.levers.forEach((l) => {
+      const tr = document.createElement("tr");
+      const td = (txt, cls) => { const c = document.createElement("td"); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const flips = td("", "num flips");
+      const bar = document.createElement("span"); bar.className = "flip-bar"; bar.setAttribute("aria-hidden", "true");
+      const good = document.createElement("span"); good.className = "flip-fixed"; good.style.width = `${(100 * l.fixed) / most}%`;
+      const bad = document.createElement("span"); bad.className = "flip-broken"; bad.style.width = `${(100 * l.broken) / most}%`;
+      bar.append(good, bad);
+      flips.append(`${l.fixed} / ${l.broken}`, bar);
+      const env = l.envelope, base = d.baseline.envelope;
+      const delta = (k) => (n(env[k]) === n(base[k]) ? `${n(env[k])}` : `${n(env[k])} (${env[k] > base[k] ? "+" : "−"}${Math.abs(n(env[k]) - n(base[k]))})`);
+      tr.append(td(l.title), td(l.owner), flips, td(l.p_value < 0.001 ? "< 0.001" : l.p_value.toFixed(3), "num" + (l.p_value < 0.05 ? " good" : "")),
+        td(`${delta("left")} / ${delta("front")} N·s`, "num"));
+      tb.appendChild(tr);
+    });
+    const top = d.levers[0];
+    $("#levers-note").textContent = `Biggest single win: ${top.title.toLowerCase()} (${top.fixed} shifts saved, none lost). Ankle torque buys nothing at full strength: the foot, not the ankle, limits the centre of pressure. A wider stance helps as many shifts as it hurts: the loaded foot sits further out during the swing.`;
+  }).catch(() => { $("#levers-table tbody").innerHTML = "<tr><td colspan=5>Run python -m breakpoint design to produce this table.</td></tr>"; });
+
   // ---------- wire up ----------
   const outs = { imp: (v) => `${v} N·s`, payload: (v) => `${v} kg`, friction: (v) => `μ ${(+v).toFixed(2)}`, latency: (v) => `${v} ms`,
     strength: (v) => `${Math.round(v * 100)}%`, step: (v) => `${Math.round(v * 100)} cm` };

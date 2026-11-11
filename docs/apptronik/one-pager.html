@@ -67,7 +67,8 @@
         <li>A policy that walked in noisy training stood still when run for real, and scored below the gait it was built on.</li>
         <li>A second hardening round overfit; a fresh audit caught it.</li>
         <li>Training could not remove latency failures; gating the learned residual on measured link latency did.</li>
-        <li>Legs vs wheels: the wheeled base survives 1.5× bigger shoves from the front and 2.7× from the side, but fails 47% of home-care routes (stairs); the biped fails 0% there, but 13% of trailer shifts (mostly slips).</li>
+        <li>Legs vs wheels: the wheeled base survives 1.5× bigger shoves from the front and 2.7× from the side, but fails 47% of home-care routes (stairs); the biped fails 0% there, but 13% of trailer shifts.</li>
+        <li>Design levers, paired on 750 shifts: a 15% faster swing saves 24 and loses none (p &lt; 0.001); +25% ankle torque saves none.</li>
         <li>A capturability map and an independent review exposed three modelling errors (a non-causal latency model, a swing foot that still held weight, ankles that ignored lag); each fix made the biped’s odds worse and more honest.</li>
         <li>The C++ controller step costs about 1 µs; stock-kernel wake-up jitter reaches 4.9 ms, which is the case for PREEMPT_RT.</li>
       </ul>

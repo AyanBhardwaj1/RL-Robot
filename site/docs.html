@@ -51,6 +51,7 @@ pytest -q</code></pre>
         <tr><td><code>certify --policy p --min-score 80</code></td><td>Readiness certificate with policy hash and toolchain versions.</td></tr>
         <tr><td><code>humanoid --latency-ms 150</code></td><td>Humanoid push envelopes for a walking biped and a wheeled base, plus failure odds by job.</td></tr>
         <tr><td><code>fleet --log shifts.jsonl</code></td><td>Fit a site profile from per-shift telemetry (robust quantiles) and re-run humanoid odds for both bodies. <code>--demo "tote handling"</code> generates a synthetic log.</td></tr>
+        <tr><td><code>design</code></td><td>Which spec change buys the most robustness: every job re-run on the same sampled shifts with one change, shifts fixed vs broken, sign test.</td></tr>
         <tr><td><code>hazards --fail-on-high</code></td><td>Hazard log from measured humanoid failures: rate, 95% bound, severity, risk, mitigation, verify command.</td></tr>
         <tr><td><code>quantize --policy p --gated</code></td><td>FP16 and INT8 compression, profiled and re-audited for robustness.</td></tr>
         <tr><td><code>serve</code></td><td>The local lab with live shove mode over a WebSocket.</td></tr>

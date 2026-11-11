@@ -102,6 +102,26 @@ def _clamp_to_foot(p: np.ndarray, foot: np.ndarray, robot: Humanoid) -> np.ndarr
                      np.clip(p[1], foot[1] - robot.foot_half_width, foot[1] + robot.foot_half_width)])
 
 
+GRIPPY = 10.0  # friction coefficient used to ask "would it have recovered with ample grip?"
+
+
+def _friction_limited(p: np.ndarray, x: np.ndarray, box: tuple[np.ndarray, np.ndarray],
+                      r: float) -> tuple[np.ndarray, float]:
+    """Move the desired CoP p toward the support point nearest the CoM x until |x - p| <= r.
+
+    Returns the CoP to apply and the smallest friction offset any support point needs (|x - q|, with q
+    the support point nearest x); if that exceeds r no admissible CoP exists and the foot slips.
+    """
+    q = np.clip(x, *box)
+    need = float(np.linalg.norm(x - q))
+    if float(np.linalg.norm(x - p)) <= r or need > r:
+        return p, need
+    d, f = p - q, q - x  # walk from q (inside the friction disc) toward p (outside) to the disc edge
+    a, b, c = float(d @ d), 2.0 * float(f @ d), float(f @ f) - r * r
+    s = (-b + math.sqrt(max(b * b - 4 * a * c, 0.0))) / (2 * a)
+    return q + min(max(s, 0.0), 1.0) * d, need
+
+
 def _ticks(latency_s: float) -> int:
     """Latency in control ticks, rounding halves up (as Math.round and std::lround do), never negative."""
     return max(0, math.floor(latency_s / DT + 0.5))
@@ -176,20 +196,28 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
         lo, hi = foot_box(stance, half_w)
         if planned is not None and double_support:
             # first swing: the stepping foot is in the air, so only the other foot can hold the CoP
-            p = np.clip(est, *foot_box(swing_stance, robot.foot_half_width))
+            box = foot_box(swing_stance, robot.foot_half_width)
         else:
-            p = np.clip(est, lo, hi)
+            box = (lo, hi)
+        p = np.clip(est, *box)
+        # Friction cone: the horizontal ground force m w^2 |x - p| may not exceed mu m g, i.e. |x - p| <= mu z.
+        # The controller respects it (as a balance QP would) by pulling the CoP toward the CoM; the foot
+        # slips only when even the support point nearest the CoM needs more friction than the floor has.
+        p, need = _friction_limited(p, x, box, max_offset)
+        if need > max_offset:
+            rec.reason = f"slipped: needed friction {need / z:.2f} > {cond.friction:.2f}"
+            # Attribute the cause honestly: a falling robot's foot always slips in the end. Only call it a
+            # slip if the same shove would have been recovered on a floor with ample grip.
+            if cond.friction < GRIPPY:
+                grippy = recover(impulse, direction_deg, robot, replace(cond, friction=GRIPPY), horizon_s=horizon_s)
+                if not grippy.recovered:
+                    rec.reason = grippy.reason
+            break
         if latency_steps:
             j = tick % latency_steps
             cop_sum = e_dt * cop_sum + (e_dt - 1.0) * p - e_n * (e_dt - 1.0) * cop_ring[j]
             cop_ring[j] = p.copy()
         tick += 1
-        # friction: the CoP may not sit further than mu*z from the CoM horizontally
-        d = x - p
-        dn = float(np.linalg.norm(d))
-        if dn > max_offset:
-            rec.reason = f"slipped: needed friction {dn / z:.2f} > {cond.friction:.2f}"
-            break
         inside = bool(np.all(est >= lo - 1e-9) and np.all(est <= hi + 1e-9))
         if planned is None and not inside:
             if steps >= robot.max_steps:

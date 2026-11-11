@@ -16,7 +16,8 @@ CASES = [
     ("biped", 30.0, 45.0, {"payload_kg": 20.0}), ("biped", 0.0, 0.0, {"floor_slope_deg": 4.0}),
     ("biped", 0.0, 0.0, {"floor_step_m": 0.25}),
     ("biped", 60.0, 180.0, {"latency_s": 0.025}), ("biped", 40.0, -135.0, {"latency_s": 0.1, "payload_kg": 10.0}),
-    ("biped", 45.0, 90.0, {}), ("biped", 30.0, -90.0, {}), ("biped", 35.0, 180.0, {"actuator_strength": 0.6}),
+    ("biped", 45.0, 90.0, {}), ("biped", 61.0, 103.0, {"friction": 0.5, "floor_slope_deg": -2.7, "payload_kg": 15.0}),
+    ("biped", 60.0, 180.0, {"friction": 0.1}), ("biped", 40.0, 180.0, {"friction": 0.35}), ("biped", 30.0, -90.0, {}), ("biped", 35.0, 180.0, {"actuator_strength": 0.6}),
     ("wheeled", 100.0, -90.0, {}), ("wheeled", 90.0, 0.0, {"latency_s": 0.025}), ("wheeled", 0.0, 0.0, {"floor_step_m": 0.10}), ("wheeled", 80.0, 135.0, {"friction": 0.3}),
 ]
 

@@ -49,8 +49,9 @@ HAZARDS = (
                 "python -m breakpoint humanoid --payload 25"),
     HazardClass("H6", "Capture point runs away beyond leg reach", "capture point ran away",
                 "Fall onto a person, a product or itself", 3,
-                "Same as H1; detect early and trigger a protective stop",
-                "python -m breakpoint humanoid"),
+                "Faster swing and more side-step reach (the two largest measured wins); detect early and "
+                "trigger a protective stop",
+                "python -m breakpoint design  # paired test of each spec change"),
 )
 
 RISK = {  # severity x likelihood band -> risk level, a common 4x4 matrix

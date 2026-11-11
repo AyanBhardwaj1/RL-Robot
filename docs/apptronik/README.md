@@ -98,7 +98,9 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
      cannot cross the loaded one. Switch to the wheeled base: 120 N·s from the side, 137 from the front.
    - Raise the curb slider to 10 cm and it is blocked.
    - Scroll to “Legs or wheels, by job”. Home care: wheeled fails 47%, biped 0%. Trailer
-     unloading: wheeled fails 16% (blocked), biped 13% (mostly slips).
+     unloading: wheeled fails 16% (blocked), biped 13% (heavy cases on ramps).
+   - Scroll to “Which spec change helps most”. Say: “If you had one spec to improve, the data says swing
+     speed: 24 shifts saved, none lost, p < 0.001. Ankle torque buys nothing; the foot is the limit.”
    - Show the capturability map, then drag latency to 150 ms. Say: “This map caught a bug in my own
      latency model that bisection missed, and an independent review caught two more. Each fix made the
      biped look worse and the numbers more honest.”

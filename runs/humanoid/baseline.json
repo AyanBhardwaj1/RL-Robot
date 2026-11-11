@@ -40,8 +40,7 @@
     "failure_rate": 0.04666666666666667,
     "failure_rate_upper_95": 0.0839,
     "causes": {
-     "slipped": 3,
-     "capture point ran away beyond leg reach": 2,
+     "capture point ran away beyond leg reach": 5,
      "needed more than 3 steps": 2
     }
    },
@@ -63,8 +62,7 @@
     "failure_rate_upper_95": 0.0922,
     "causes": {
      "needed more than 3 steps": 1,
-     "slipped": 2,
-     "capture point ran away beyond leg reach": 5
+     "capture point ran away beyond leg reach": 7
     }
    },
    "wheeled": {
@@ -84,9 +82,9 @@
     "failure_rate": 0.13333333333333333,
     "failure_rate_upper_95": 0.1855,
     "causes": {
-     "slipped": 16,
-     "needed more than 3 steps": 2,
-     "capture point ran away beyond leg reach": 2
+     "capture point ran away beyond leg reach": 13,
+     "needed more than 3 steps": 6,
+     "slipped": 1
     }
    },
    "wheeled": {
@@ -128,9 +126,8 @@
     "failure_rate": 0.10666666666666667,
     "failure_rate_upper_95": 0.1553,
     "causes": {
-     "capture point ran away beyond leg reach": 6,
-     "slipped": 6,
-     "needed more than 3 steps": 4
+     "capture point ran away beyond leg reach": 10,
+     "needed more than 3 steps": 6
     }
    },
    "wheeled": {

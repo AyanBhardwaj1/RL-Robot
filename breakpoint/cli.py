@@ -384,6 +384,18 @@ def cmd_quantize(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_design(a: argparse.Namespace) -> int:
+    from .design import lever_table, to_text
+
+    table = lever_table(trials=a.trials, seed=a.seed)
+    print(to_text(table))
+    if a.out:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(json.dumps(table, indent=1))
+        print(f"\nwrote {a.out}")
+    return 0
+
+
 def cmd_hazards(a: argparse.Namespace) -> int:
     from .hazards import hazard_log, to_markdown
 
@@ -519,6 +531,12 @@ def main(argv: list[str] | None = None) -> int:
     fl.add_argument("--write-demo", help="also save the synthetic log here")
     fl.add_argument("--out")
     fl.set_defaults(fn=cmd_fleet)
+
+    de = sub.add_parser("design", help="which spec change buys the most push robustness, job by job (paired)")
+    de.add_argument("--trials", type=int, default=150)
+    de.add_argument("--seed", type=int, default=0)
+    de.add_argument("--out", default="runs/humanoid/levers.json")
+    de.set_defaults(fn=cmd_design)
 
     hz = sub.add_parser("hazards", help="hazard log with measured frequencies from the humanoid lab")
     hz.add_argument("--trials", type=int, default=150)

@@ -1,6 +1,7 @@
 import itertools
 import math
 
+import numpy as np
 import pytest
 
 from breakpoint.humanoid import (
@@ -187,3 +188,39 @@ def test_latency_ticks_round_half_up_like_js_and_cpp():
     from breakpoint.humanoid import _ticks
 
     assert _ticks(0.005) == 3 and _ticks(0.025) == 13 and _ticks(0.0) == 0 and _ticks(-0.1) == 0
+
+
+def test_slip_is_blamed_only_when_grip_would_have_saved_it():
+    """A falling robot's foot always slips at the end; the cause must be the fall, not the floor."""
+    ice = recover(60.0, 180.0, cond=Conditions(friction=0.1))
+    assert not ice.recovered and ice.reason.startswith("slipped")
+    fall = recover(61.0, 103.0, cond=Conditions(friction=0.5, floor_slope_deg=-2.7, payload_kg=15.0))
+    assert not fall.recovered and not fall.reason.startswith("slipped")
+
+
+def test_friction_cone_respected_by_the_controller():
+    """The CoP is pulled toward the CoM rather than demanding more friction than the floor has."""
+    from breakpoint.humanoid import _friction_limited
+
+    box = (np.array([-0.11, -0.16]), np.array([0.11, 0.16]))
+    x = np.array([0.30, 0.0])
+    p, need = _friction_limited(np.array([-0.11, 0.0]), x, box, 0.25)
+    assert need == pytest.approx(0.19) and np.linalg.norm(x - p) == pytest.approx(0.25)
+    assert box[0][0] <= p[0] <= box[1][0]
+    _, need = _friction_limited(np.array([-0.11, 0.0]), x, box, 0.1)
+    assert need > 0.1  # no admissible CoP: a genuine slip
+
+
+def test_design_levers_are_paired_and_signed():
+    from breakpoint.design import LEVERS, Lever, lever_table, sign_test_p
+
+    assert sign_test_p(0, 0) == 1.0 and sign_test_p(10, 0) == pytest.approx(2 / 2**10)
+    assert sign_test_p(3, 3) == 1.0
+    same = Lever("none", "No change", "Nobody")
+    swing = next(lv for lv in LEVERS if lv.key == "swing_time")
+    t = lever_table(trials=25, jobs=("trailer unloading", "home care"), levers=(same, swing))
+    rows = {r["key"]: r for r in t["levers"]}
+    assert rows["none"]["fixed"] == rows["none"]["broken"] == 0  # common random numbers: identical shifts
+    assert rows["swing_time"]["broken"] == 0 and rows["swing_time"]["envelope"]["left"] > t["baseline"]["envelope"]["left"]
+    for j in t["jobs"]:
+        assert rows["none"]["jobs"][j]["failure_rate"] == t["baseline"]["jobs"][j]["failure_rate"]
