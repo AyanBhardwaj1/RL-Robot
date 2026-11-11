@@ -16,6 +16,7 @@
     actuator_strength: 1, floor_slope_deg: 0, floor_step_m: 0 };
 
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const ticks = (s) => Math.max(0, Math.floor(s / DT + 0.5)); // same rounding as humanoid.py _ticks
   const norm = (a, b) => Math.hypot(a, b);
 
   function effective(robot, c) {
@@ -45,9 +46,16 @@
     const a = dirDeg * Math.PI / 180;
     let vx = (impulse / m) * Math.cos(a), vy = (impulse / m) * Math.sin(a);
     let t = 0, steps = 0, dbl = true, swingUntil = -1, planned = null;
-    const lat = Math.round(cond.latency_s / DT);
+    const lat = ticks(cond.latency_s);
     const hist = [];
     const maxOff = cond.friction * z;
+    const hx = Math.min(robot.foot_half_length, copReach);
+    // Smith predictor (see humanoid.py): roll the late measurement forward with the CoP commanded since.
+    const eDt = Math.exp(w * DT), eN = Math.pow(eDt, lat);
+    const p0x = clamp(prePush[0], -hx, hx), p0y = clamp(prePush[1], -supportHalfW, supportHalfW);
+    const ringX = new Array(lat).fill(p0x), ringY = new Array(lat).fill(p0y);
+    let sumX = (eN - 1) * p0x, sumY = (eN - 1) * p0y;
+    let tick = 0, swX = 0, swY = 0; // swX/swY: the loaded foot during the first swing
     let reason = "";
     let i = 0;
     let finished = false;
@@ -55,17 +63,33 @@
       const xix = x + vx / w + biasX, xiy = y + vy / w;
       hist.push([xix, xiy]);
       const seen = hist.length > lat ? hist[hist.length - 1 - lat] : prePush; // stale view is the pre-push state
+      const estX = lat ? eN * seen[0] - sumX : seen[0], estY = lat ? eN * seen[1] - sumY : seen[1];
       const hw = dbl ? supportHalfW : robot.foot_half_width;
-      const hx = Math.min(robot.foot_half_length, copReach);
       const lox = sx - hx, hix = sx + hx, loy = sy - hw, hiy = sy + hw;
-      const px = clamp(xix, lox, hix), py = clamp(xiy, loy, hiy);
+      let px, py;
+      if (planned !== null && dbl) { // first swing: only the other foot can hold the CoP
+        px = clamp(estX, swX - hx, swX + hx); py = clamp(estY, swY - robot.foot_half_width, swY + robot.foot_half_width);
+      } else { px = clamp(estX, lox, hix); py = clamp(estY, loy, hiy); }
+      if (lat) {
+        const j = tick % lat;
+        sumX = eDt * sumX + (eDt - 1) * px - eN * (eDt - 1) * ringX[j];
+        sumY = eDt * sumY + (eDt - 1) * py - eN * (eDt - 1) * ringY[j];
+        ringX[j] = px; ringY[j] = py;
+      }
+      tick += 1;
       const dn = norm(x - px, y - py);
       if (dn > maxOff) { reason = `slipped: needed friction ${(dn / z).toFixed(2)} > ${cond.friction.toFixed(2)}`; finished = true; break; }
-      const inside = seen[0] >= lox - 1e-9 && seen[0] <= hix + 1e-9 && seen[1] >= loy - 1e-9 && seen[1] <= hiy + 1e-9;
+      const inside = estX >= lox - 1e-9 && estX <= hix + 1e-9 && estY >= loy - 1e-9 && estY <= hiy + 1e-9;
       if (planned === null && !inside) {
         if (steps >= robot.max_steps) { reason = `needed more than ${robot.max_steps} steps`; finished = true; break; }
+        let qx = px, qy = py; // CoP during the coming swing
+        if (dbl) {
+          const side = estY - sy > 1e-9 ? 1 : estY - sy < -1e-9 ? -1 : 1;
+          swX = sx; swY = sy - side * robot.stance_half_width;
+          qx = clamp(estX, swX - hx, swX + hx); qy = clamp(estY, swY - robot.foot_half_width, swY + robot.foot_half_width);
+        }
         const e = Math.exp(w * swing);
-        let dx = px + (seen[0] - px) * e - sx, dy = py + (seen[1] - py) * e - sy;
+        let dx = qx + (estX - qx) * e - sx, dy = qy + (estY - qy) * e - sy;
         const reach = norm(dx, dy);
         if (reach > robot.max_step) { dx *= robot.max_step / reach; dy *= robot.max_step / reach; }
         dy = clamp(dy, -robot.max_lateral_step, robot.max_lateral_step);
@@ -80,14 +104,14 @@
       vx += ax * DT; vy += ay * DT; x += vx * DT; y += vy * DT; t += DT; i += 1;
       if (rec && i % 10 === 0) { rec.com.push([+t.toFixed(3), +x.toFixed(4), +y.toFixed(4)]); rec.capture.push([+t.toFixed(3), +xix.toFixed(4), +xiy.toFixed(4)]); }
       const nxix = x + vx / w + biasX, nxiy = y + vy / w;
-      if (planned === null && norm(vx, vy) < 0.02 && Math.abs(nxix - sx) <= robot.foot_half_length + 1e-9 && Math.abs(nxiy - sy) <= robot.foot_half_width + 1e-9 && t > 0.3) {
+      const rw = dbl ? supportHalfW : robot.foot_half_width;
+      if (planned === null && norm(vx, vy) < 0.02 && Math.abs(nxix - sx) <= hx && Math.abs(nxiy - sy) <= rw && t > 0.3) {
         return result(true, steps, "came to rest", t, rec);
       }
       if (norm(nxix - sx, nxiy - sy) > robot.max_step * 3) { reason = "capture point ran away beyond leg reach"; finished = true; break; }
     }
     if (finished) return result(false, steps, reason, t, rec);
     const hw = dbl ? supportHalfW : robot.foot_half_width;
-    const hx = Math.min(robot.foot_half_length, copReach);
     const ex = x + vx / w + biasX, ey = y + vy / w;
     const ok = ex >= sx - hx && ex <= sx + hx && ey >= sy - hw && ey <= sy + hw;
     return result(ok, steps, ok ? "came to rest" : "still moving at the end of the horizon", t, rec);
@@ -107,7 +131,7 @@
     const a = dirDeg * Math.PI / 180;
     let vx = (impulse / m) * Math.cos(a), vy = (impulse / m) * Math.sin(a);
     const hx = base.half_length, hy = base.half_width;
-    const delay = Math.round((cond.latency_s + base.reaction_s) / DT);
+    const delay = ticks(cond.latency_s + base.reaction_s);
     const hist = [];
     let t = 0, i = 0;
     const tipX = hx + base.max_speed ** 2 / (2 * accel) + 0.25, tipY = hy + base.max_speed ** 2 / (2 * accel) + 0.25;

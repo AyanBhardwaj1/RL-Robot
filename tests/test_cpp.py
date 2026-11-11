@@ -31,6 +31,7 @@ def run(binary, *args):
 @pytest.mark.parametrize("imp,deg,lat,payload,mu", [
     (0, 0, 0, 0, 0.8), (40, 0, 0, 0, 0.8), (60, -90, 0, 0, 0.8), (95, 0, 0, 0, 0.8),
     (50, -90, 0.15, 0, 0.8), (30, 45, 0, 20, 0.8), (70, 0, 0, 0, 0.15),
+    (60, 180, 0.025, 0, 0.8), (40, -135, 0.1, 10, 0.8), (45, 90, 0, 0, 0.8), (30, -90, 0, 0, 0.8),
 ])
 def test_cpp_recover_matches_python(binary, imp, deg, lat, payload, mu):
     got = run(binary, "recover", imp, deg, lat, payload, mu)
@@ -52,3 +53,9 @@ def test_cpp_realtime_step_is_fast(binary):
     b = run(binary, "bench", 0.3)
     assert b["ticks"] > 50
     assert b["step_us_p99"] < 200  # the control step itself, not the OS wake-up jitter
+
+
+def test_cpp_negative_latency_is_treated_as_none(binary):
+    got = run(binary, "recover", 40, 0, -0.5, 0, 0.8)
+    py = recover(40, 0, cond=Conditions())
+    assert got["recovered"] == py.recovered and got["steps"] == py.steps

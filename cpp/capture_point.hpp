@@ -1,10 +1,10 @@
 // capture_point.hpp: header-only C++17 port of breakpoint/humanoid.py (biped push recovery).
 //
 // Linear inverted pendulum + capture-point stepping, with ankle-torque, friction, swing-time,
-// leg-reach, lateral-reach and latency limits. Allocation-free inside the control step: the
-// latency history is a fixed ring buffer sized at construction, so `step()` is safe to call
-// from a real-time loop. The batch `recover()` mirrors the Python reference exactly and is
-// checked against it by tests/test_cpp.py.
+// leg-reach, lateral-reach and latency limits; latency is compensated by a Smith predictor.
+// Allocation-free inside the control step: the latency history and the commanded-CoP history are
+// fixed ring buffers sized at construction, so `step()` is safe to call from a real-time loop. The
+// batch `recover()` mirrors the Python reference exactly and is checked against it by tests/test_cpp.py.
 #pragma once
 
 #include <algorithm>
@@ -70,8 +70,17 @@ class CapturePointController {
     pre_push_ = x_ + Vec2{bias_x_, 0};
     const double a = direction_deg * kPi / 180.0;
     v_ = Vec2{std::cos(a), std::sin(a)} * (impulse / m);
-    lat_ = static_cast<std::size_t>(std::lround(c.latency_s / kDt));
+    // Latency in ticks, rounding halves up like humanoid.py; a negative latency is treated as none.
+    lat_ = static_cast<std::size_t>(std::max(0.0, std::floor(c.latency_s / kDt + 0.5)));
     ring_.assign(lat_ + 1, Vec2{});
+    // Smith predictor state (see humanoid.py): commanded-CoP ring and the running sum of its terms.
+    hx_ = std::min(r.foot_half_length, cop_reach_);
+    e_dt_ = std::exp(w_ * kDt);
+    e_n_ = std::pow(e_dt_, static_cast<double>(lat_));
+    const double shw = r.stance_half_width + r.foot_half_width;
+    const Vec2 p0{std::clamp(pre_push_.x, -hx_, hx_), std::clamp(pre_push_.y, -shw, shw)};
+    cop_ring_.assign(lat_, p0);
+    cop_sum_ = p0 * (e_n_ - 1.0);
   }
 
   bool done() const { return done_; }
@@ -88,18 +97,36 @@ class CapturePointController {
     ++count_;
     const Vec2 seen = count_ > lat_ ? ring_[(head_ + 1) % ring_.size()] : pre_push_;  // stale view = standing still
     head_ = (head_ + 1) % ring_.size();
+    const Vec2 est = lat_ ? seen * e_n_ - cop_sum_ : seen;  // best estimate of the capture point now
 
     const double hw = dbl_ ? r_.stance_half_width + r_.foot_half_width : r_.foot_half_width;
-    const double hx = std::min(r_.foot_half_length, cop_reach_);
+    const double hx = hx_, fw = r_.foot_half_width;
     const Vec2 lo{stance_.x - hx, stance_.y - hw}, hi{stance_.x + hx, stance_.y + hw};
-    const Vec2 p{std::clamp(xi.x, lo.x, hi.x), std::clamp(xi.y, lo.y, hi.y)};
+    Vec2 p;
+    if (planned_ && dbl_) {  // first swing: only the other foot can hold the CoP
+      p = {std::clamp(est.x, swing_stance_.x - hx, swing_stance_.x + hx), std::clamp(est.y, swing_stance_.y - fw, swing_stance_.y + fw)};
+    } else {
+      p = {std::clamp(est.x, lo.x, hi.x), std::clamp(est.y, lo.y, hi.y)};
+    }
+    if (lat_) {
+      const std::size_t j = tick_ % lat_;
+      cop_sum_ = cop_sum_ * e_dt_ + p * (e_dt_ - 1.0) - cop_ring_[j] * (e_n_ * (e_dt_ - 1.0));
+      cop_ring_[j] = p;
+    }
+    ++tick_;
     const double dn = (x_ - p).norm();
     if (dn > c_.friction * z_) return finish(false, "slipped");
-    const bool inside = seen.x >= lo.x - 1e-9 && seen.x <= hi.x + 1e-9 && seen.y >= lo.y - 1e-9 && seen.y <= hi.y + 1e-9;
+    const bool inside = est.x >= lo.x - 1e-9 && est.x <= hi.x + 1e-9 && est.y >= lo.y - 1e-9 && est.y <= hi.y + 1e-9;
     if (!planned_ && !inside) {
       if (steps_ >= r_.max_steps) return finish(false, "needed more than max steps");
+      Vec2 q = p;  // CoP during the coming swing
+      if (dbl_) {
+        const double side = est.y - stance_.y > 1e-9 ? 1.0 : est.y - stance_.y < -1e-9 ? -1.0 : 1.0;
+        swing_stance_ = {stance_.x, stance_.y - side * r_.stance_half_width};
+        q = {std::clamp(est.x, swing_stance_.x - hx, swing_stance_.x + hx), std::clamp(est.y, swing_stance_.y - fw, swing_stance_.y + fw)};
+      }
       const double e = std::exp(w_ * swing_);
-      Vec2 d = p + (seen - p) * e - stance_;
+      Vec2 d = q + (est - q) * e - stance_;
       const double reach = d.norm();
       if (reach > r_.max_step) d = d * (r_.max_step / reach);
       d.y = std::clamp(d.y, -r_.max_lateral_step, r_.max_lateral_step);
@@ -118,8 +145,8 @@ class CapturePointController {
     x_ = x_ + v_ * kDt;
     t_ += kDt;
     const Vec2 nxi = capture_point();
-    if (!planned_ && v_.norm() < 0.02 && std::abs(nxi.x - stance_.x) <= r_.foot_half_length + 1e-9 &&
-        std::abs(nxi.y - stance_.y) <= r_.foot_half_width + 1e-9 && t_ > 0.3)
+    const double rw = dbl_ ? r_.stance_half_width + r_.foot_half_width : r_.foot_half_width;
+    if (!planned_ && v_.norm() < 0.02 && std::abs(nxi.x - stance_.x) <= hx_ && std::abs(nxi.y - stance_.y) <= rw && t_ > 0.3)
       return finish(true, "came to rest");
     if ((nxi - stance_).norm() > r_.max_step * 3) return finish(false, "capture point ran away");
   }
@@ -129,9 +156,8 @@ class CapturePointController {
     while (!done_ && t_ < horizon_s) step();
     if (!done_) {
       const double hw = dbl_ ? r_.stance_half_width + r_.foot_half_width : r_.foot_half_width;
-      const double hx = std::min(r_.foot_half_length, cop_reach_);
       const Vec2 xi = capture_point();
-      const bool ok = std::abs(xi.x - stance_.x) <= hx && std::abs(xi.y - stance_.y) <= hw;
+      const bool ok = std::abs(xi.x - stance_.x) <= hx_ && std::abs(xi.y - stance_.y) <= hw;
       finish(ok, ok ? "came to rest" : "still moving");
     }
     return result_;
@@ -146,11 +172,13 @@ class CapturePointController {
   Humanoid r_;
   Conditions c_;
   double z_ = 0, w_ = 1, swing_ = 0, slope_acc_ = 0, bias_x_ = 0, cop_reach_ = 0, t_ = 0, swing_until_ = -1;
-  Vec2 x_, v_, stance_, target_, pre_push_;
+  double hx_ = 0, e_dt_ = 1, e_n_ = 1;
+  Vec2 x_, v_, stance_, target_, pre_push_, swing_stance_, cop_sum_;
   bool dbl_ = true, planned_ = false, done_ = false;
   int steps_ = 0;
-  std::size_t lat_ = 0, head_ = 0, count_ = 0;
-  std::vector<Vec2> ring_;  // sized once in the constructor; never grows in step()
+  std::size_t lat_ = 0, head_ = 0, count_ = 0, tick_ = 0;
+  std::vector<Vec2> ring_;      // measured capture points; sized once in the constructor, never grows in step()
+  std::vector<Vec2> cop_ring_;  // commanded CoP over the last `lat_` ticks; same rule
   Result result_;
 };
 

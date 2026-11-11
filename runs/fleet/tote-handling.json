@@ -1,6 +1,6 @@
 {
  "profile": {
-  "name": "demo: tote handling",
+  "name": "tote-handling",
   "description": "Fitted from 300 logged shifts.",
   "payload": [
    5.6775,
@@ -35,15 +35,19 @@
  },
  "odds": {
   "biped": {
-   "job": "__fleet__demo: tote handling",
+   "job": "__fleet__tote-handling",
    "trials": 150,
-   "failures": 0,
-   "failure_rate": 0.0,
-   "failure_rate_upper_95": 0.0198,
-   "causes": {}
+   "failures": 7,
+   "failure_rate": 0.04666666666666667,
+   "failure_rate_upper_95": 0.0839,
+   "causes": {
+    "needed more than 3 steps": 3,
+    "slipped": 2,
+    "capture point ran away beyond leg reach": 2
+   }
   },
   "wheeled": {
-   "job": "__fleet__demo: tote handling",
+   "job": "__fleet__tote-handling",
    "trials": 150,
    "failures": 0,
    "failure_rate": 0.0,

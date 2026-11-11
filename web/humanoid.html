@@ -37,8 +37,8 @@
         <label><input type="radio" name="body" value="biped" checked> Walking biped</label>
         <label><input type="radio" name="body" value="wheeled"> Wheeled base</label>
       </fieldset>
-      <div class="slider"><label for="imp">Shove <output id="imp-out">60 N·s</output></label>
-        <input id="imp" name="imp" type="range" min="0" max="200" step="1" value="60" autocomplete="off"></div>
+      <div class="slider"><label for="imp">Shove <output id="imp-out">40 N·s</output></label>
+        <input id="imp" name="imp" type="range" min="0" max="200" step="1" value="40" autocomplete="off"></div>
       <div class="slider"><label for="payload">Tote held in front <output id="payload-out">0 kg</output></label>
         <input id="payload" name="payload" type="range" min="0" max="25" step="1" value="0" autocomplete="off"></div>
       <div class="slider"><label for="friction">Floor friction <output id="friction-out">μ 0.80</output></label>
@@ -100,7 +100,8 @@
     <h2 id="how-h">How it decides where to step</h2>
     <div class="how-cols">
       <p>The centre of mass moves like an inverted pendulum over the centre of pressure p: <code>x″ = ω²(x − p)</code>, with <code>ω = √(g / z₀)</code>. Its capture point <code>ξ = x + ẋ/ω</code> is where the robot must put its centre of pressure to come to rest, and it runs away from p: <code>ξ′ = ω(ξ − p)</code>.</p>
-      <p>Ankles first: the centre of pressure goes to the point of the foot nearest ξ, capped by ankle torque and by friction (<code>|x − p| ≤ μz</code>). If the capture point, as seen through the control latency, leaves the foot, the robot steps where ξ will be at touchdown, capped by leg reach, lateral reach and swing time. More than 3 steps, or a slip, is a fall.</p>
+      <p>Ankles first: the centre of pressure goes to the point of the support nearest ξ, capped by ankle torque and by friction (<code>|x − p| ≤ μz</code>). If ξ leaves the support, the robot steps where ξ will be at touchdown, capped by leg reach, lateral reach and swing time; while one foot swings, only the other carries weight, which is why side shoves are hardest. More than 3 steps, or a slip, is a fall.</p>
+      <p>Latency: the controller measures ξ late, but it knows the centre of pressure it has commanded since, so it rolls the measurement forward (a Smith predictor). What lag costs is the time a shove goes unseen, about a factor <code>e^(−ωL)</code> on the largest survivable shove.</p>
       <p>The wheeled base has a big footprint and no steps: it drives under the capture point with bounded acceleration and speed, and traction falls with friction. It tips over if ξ escapes faster than it can follow, and is blocked by anything taller than a threshold.</p>
     </div>
   </section>

@@ -11,14 +11,14 @@
  },
  "envelope": {
   "biped": {
-   "front": 92.72,
-   "front-left": 103.81,
-   "left": 76.9,
-   "rear-left": 103.81,
-   "rear": 92.72,
-   "rear-right": 103.81,
-   "right": 76.9,
-   "front-right": 103.81
+   "front": 92.38,
+   "front-left": 62.7,
+   "left": 44.34,
+   "rear-left": 62.7,
+   "rear": 92.38,
+   "rear-right": 62.7,
+   "right": 44.34,
+   "front-right": 62.7
   },
   "wheeled": {
    "front": 137.01,
@@ -36,10 +36,14 @@
    "biped": {
     "job": "line-side kitting",
     "trials": 150,
-    "failures": 0,
-    "failure_rate": 0.0,
-    "failure_rate_upper_95": 0.0198,
-    "causes": {}
+    "failures": 7,
+    "failure_rate": 0.04666666666666667,
+    "failure_rate_upper_95": 0.0839,
+    "causes": {
+     "slipped": 3,
+     "capture point ran away beyond leg reach": 2,
+     "needed more than 3 steps": 2
+    }
    },
    "wheeled": {
     "job": "line-side kitting",
@@ -54,11 +58,13 @@
    "biped": {
     "job": "tote handling",
     "trials": 150,
-    "failures": 1,
-    "failure_rate": 0.006666666666666667,
-    "failure_rate_upper_95": 0.0293,
+    "failures": 8,
+    "failure_rate": 0.05333333333333334,
+    "failure_rate_upper_95": 0.0922,
     "causes": {
-     "slipped": 1
+     "needed more than 3 steps": 1,
+     "slipped": 2,
+     "capture point ran away beyond leg reach": 5
     }
    },
    "wheeled": {
@@ -74,12 +80,13 @@
    "biped": {
     "job": "trailer unloading",
     "trials": 150,
-    "failures": 12,
-    "failure_rate": 0.08,
-    "failure_rate_upper_95": 0.1243,
+    "failures": 20,
+    "failure_rate": 0.13333333333333333,
+    "failure_rate_upper_95": 0.1855,
     "causes": {
-     "slipped": 11,
-     "needed more than 3 steps": 1
+     "slipped": 16,
+     "needed more than 3 steps": 2,
+     "capture point ran away beyond leg reach": 2
     }
    },
    "wheeled": {
@@ -117,12 +124,13 @@
    "biped": {
     "job": "teleoperated data collection",
     "trials": 150,
-    "failures": 3,
-    "failure_rate": 0.02,
-    "failure_rate_upper_95": 0.049,
+    "failures": 16,
+    "failure_rate": 0.10666666666666667,
+    "failure_rate_upper_95": 0.1553,
     "causes": {
-     "slipped": 1,
-     "needed more than 3 steps": 2
+     "capture point ran away beyond leg reach": 6,
+     "slipped": 6,
+     "needed more than 3 steps": 4
     }
    },
    "wheeled": {

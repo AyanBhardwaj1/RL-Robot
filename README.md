@@ -29,21 +29,25 @@ and the browser lab at `/humanoid`):
   - friction (`|x − p| ≤ μz`),
   - swing time, which grows with payload,
   - leg reach and lateral reach,
-  - sensing latency.
+  - the stance leg: while one foot swings, only the other foot carries weight,
+  - sensing latency, compensated by a Smith predictor (the last measurement rolled forward with the
+    centre of pressure the controller has commanded since), so latency costs exactly the time a shove
+    goes unseen.
 
   It compensates for slopes by leaning. A tote held in front shifts and raises the combined centre of mass.
 - **Biped versus wheeled base.** The wheeled model has a statically stable footprint and drives under its
-  capture point. It survives about 1.6× bigger shoves (146 vs 93 N·s from the front), but it cannot climb
-  anything taller than a 2.5 cm threshold.
+  capture point. It survives about 1.5× bigger shoves from the front (137 vs 92 N·s) and 2.7× from the side
+  (120 vs 44 N·s), but it cannot climb anything taller than a 2.5 cm threshold. Side shoves are the biped's
+  weak spot: the leg that must step cannot cross the leg that carries the weight.
 - **Odds by job** (150 sampled shifts each):
 
   | Job | Biped | Wheeled |
   |---|---|---|
-  | Line-side kitting | 0% | 0% |
-  | Tote handling | 0.7% | 0% |
-  | Trailer unloading | 8.0% (slips) | 16.0% (blocked) |
+  | Line-side kitting | 4.7% (hard side shoves) | 0% |
+  | Tote handling | 5.3% (hard side shoves) | 0% |
+  | Trailer unloading | 13.3% (mostly slips) | 16.0% (blocked) |
   | Home care | 0% | 47% |
-  | Teleoperated data collection | 2.0% | 0% |
+  | Teleoperated data collection | 10.7% (shoves under lag) | 0% |
 
 - **Browser parity.** The browser version is a line-for-line JavaScript port, and `tests/test_humanoid_js.py`
   runs it under Node to check it against Python.
@@ -53,6 +57,11 @@ and the browser lab at `/humanoid`):
   big shoves instantly. A real controller sees the robot still standing for those first milliseconds. After
   the fix, the region shrinks steadily outward again, and the job odds became less flattering to the biped
   (trailer unloading 0% → 8%). Bisection had missed the bug because it only finds the inner boundary.
+- **What an independent review caught.** A second review of the humanoid code found that the swinging foot
+  could still hold weight (side shoves looked about 2× easier than they are), that the ankles reacted to
+  shoves with no latency at all, and that Python rounded latency differently from the JavaScript and C++
+  ports. All three ports were fixed together, each finding has a regression test, and the ports now agree
+  on time-to-rest as well as outcome. The job odds above are the honest, less flattering result.
 
 ![capturability map](docs/capturability.png)
 

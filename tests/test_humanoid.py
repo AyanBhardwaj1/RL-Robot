@@ -1,3 +1,4 @@
+import itertools
 import math
 
 import pytest
@@ -131,3 +132,58 @@ def test_fleet_fit_recovers_profile_and_ignores_glitches(tmp_path):
         read_log(bad)
     with pytest.raises(ValueError):
         synthetic_log("moon")
+
+
+def test_swing_foot_carries_no_weight_so_side_pushes_are_harder():
+    """Regression: during the first swing the CoP must stay on the loaded foot (review finding, high)."""
+    from breakpoint.humanoid import envelope
+
+    env = envelope()
+    assert env["left"] == env["right"] and env["front"] == env["rear"]
+    assert env["left"] < 0.6 * env["front"]  # the stepping leg cannot cross the stance leg
+    assert env["front-left"] < env["front"]
+
+
+def test_latency_costs_ankle_and_stepping_smoothly():
+    """Regression: the ankles also act on delayed information, and the cost falls smoothly with latency."""
+    from breakpoint.humanoid import breaking_point
+
+    def ankle_only(lat):
+        lo, hi = 0.0, 60.0
+        for _ in range(12):
+            mid = 0.5 * (lo + hi)
+            r = recover(mid, 180.0, cond=Conditions(latency_s=lat))
+            lo, hi = (mid, hi) if (r.recovered and r.steps == 0) else (lo, mid)
+        return lo
+
+    a0, a1, a2 = ankle_only(0.0), ankle_only(0.1), ankle_only(0.25)
+    assert a0 > a1 > a2 > 0
+    front = [breaking_point(180.0, cond=Conditions(latency_s=lat)) for lat in (0.0, 0.05, 0.1, 0.15, 0.25)]
+    assert all(a > b for a, b in itertools.pairwise(front))
+    w = math.sqrt(9.81 / 0.95)
+    assert front[-1] / front[0] == pytest.approx(math.exp(-w * 0.25), abs=0.05)  # unseen for L seconds
+
+
+def test_zero_step_limit_matches_simulation_with_torque_and_slope():
+    """Regression: the analytic ankle-only limit uses the same torque-capped foot and slope lean as the sim."""
+    from breakpoint.humanoid import zero_step_limit
+
+    for cond in (Conditions(), Conditions(actuator_strength=0.5, payload_kg=20.0), Conditions(floor_slope_deg=3.0)):
+        lo, hi = 0.0, 80.0
+        for _ in range(16):
+            mid = 0.5 * (lo + hi)
+            r = recover(mid, 180.0, cond=cond)
+            lo, hi = (mid, hi) if (r.recovered and r.steps == 0) else (lo, mid)
+        assert zero_step_limit(180.0, cond=cond) == pytest.approx(lo, rel=0.01), cond
+
+
+def test_ankle_only_side_push_settles_quickly():
+    """Regression: the rest check uses the double-support box, not one foot centred between the feet."""
+    r = recover(30.0, -90.0)
+    assert r.recovered and r.steps == 0 and r.time_s < 1.5
+
+
+def test_latency_ticks_round_half_up_like_js_and_cpp():
+    from breakpoint.humanoid import _ticks
+
+    assert _ticks(0.005) == 3 and _ticks(0.025) == 13 and _ticks(0.0) == 0 and _ticks(-0.1) == 0

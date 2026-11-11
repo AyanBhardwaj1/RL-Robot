@@ -53,8 +53,8 @@ int main(int argc, char** argv) {
     auto next = clock::now() + period;
     const auto end = clock::now() + std::chrono::duration_cast<clock::duration>(std::chrono::duration<double>(seconds));
     while (clock::now() < end) {
+      if (ctl.done()) ctl = CapturePointController(60.0, -90.0);  // restart the push scenario (allocates; not timed)
       const auto t0 = clock::now();
-      if (ctl.done()) ctl = CapturePointController(60.0, -90.0);  // restart the push scenario
       ctl.step();
       step_us.push_back(std::chrono::duration<double, std::micro>(clock::now() - t0).count());
       std::this_thread::sleep_until(next);

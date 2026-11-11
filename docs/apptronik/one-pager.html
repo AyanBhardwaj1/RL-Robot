@@ -46,7 +46,7 @@
   <div class="figs">
     <div class="fig"><b>84.1</b><span>readiness of the best quadruped policy, up from 66.8 for its bare gait</span></div>
     <div class="fig"><b>0 / 60</b><span>teleop worlds it fell in after a latency gate (10% before)</span></div>
-    <div class="fig"><b>93 vs 146</b><span>N·s shove survived: walking biped vs wheeled base</span></div>
+    <div class="fig"><b>44 vs 120</b><span>N·s side shove survived: walking biped vs wheeled base</span></div>
     <div class="fig"><b>3.6×</b><span>smaller INT8 policy with no measured robustness loss</span></div>
   </div>
 
@@ -67,8 +67,8 @@
         <li>A policy that walked in noisy training stood still when run for real, and scored below the gait it was built on.</li>
         <li>A second hardening round overfit; a fresh audit caught it.</li>
         <li>Training could not remove latency failures; gating the learned residual on measured link latency did.</li>
-        <li>Legs vs wheels: the wheeled base survives about 1.6× bigger shoves but fails 47% of home-care routes (stairs); the biped fails 0% there, but 8% of trailer shifts (slips).</li>
-        <li>A capturability map exposed a latency-model bug that bisection could not see; the fix made the biped’s job odds worse and more honest.</li>
+        <li>Legs vs wheels: the wheeled base survives 1.5× bigger shoves from the front and 2.7× from the side, but fails 47% of home-care routes (stairs); the biped fails 0% there, but 13% of trailer shifts (mostly slips).</li>
+        <li>A capturability map and an independent review exposed three modelling errors (a non-causal latency model, a swing foot that still held weight, ankles that ignored lag); each fix made the biped’s odds worse and more honest.</li>
         <li>The C++ controller step costs about 1 µs; stock-kernel wake-up jitter reaches 4.9 ms, which is the case for PREEMPT_RT.</li>
       </ul>
     </section>
@@ -78,7 +78,7 @@
   <table>
     <thead><tr><th>Team</th><th>Evidence in the repo</th></tr></thead>
     <tbody>
-      <tr><td>Controls</td><td>LIP + capture-point stepping with ankle, friction, reach, swing and latency limits (<code>humanoid.py</code>, <code>cpp/capture_point.hpp</code>)</td></tr>
+      <tr><td>Controls</td><td>LIP + capture-point stepping with ankle, friction, reach, swing and stance-leg limits, Smith-predictor latency compensation (<code>humanoid.py</code>, <code>cpp/capture_point.hpp</code>)</td></tr>
       <tr><td>Simulation</td><td>Procedural MJCF quadruped and terrain, validated scenario schema, physical convention tests</td></tr>
       <tr><td>Robot learning</td><td>numpy PPO with finite-difference-checked backprop, failure replay, deterministic checkpoint selection</td></tr>
       <tr><td>ML systems</td><td>FP16 and per-channel INT8 compression judged by breaking points, not only action error</td></tr>

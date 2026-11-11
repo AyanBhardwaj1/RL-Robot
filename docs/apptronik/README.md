@@ -94,12 +94,14 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
    number here comes from the linear inverted pendulum and capture-point theory, with a real robot’s
    limits.”
 2. **The product question (60 s).**
-   - Switch to the wheeled base. It survives about 1.6× bigger shoves.
+   - Shove from the side: the biped holds only 44 N·s, half its front limit, because the stepping leg
+     cannot cross the loaded one. Switch to the wheeled base: 120 N·s from the side, 137 from the front.
    - Raise the curb slider to 10 cm and it is blocked.
    - Scroll to “Legs or wheels, by job”. Home care: wheeled fails 47%, biped 0%. Trailer
-     unloading: wheeled fails 16% (blocked), biped 8% (slips).
+     unloading: wheeled fails 16% (blocked), biped 13% (mostly slips).
    - Show the capturability map, then drag latency to 150 ms. Say: “This map caught a bug in my own
-     latency model that bisection missed.”
+     latency model that bisection missed, and an independent review caught two more. Each fix made the
+     biped look worse and the numbers more honest.”
    - Say: “This is the biped-versus-wheeled trade-off you shipped in Apollo 2, made measurable.”
 3. **Readiness, honestly (90 s).** Open the quadruped report.
    - The first trained policy looked fine in training but scored below the gait it was built on.
@@ -140,6 +142,6 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
 > an open-source robustness lab for legged-robot policies. It finds the exact shove, slope, load and lag
 > where a policy fails, hardens the policy, and gives deployment odds with confidence bounds. For Apollo’s world I
 > added a humanoid push-recovery lab using capture-point stepping, which compares a walking biped with a
-> wheeled base by job: legs win home-care routes 0% to 47%, wheels survive 1.6× bigger shoves.
+> wheeled base by job: legs win home-care routes 0% to 47%, wheels survive 2.7× bigger side shoves.
 > I also measured that an INT8 policy is 3.6× smaller with no robustness loss. Demo: [link]. Code:
 > https://github.com/AyanBhardwaj1/RL-Robot. I’d love to bring this to [team]; happy to walk through it in five minutes.

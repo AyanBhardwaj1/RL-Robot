@@ -102,8 +102,9 @@ def _clamp_to_foot(p: np.ndarray, foot: np.ndarray, robot: Humanoid) -> np.ndarr
                      np.clip(p[1], foot[1] - robot.foot_half_width, foot[1] + robot.foot_half_width)])
 
 
-def _inside_foot(pt: np.ndarray, foot: np.ndarray, robot: Humanoid, tol: float = 1e-9) -> bool:
-    return (abs(pt[0] - foot[0]) <= robot.foot_half_length + tol and abs(pt[1] - foot[1]) <= robot.foot_half_width + tol)
+def _ticks(latency_s: float) -> int:
+    """Latency in control ticks, rounding halves up (as Math.round and std::lround do), never negative."""
+    return max(0, math.floor(latency_s / DT + 0.5))
 
 
 def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), cond: Conditions = Conditions(),
@@ -111,10 +112,12 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
     """Simulate a CoM impulse (N·s) and the capture-point stepping controller.
 
     The robot starts in double support; the push lands on the CoM. The controller:
-      1. uses ankle torque: CoP goes to the point of the support foot nearest the capture point,
-         limited by friction (|x - p| <= mu * z);
-      2. if the (latency-delayed) capture point leaves the foot, it steps: after the swing time
-         it places the new foot at the predicted capture point, limited by leg reach;
+      1. uses ankle torque: CoP goes to the point of the support nearest the capture point *as the
+         controller sees it* (delayed by the control latency), limited by friction (|x - p| <= mu * z);
+      2. if that delayed capture point leaves the support, it steps. While the swing foot is in the
+         air only the stance foot carries weight. After the swing time it places the new foot where
+         the capture point will be at touchdown (projected over swing time plus latency), limited by
+         leg reach and lateral reach;
       3. it falls if the CoM leaves friction limits, the capture point outruns the reach, or
          it needs more than `max_steps` steps.
     """
@@ -127,7 +130,8 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
     # A constant downhill pull is cancelled by leaning: the controller works with the capture point
     # shifted by the equilibrium CoP offset a/w^2 (the robot leans into the slope).
     bias = np.array([slope_acc / (w * w), 0.0])
-    # Ankle torque bounds the CoP offset from the ankle: |p - ankle| <= tau / (m g) (per foot; doubled in double support)
+    # Ankle torque bounds the CoP offset from the ankle: |p - ankle| <= tau / (m g). Conservatively the same
+    # bound is used in double support (two ankles could share the load).
     cop_reach = robot.ankle_torque * max(cond.actuator_strength, 0.05) / (m * G)
     # Double support: treat the support as one wide foot centred under the body.
     stance = np.array([0.0, 0.0])
@@ -140,7 +144,7 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
     double_support = True
     swing_until = -1.0
     planned = None
-    latency_steps = round(cond.latency_s / DT)
+    latency_steps = _ticks(cond.latency_s)
     history: list[np.ndarray] = []
     rec = Recovery(False, 0, "", 0.0)
     max_offset = cond.friction * z  # friction cone: horizontal force <= mu * m * g
@@ -149,27 +153,58 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
         hx = min(robot.foot_half_length, cop_reach)
         return (center - np.array([hx, half_w]), center + np.array([hx, half_w]))
 
+    # Latency compensation (a Smith predictor): the controller measures the capture point `latency` late,
+    # but knows the CoP it has commanded since, so it rolls the measurement forward with the exact
+    # discrete LIP map xi' = p + (xi - p) e^(w dt). With S the running sum of the CoP terms over the last
+    # `latency` ticks, the estimate of now is E^n * seen - S, updated in O(1) per tick. What latency costs
+    # is then exactly what it should: the shove goes unseen for `latency` seconds.
+    e_dt = math.exp(w * DT)
+    e_n = e_dt ** latency_steps
+    p0 = np.clip(pre_push, *foot_box(stance, support_half_w))  # CoP while standing before the shove
+    cop_ring = [p0.copy() for _ in range(latency_steps)]
+    cop_sum = (e_n - 1.0) * p0
+    tick = 0
+    swing_stance = stance.copy()  # the loaded foot during the first swing (set when the step is planned)
+
     while t < horizon_s:
         xi = x + v / w + bias
         history.append(xi.copy())
         # Until the delay has elapsed the controller still sees the robot standing still (pre-push state).
         seen = history[-1 - latency_steps] if len(history) > latency_steps else pre_push
+        est = e_n * seen - cop_sum if latency_steps else seen
         half_w = support_half_w if double_support else robot.foot_half_width
         lo, hi = foot_box(stance, half_w)
-        p = np.clip(xi, lo, hi)
+        if planned is not None and double_support:
+            # first swing: the stepping foot is in the air, so only the other foot can hold the CoP
+            p = np.clip(est, *foot_box(swing_stance, robot.foot_half_width))
+        else:
+            p = np.clip(est, lo, hi)
+        if latency_steps:
+            j = tick % latency_steps
+            cop_sum = e_dt * cop_sum + (e_dt - 1.0) * p - e_n * (e_dt - 1.0) * cop_ring[j]
+            cop_ring[j] = p.copy()
+        tick += 1
         # friction: the CoP may not sit further than mu*z from the CoM horizontally
         d = x - p
         dn = float(np.linalg.norm(d))
         if dn > max_offset:
             rec.reason = f"slipped: needed friction {dn / z:.2f} > {cond.friction:.2f}"
             break
-        inside = bool(np.all(seen >= lo - 1e-9) and np.all(seen <= hi + 1e-9))
+        inside = bool(np.all(est >= lo - 1e-9) and np.all(est <= hi + 1e-9))
         if planned is None and not inside:
             if steps >= robot.max_steps:
                 rec.reason = f"needed more than {robot.max_steps} steps"
                 break
-            # predict the capture point at touchdown from what the controller sees
-            pred = p + (seen - p) * math.exp(w * swing)
+            # From double support the leg on the side of the step swings and the other one (the swing leg
+            # cannot cross it) carries the weight, so that foot sets the CoP during the swing.
+            if double_support:
+                side = 1.0 if est[1] - stance[1] > 1e-9 else -1.0 if est[1] - stance[1] < -1e-9 else 1.0
+                swing_stance = np.array([stance[0], stance[1] - side * robot.stance_half_width])
+                p_swing = np.clip(est, *foot_box(swing_stance, robot.foot_half_width))
+            else:
+                p_swing = p
+            # step where the (estimated) capture point will be at touchdown, given the CoP during the swing
+            pred = p_swing + (est - p_swing) * math.exp(w * swing)
             step_vec = pred - stance
             reach = float(np.linalg.norm(step_vec))
             if reach > robot.max_step:
@@ -194,7 +229,8 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
             rec.capture.append((round(t, 3), round(float(xi[0]), 4), round(float(xi[1]), 4)))
         speed = float(np.linalg.norm(v))
         xi_now = x + v / w + bias
-        if planned is None and speed < 0.02 and _inside_foot(xi_now, stance, robot) and t > 0.3:
+        rest_lo, rest_hi = foot_box(stance, support_half_w if double_support else robot.foot_half_width)
+        if planned is None and speed < 0.02 and bool(np.all(xi_now >= rest_lo) and np.all(xi_now <= rest_hi)) and t > 0.3:
             rec.recovered, rec.reason = True, "came to rest"
             break
         if float(np.linalg.norm(xi_now - stance)) > robot.max_step * 3:
@@ -250,7 +286,7 @@ def recover_wheeled(impulse: float, direction_deg: float, base: WheeledBase = Wh
     ang = math.radians(direction_deg)
     v = (impulse / m) * np.array([math.cos(ang), math.sin(ang)])
     half = np.array([base.half_length, base.half_width])
-    delay = round((cond.latency_s + base.reaction_s) / DT)
+    delay = _ticks(cond.latency_s + base.reaction_s)
     history: list[np.ndarray] = []
     rec = Recovery(False, 0, "", 0.0)
     t = 0.0
@@ -322,15 +358,23 @@ def envelope(robot: Humanoid | WheeledBase = Humanoid(), cond: Conditions = Cond
 
 
 def zero_step_limit(direction_deg: float, robot: Humanoid = Humanoid(), cond: Conditions = Conditions()) -> float:
-    """Analytic ankle-only limit: the impulse that puts the capture point on the support edge."""
+    """Analytic ankle-only limit at zero latency: the impulse that puts the capture point on the support edge.
+
+    Uses the same support as the simulation: the foot length capped by ankle torque, and the capture
+    point's standing position shifted by the slope lean.
+    """
     z, offset, m = effective(robot, cond)
     w = math.sqrt(G / z)
     ang = math.radians(direction_deg)
     c, s = math.cos(ang), math.sin(ang)
-    half_x = robot.foot_half_length
+    cop_reach = robot.ankle_torque * max(cond.actuator_strength, 0.05) / (m * G)
+    half_x = min(robot.foot_half_length, cop_reach)
     half_y = robot.stance_half_width + robot.foot_half_width
-    # distance from the CoM start (offset, 0) to the support edge along the push direction
-    tx = ((half_x - offset) / c) if c > 1e-9 else ((-half_x - offset) / c if c < -1e-9 else math.inf)
+    x0 = offset + G * math.sin(math.radians(cond.floor_slope_deg)) / (w * w)  # standing capture point
+    if abs(x0) > half_x:
+        return 0.0
+    # distance from the standing capture point to the support edge along the push direction
+    tx = ((half_x - x0) / c) if c > 1e-9 else ((-half_x - x0) / c if c < -1e-9 else math.inf)
     ty = (half_y / abs(s)) if abs(s) > 1e-9 else math.inf
     reach = max(0.0, min(tx, ty))
     return m * w * reach
