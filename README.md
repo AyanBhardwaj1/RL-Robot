@@ -311,6 +311,10 @@ a unit-test suite.
   it does.
 - Static search cannot prove the absence of failures. The report always states the search budget.
 - The image heuristic is a cheap, explainable prior, not 3D reconstruction. A vision LLM improves it.
+- The humanoid lab is a reduced model (a linear inverted pendulum with a constant CoM height, no angular
+  momentum, no swing-leg dynamics). It compares designs; it does not replace whole-body simulation.
+  The biped compensates latency with a Smith predictor; the wheeled base acts on the raw delayed
+  measurement, which is conservative for the wheels. Its tip-over threshold is a heuristic.
 
 See `reports/Legged robot robustness platform.md` for the research behind these design choices
 (the notes it draws on are in `research_notes/`). `scripts/reproduce.sh` re-runs every committed
