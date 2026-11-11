@@ -172,7 +172,10 @@ def cmd_harden(a: argparse.Namespace) -> int:
             best["score"] = row["det_score"]
             policy.save(hardened)
 
-    train(pol, ScenarioSampler(failures=failures, seed=a.seed + 1), PPOConfig(total_steps=a.steps, lr=2e-4),
+    profiles = [PROFILES[n] for n in (a.profile.split(",") if a.profile else [])]
+    sampler = ScenarioSampler(failures=failures, seed=a.seed + 1, profiles=profiles,
+                              widen_frac=0.35 if profiles else 0.2)
+    train(pol, sampler, PPOConfig(total_steps=a.steps, lr=2e-4),
           seed=a.seed + 1, log=_log, checkpoint=keep_best)
     print(f"[harden] deterministic score {start:.3f} -> best {best['score']:.3f}", flush=True)
     after = audit(str(hardened), "after", a.hunt_gens, a.workers)
@@ -271,6 +274,7 @@ def main(argv: list[str] | None = None) -> int:
             s.add_argument("--baseline", action="store_true", help="also audit the bare CPG gait")
         else:
             s.add_argument("--steps", type=int, default=120_000)
+            s.add_argument("--profile", help="comma-separated deployment profiles to train toward, e.g. sidewalk,construction")
         s.set_defaults(fn=fn)
 
     g = sub.add_parser("regress", help="run a saved failure suite (CI gate)")

@@ -402,3 +402,12 @@ def test_deployment_check_reports_rate_and_bound():
     assert r["failure_rate_upper_95"] >= r["failure_rate"]
     with pytest.raises(ValueError):
         deployment_check(None, "moon", trials=1)
+
+
+def test_sampler_draws_from_deployment_profiles():
+    from breakpoint.ppo import ScenarioSampler
+    from breakpoint.profiles import PROFILES
+
+    s = ScenarioSampler(seed=0, profiles=[PROFILES["construction"]], widen_frac=1.0)
+    worlds = [s.sample(6.0) for _ in range(20)]
+    assert all(w.name == "construction sample" for w in worlds)

@@ -43,9 +43,10 @@ class ScenarioSampler:
     """Draws training worlds: randomised nominal worlds plus replayed failures."""
 
     def __init__(self, base: Scenario | None = None, failures: list[Scenario] | None = None,
-                 replay_frac: float = 0.3, widen_frac: float = 0.2, seed: int = 0):
+                 replay_frac: float = 0.3, widen_frac: float = 0.2, seed: int = 0, profiles: list | None = None):
         self.base = base or Scenario()
         self.failures = list(failures or [])
+        self.profiles = list(profiles or [])  # deployment profiles: replace the "widened" share
         self.replay_frac = replay_frac if self.failures else 0.0
         self.widen_frac = widen_frac
         self.rng = np.random.default_rng(seed)
@@ -72,7 +73,11 @@ class ScenarioSampler:
         if u < self.replay_frac:
             scn = self.failures[int(self.rng.integers(len(self.failures)))]
         elif u < self.replay_frac + self.widen_frac:
-            scn = self._randomised(widen=1.0)
+            if self.profiles:
+                prof = self.profiles[int(self.rng.integers(len(self.profiles)))]
+                scn = prof.sample(self.rng, episode_s)
+            else:
+                scn = self._randomised(widen=1.0)
         else:
             scn = self._randomised(widen=0.0)
         return scn.with_(duration_s=episode_s)
