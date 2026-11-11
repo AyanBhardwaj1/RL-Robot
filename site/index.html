@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Breakpoint: find where your walking robot breaks</title>
+<meta name="description" content="Breakpoint is a CPU-only robustness lab for learned legged-robot policies. It finds the exact shove, slope, load and lag where a policy breaks, hardens it, and tells you the odds before you ship.">
+<meta name="theme-color" content="#17161b">
+<meta property="og:title" content="Breakpoint: find where your walking robot breaks">
+<meta property="og:description" content="Shove a simulated quadruped in your browser, then read its readiness certificate: 17 measured breaking points, failure odds by place, and the fixes that worked.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="preload" href="/assets/data/hero.json" as="fetch" crossorigin>
+</head>
+<body class="landing">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar" data-field="dark">
+  <a class="topbar-link left" href="https://github.com/AyanBhardwaj1/RL-Robot" rel="noopener">Source</a>
+  <a class="wordmark" href="/" translate="no">Breakpoint</a>
+  <a class="topbar-link right" href="/app">Open the lab</a>
+</header>
+
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-words">
+    <h1 id="hero-title" translate="no">Breakpoint</h1>
+    <p class="hero-lead">Find the shove, slope, load and lag where your walking robot’s policy breaks: on a laptop, before the real world finds it.</p>
+  </div>
+
+  <nav class="folders" aria-label="Sections">
+    <a class="folder f1" href="#certificate"><span class="tab">Breaking points</span></a>
+    <a class="folder f2" href="#how"><span class="tab">How it hunts</span></a>
+    <a class="folder f3" href="#odds"><span class="tab">Odds by place</span></a>
+    <a class="folder f4" href="#caught"><span class="tab">What it caught</span></a>
+  </nav>
+
+  <div class="front-folder" id="shove">
+    <span class="tab front-tab" aria-hidden="true"></span>
+    <svg class="envelope" viewBox="-100 -100 200 200" aria-hidden="true" focusable="false"><polygon id="envelope-shape" points=""/></svg>
+    <div class="front-inner">
+      <div class="shove-panel">
+        <h2 class="shove-title">Push it until it falls</h2>
+        <p class="shove-copy">This is the best policy Breakpoint produced, running in MuJoCo. Pick a side and a strength, then shove it 1.2 seconds into its stride.</p>
+        <form class="shove-form" id="shove-form" novalidate>
+          <fieldset class="dir-pick">
+            <legend>Shove from</legend>
+            <label><input type="radio" name="dir" value="left" checked> Left</label>
+            <label><input type="radio" name="dir" value="right"> Right</label>
+            <label><input type="radio" name="dir" value="front"> Front</label>
+            <label><input type="radio" name="dir" value="rear"> Rear</label>
+          </fieldset>
+          <label class="impulse" for="impulse">Strength <output id="impulse-out" for="impulse">8 N·s</output></label>
+          <input id="impulse" name="impulse" type="range" min="2" max="16" step="1" value="8" autocomplete="off">
+          <button class="btn btn-dark" type="submit" id="shove-btn">Shove the robot</button>
+        </form>
+        <p class="shove-result" id="shove-result" aria-live="polite">It walks at 0.4 m/s. Its measured limit from the left is 5.6 N·s.</p>
+      </div>
+      <figure class="robot-stage" data-ui>
+        <div class="robot-canvas" id="hero-robot">
+          <img class="robot-still" src="/assets/img/playground.png" width="1280" height="820" alt="The simulated quadruped carrying a box up a ramp in the Breakpoint lab" fetchpriority="high">
+        </div>
+        <button class="pause" type="button" id="hero-pause" aria-label="Pause the robot animation" aria-pressed="false">Pause</button>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="stats" id="numbers" aria-labelledby="stats-title" data-reveal>
+  <div class="stat-tile big">
+    <p class="figure">84.1</p>
+    <img class="stat-pic" src="/assets/img/world-payload.jpg" width="1600" height="1000" alt="The robot carrying a 6 kg block up a 12° slope" loading="lazy">
+    <p class="caption">Readiness score of the best policy, up from 66.8 for the bare walking gait it was built on.</p>
+  </div>
+  <h2 id="stats-title" class="stats-heading">One number per stress</h2>
+  <div class="stat-tile mid">
+    <p class="figure">120 ms</p>
+    <p class="caption">Control lag it tolerates after the latency gate. Before it: 60 ms.</p>
+  </div>
+  <div class="stat-tile low">
+    <p class="figure">0 of 60</p>
+    <p class="caption">Remote-operated worlds where it fell. The policy before the gate fell in 1 of every 10.</p>
+  </div>
+</section>
+
+<section class="how" id="how" aria-labelledby="how-title" data-reveal>
+  <div class="how-words">
+    <h2 id="how-title" class="how-clause" aria-live="polite">Probe every stress</h2>
+    <p class="how-note" id="how-note">17 stresses, from a shove at 4 points in the stride to 120 ms of lag. Each one is pushed until the robot stops passing, then halved back to the exact edge.</p>
+  </div>
+  <div class="how-stage">
+    <div class="frag frag-probe is-on" data-stage="0" data-ui>
+      <p class="frag-title">Breaking points · best policy</p>
+      <ul class="bars">
+        <li><span>Uphill</span><span class="bar"><i style="--v:1"></i></span><b>20°</b></li>
+        <li><span>Payload</span><span class="bar"><i style="--v:1"></i></span><b>8 kg</b></li>
+        <li><span>Stairs</span><span class="bar"><i style="--v:.94"></i></span><b>9.4 cm</b></li>
+        <li><span>Downhill</span><span class="bar"><i style="--v:.61"></i></span><b>12.2°</b></li>
+        <li><span>Shove from front</span><span class="bar"><i style="--v:.34"></i></span><b>13.8 N·s</b></li>
+        <li><span>Shove from left</span><span class="bar"><i style="--v:.14"></i></span><b>5.6 N·s</b></li>
+      </ul>
+    </div>
+    <div class="frag frag-hunt" data-stage="1" data-ui>
+      <p class="frag-title">Failure atlas · mildest failure per cell</p>
+      <div class="atlas" aria-hidden="true">
+        <i class="hit"></i><i></i><i></i><i class="hit"></i><i></i>
+        <i></i><i class="hit"></i><i></i><i></i><i></i>
+        <i class="hit"></i><i class="hit"></i><i></i><i></i><i class="hit"></i>
+        <i></i><i></i><i class="hit"></i><i></i><i></i>
+      </div>
+      <p class="frag-quote">“Fell 0.7 s after a 12.0 N·s shove from the right: it tipped over with slippery ground (μ = 0.20) and a 3.0 kg payload.”</p>
+    </div>
+    <div class="frag frag-shrink" data-stage="2" data-ui>
+      <p class="frag-title">runs/v2field/suite/case_03_push.json</p>
+<pre><code>{
+  "stressor": "push",
+  "alpha": 0.69,
+  "seed": 362183,
+  "scenario": {
+    "terrain": "rough",
+    "friction": 0.84,
+    "payload_kg": 1.52,
+    "pushes": [{ "t": 2.94, "force": 129.8,
+                 "direction_deg": -180, "duration": 0.1 }]
+  }
+}</code></pre>
+    </div>
+    <div class="frag frag-harden" data-stage="3" data-ui>
+      <p class="frag-title">Hardening round · v2 → v2field</p>
+      <p class="score-pair"><span>76.5</span><span class="arrow" aria-hidden="true">→</span><span>82.6</span></p>
+      <p class="stamp">Supervised</p>
+      <p class="frag-foot">The checkpoint is kept only if it beats the start. Then the gate takes it to 84.1.</p>
+    </div>
+  </div>
+  <div class="how-slider">
+    <label class="visually-hidden" for="how-range">Stage of the hardening loop</label>
+    <input id="how-range" type="range" min="0" max="3" step="1" value="0" list="how-stops" autocomplete="off">
+    <ol class="how-stops" id="how-stops">
+      <li class="is-on">Probe</li><li>Hunt</li><li>Shrink</li><li>Harden</li>
+    </ol>
+  </div>
+</section>
+
+<section class="odds" id="odds" aria-labelledby="odds-title" data-reveal>
+  <div class="odds-tile head">
+    <h2 id="odds-title">Odds by place</h2>
+    <p>Failure rate of the best policy over 30 independently seeded worlds per place. The number in brackets is the 95% upper bound.</p>
+  </div>
+  <div class="odds-tile pic"><img src="/assets/img/world-shove.jpg" width="1600" height="1000" alt="The robot on a flat floor, mid-shove from the side" loading="lazy"><h3>Warehouse</h3><p class="rate">0%</p><p class="bound">(≤ 9.5%) · spills, totes up to 4 kg, cart bumps</p></div>
+  <div class="odds-tile pic"><img src="/assets/img/world-stairs.jpg" width="1600" height="1000" alt="The robot climbing 8 cm stairs" loading="lazy"><h3>Home</h3><p class="rate">0%</p><p class="bound">(≤ 9.5%) · rugs, a few steps, pets and kids</p></div>
+  <div class="odds-tile"><h3>Teleop link</h3><p class="rate">0%</p><p class="bound">(≤ 9.5%) · 40–100 ms of control lag. Before the latency gate: 10%.</p></div>
+  <div class="odds-tile pic"><img src="/assets/img/world-ice.jpg" width="1600" height="1000" alt="The robot walking down an icy 6° slope" loading="lazy"><h3>Sidewalk</h3><p class="rate">6.7%</p><p class="bound">(≤ 18.3%) · curbs, ramps, rain, crowds</p></div>
+  <div class="odds-tile pic wide"><img src="/assets/img/world-rubble.jpg" width="1600" height="1000" alt="The robot crossing rubble with 5 cm bumps" loading="lazy"><h3>Construction</h3><p class="rate">13.3%</p><p class="bound">(≤ 26.6%) · gravel, mud, rubble, tool loads. Its weakest place.</p></div>
+  <div class="odds-tile method">
+    <h3>How it’s counted</h3>
+    <p>A fall is tilt past 65° or the body within 11 cm of the ground. A stall is under 35% of the commanded distance. Both count as failures.</p>
+  </div>
+</section>
+
+<section class="caught" id="caught" aria-labelledby="caught-title" data-reveal>
+  <h2 id="caught-title">What it caught</h2>
+  <div class="caught-body">
+    <ul class="index" id="caught-index">
+      <li><button type="button" class="index-row is-on" data-img="report_deploy" aria-controls="caught-frame">
+        <span class="row-title">Training couldn’t fix lag</span>
+        <span class="row-text">Every learned policy fell under 40–100 ms of lag; the bare gait never did. A latency gate, not more PPO, took teleop failures to 0 of 60.</span></button>
+        <img class="row-img" src="/assets/img/report_deploy.png" width="1000" height="420" alt="Deployment-risk table: failure rate by place for five policies" loading="lazy"></li>
+      <li><button type="button" class="index-row" data-img="report" aria-controls="caught-frame">
+        <span class="row-title">The trained policy stood still</span>
+        <span class="row-text">v1 walked during noisy training and stalled when run for real. It scored 50.9, below the gait it was built on. Now every checkpoint is judged without noise.</span></button>
+        <img class="row-img" src="/assets/img/report.png" width="1000" height="1400" alt="Readiness report scorecard comparing four policies" loading="lazy"></li>
+      <li><button type="button" class="index-row" data-img="report_compound" aria-controls="caught-frame">
+        <span class="row-title">Two safe stresses, one fall</span>
+        <span class="row-text">Stairs and a payload, each at 75% of its own limit, fail together on every seed. A single-axis report never shows this.</span></button>
+        <img class="row-img" src="/assets/img/report_compound.png" width="1000" height="1400" alt="Compound-stress table and failure-boundary heatmap from a readiness report" loading="lazy"></li>
+      <li><button type="button" class="index-row" data-img="compare" aria-controls="caught-frame">
+        <span class="row-title">More training made it worse</span>
+        <span class="row-text">A second hardening round fixed 2 of 11 failures, and red-team losses rose from 2 to 5. The fresh audit caught what its own report missed.</span></button>
+        <img class="row-img" src="/assets/img/compare.png" width="1280" height="760" alt="Two policies on the same ramp: the hardened one and a translucent ghost of the older one" loading="lazy"></li>
+      <li><button type="button" class="index-row" data-img="shove" aria-controls="caught-frame">
+        <span class="row-title">Ice can save it</span>
+        <span class="row-text">On friction 0.05 it survives a side shove that topples it on concrete: it slides instead of tripping. It also can’t walk forward there at all.</span></button>
+        <img class="row-img" src="/assets/img/shove.png" width="1280" height="1000" alt="The robot on an icy floor in shove mode, with the shove controls beside it" loading="lazy"></li>
+    </ul>
+    <figure class="caught-frame" id="caught-frame">
+      <img id="caught-img" src="/assets/img/report_deploy.png" width="1000" height="420" alt="Deployment-risk table: failure rate by place for five policies" loading="lazy">
+    </figure>
+  </div>
+</section>
+
+<section class="certificate" id="certificate" aria-labelledby="cert-title" data-reveal>
+  <div class="sheet">
+    <h2 id="cert-title">Readiness certificate</h2>
+    <p class="sheet-note"><span translate="no">gated-policy_v2field</span> · score 84.1 · supervised trials with a spotter and kill switch</p>
+    <div class="sheet-group">
+      <h3>Shoves, worst point in the stride</h3>
+      <dl>
+        <div><dt>From the front</dt><dd>13.8 N·s</dd></div>
+        <div><dt>From the front-left</dt><dd>8.8 N·s</dd></div>
+        <div><dt>From the front-right</dt><dd>8.1 N·s</dd></div>
+        <div><dt>From the rear</dt><dd>8.1 N·s</dd></div>
+        <div><dt>From the right</dt><dd>6.9 N·s</dd></div>
+        <div><dt>From the rear-right</dt><dd>6.3 N·s</dd></div>
+        <div><dt>From the left</dt><dd>5.6 N·s</dd></div>
+        <div><dt>From the rear-left</dt><dd>5.6 N·s</dd></div>
+      </dl>
+    </div>
+    <div class="sheet-group">
+      <h3>Ground</h3>
+      <dl>
+        <div><dt>Uphill</dt><dd>20° · top of range</dd></div>
+        <div><dt>Downhill</dt><dd>12.2°</dd></div>
+        <div><dt>Stairs</dt><dd>9.4 cm</dd></div>
+        <div><dt>Rough ground</dt><dd>±8 cm · top of range</dd></div>
+        <div><dt>Low friction</dt><dd>μ 0.05 · top of range</dd></div>
+      </dl>
+    </div>
+    <div class="sheet-group">
+      <h3>Body and signals</h3>
+      <dl>
+        <div><dt>Payload</dt><dd>8 kg · top of range</dd></div>
+        <div><dt>Weak motors</dt><dd>21% of torque</dd></div>
+        <div><dt>Control lag</dt><dd>120 ms · top of range</dd></div>
+        <div><dt>Sensor noise</dt><dd>σ 0.5 · top of range</dd></div>
+      </dl>
+    </div>
+    <p class="sheet-end">Policy SHA-256 <span translate="no">e33d605ea86e6fb1…</span><br>MuJoCo 4.0.0 · numpy 2.5.3 · 24 nominal runs, 0 failures</p>
+  </div>
+  <div class="cert-side">
+    <figure class="clip">
+      <video autoplay muted loop playsinline preload="metadata" poster="/assets/img/shove-clip-poster.jpg" width="1280" height="720" aria-describedby="clip-cap">
+        <source src="/assets/img/shove-clip.webm" type="video/webm">
+        <source src="/assets/img/shove-clip.mp4" type="video/mp4">
+      </video>
+      <figcaption id="clip-cap">Recorded in the simulator: a 7 N·s shove from the right, on rough ground. It kept walking.</figcaption>
+    </figure>
+    <p>Every number on this sheet came from bisection in simulation, with the search budget stated. Not finding a failure is not proof it can’t fail; the certificate says how hard it looked.</p>
+    <a class="btn btn-light" href="/reports/final">Read the full report</a>
+  </div>
+</section>
+
+<section class="features" id="run" aria-labelledby="features-title" data-reveal>
+  <div class="tile t-head"><h2 id="features-title">Runs on a laptop</h2></div>
+  <div class="tile t-a" data-ui><span class="ui-readout" aria-hidden="true">4 min</span>
+    <p class="tile-cap"><b>Trains on one CPU core</b>PPO in numpy with hand-written backprop. No GPU, no PyTorch.</p></div>
+  <div class="tile t-b" data-ui><span class="ui-stamp" aria-hidden="true">Supervised</span>
+    <p class="tile-cap"><b>A grade with its evidence</b>0–100 score, margins, odds and budget.</p></div>
+  <div class="tile t-c" data-ui><span class="ui-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd></span>
+    <p class="tile-cap"><b>Shove it yourself</b>Arrow keys push the robot live in the lab.</p></div>
+  <div class="tile t-d" data-ui><span class="ui-slider" aria-hidden="true"><i></i></span>
+    <p class="tile-cap"><b>Latency gate</b>Falls back to the gait as lag climbs past 40 ms.</p></div>
+  <div class="tile t-e" data-ui><code class="ui-code">gated:policy.npz</code>
+    <p class="tile-cap"><b>Bring your own policy</b>Any obs → action callable, Gymnasium env included.</p></div>
+  <div class="tile t-f" data-ui><span class="ui-exit" aria-hidden="true">exit 1</span>
+    <p class="tile-cap"><b>Gates your release</b>certify fails CI below the score you set.</p></div>
+  <div class="tile t-g" data-ui><span class="ui-toggle" aria-hidden="true"><i></i></span>
+    <p class="tile-cap"><b>Offline by default</b>Plain English to physics without an LLM; one is optional.</p></div>
+  <div class="tile t-h install">
+    <p class="tile-cap"><b>Install</b>Python 3.10+ and MuJoCo.</p>
+<pre><code>pip install -e '.[dev]'
+python -m breakpoint certify \
+  --policy gated:runs/v2field/policy_v2field.npz</code></pre>
+  </div>
+</section>
+
+<section class="faq" id="faq" aria-labelledby="faq-title" data-reveal>
+  <h2 id="faq-title">Fair questions</h2>
+  <div class="faq-list">
+    <details name="faq" open><summary>Is this a real robot?</summary>
+      <p>No. It’s a generic 6 kg, 12-joint quadruped built procedurally in MuJoCo. Its numbers show relative robustness between policies, not certified limits of any product.</p></details>
+    <details name="faq"><summary>What does “breaking point” mean exactly?</summary>
+      <p>The largest stress the policy still passes on every seed, where passing means no fall and at least 35% of the commanded distance. It’s found by bisection, so it’s accurate to the last halving step.</p></details>
+    <details name="faq"><summary>Why should I trust a 0% failure rate?</summary>
+      <p>You shouldn’t read it alone. Every rate comes with a 95% upper bound: 0 failures in 30 worlds means the true rate is at most 9.5%. The report always states how hard it searched.</p></details>
+    <details name="faq"><summary>Can I test my own policy?</summary>
+      <p>Yes. Point <code>--policy</code> at <code>py:your.module:factory</code>, returning any callable from observation to action, or train in Breakpoint’s worlds through its Gymnasium environment.</p></details>
+    <details name="faq"><summary>Do I need an LLM or an API key?</summary>
+      <p>No. Descriptions like “icy ramp, 4 kg box, shoved from the left” are parsed by rules offline. Any OpenAI-compatible endpoint, such as a Llama API, can be plugged in, and its output is clamped to physical bounds.</p></details>
+    <details name="faq"><summary>What does the latency gate actually do?</summary>
+      <p>It fades the learned correction out as measured control lag rises from 40 to 80 ms, falling back to the open-loop gait, which never reads stale sensors. Your stack has to measure its own link latency.</p></details>
+    <details name="faq"><summary>How long does a full audit take?</summary>
+      <p>About a minute per policy on four CPU cores: 17 breaking points, 24 nominal runs, an adversarial hunt, compound and red-team tests, and 150 deployment worlds.</p></details>
+  </div>
+</section>
+
+<a class="cta" href="/app">
+  <span class="cta-note">Open the lab and push the robot until it falls.</span>
+  <svg class="cta-arrow" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M12 36 36 12M16 12h20v20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square"/></svg>
+  <span class="cta-word">Shove</span>
+</a>
+</main>
+
+<footer class="footer">
+  <div class="blockmark" aria-label="Breakpoint" role="img" id="blockmark"></div>
+  <div class="footer-cols">
+    <ul><li><a href="/app">Lab</a></li><li><a href="/docs">Docs</a></li><li><a href="/reports/final">Readiness report</a></li></ul>
+    <ul><li><a href="/docs#api">Web API</a></li><li><a href="/docs#cli">Command line</a></li><li><a href="/api/docs">API reference</a></li></ul>
+    <ul><li><a href="https://github.com/AyanBhardwaj1/RL-Robot" rel="noopener">Source on GitHub</a></li><li><a href="/reports/leaderboard-v1">First leaderboard</a></li></ul>
+    <p class="footer-contact">Built with MuJoCo, numpy and FastAPI. The 3D view uses three.js (MIT).</p>
+  </div>
+  <div class="footer-last">
+    <p>© <span id="year">2026</span> Breakpoint</p>
+    <a class="btn btn-small" href="/app">Open the lab</a>
+  </div>
+</footer>
+
+<script src="/assets/three.min.js" defer></script>
+<script src="/assets/robot-view.js" defer></script>
+<script src="/assets/landing.js" defer></script>
+</body>
+</html>

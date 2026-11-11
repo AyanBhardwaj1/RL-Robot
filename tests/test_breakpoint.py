@@ -649,3 +649,11 @@ def test_certificate_records_hash_versions_and_results(tmp_path):
     assert len(cert["policy_sha256"]) == 64 and cert["policy"] == "gated-p"
     assert cert["toolchain"]["mujoco"] and cert["margins"]["friction"]["breaking_point"] == 0.3
     assert certificate(None, fake)["policy_sha256"] is None
+
+
+def test_explain_mentions_a_survived_shove():
+    from breakpoint.explain import explain
+
+    scn = Scenario(duration_s=4.0).with_(pushes=[{"t": 1.2, "force": 40, "direction_deg": -90, "duration": 0.1}])
+    text = explain(scn, {"passed": True, "fell": False, "distance": 1.0, "time_s": 4.0})
+    assert text.startswith("Took a 4.0 N·s shove from the left at 1.2 s and kept walking")

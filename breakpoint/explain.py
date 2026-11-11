@@ -45,6 +45,11 @@ def explain(scn: Scenario, outcome: dict) -> str:
     factors = contributing_factors(scn)
     ctx = (" with " + ", ".join(factors[:-1]) + (" and " if len(factors) > 1 else "") + factors[-1]) if factors else ""
     if outcome.get("passed"):
+        took = [p for p in scn.pushes if p.t <= outcome["time_s"]]
+        if took:
+            p = max(took, key=lambda q: q.impulse)
+            return (f"Took a {p.impulse:.1f} N·s shove from {direction_name(p.direction_deg)} at {p.t:.1f} s and kept "
+                    f"walking: {outcome['distance']:.1f} m in {outcome['time_s']:.1f} s{ctx}.")
         return f"Walked {outcome['distance']:.1f} m and stayed upright for {outcome['time_s']:.1f} s{ctx}."
     if outcome.get("fell"):
         t = outcome["time_s"]
