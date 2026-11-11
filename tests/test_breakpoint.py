@@ -513,3 +513,24 @@ def test_hunt_small_budget_builds_atlas_and_suite(tmp_path):
     for p in paths:
         case = json.loads(p.read_text())
         assert 0 < case["alpha"] <= 1.0 and "scenario" in case
+
+
+def test_compile_image_vision_llm_and_caption_merge(monkeypatch):
+    monkeypatch.setenv("BREAKPOINT_LLM_BASE_URL", "https://example.invalid/v1")
+    monkeypatch.setenv("BREAKPOINT_LLM_API_KEY", "k")
+    monkeypatch.setenv("BREAKPOINT_LLM_MODEL", "m")
+    sent = {}
+
+    def fake_chat(msgs):
+        sent["content"] = msgs[-1]["content"]
+        return json.dumps({"terrain": "rough", "roughness": 0.04, "friction": 0.5})
+
+    monkeypatch.setattr("breakpoint.compiler._chat", fake_chat)
+    c = compile_image(_png([0.5, 0.5, 0.5]), caption="gravel lot")
+    assert c.source == "llm-vision" and c.scenario.roughness == 0.04
+    assert sent["content"][1]["image_url"]["url"].startswith("data:image/jpeg;base64,")
+
+    monkeypatch.delenv("BREAKPOINT_LLM_BASE_URL")
+    merged = compile_image(_png([0.2, 0.6, 0.2], 0.05), caption="carrying 3kg, kicked from the left")
+    assert merged.source == "image-heuristic"
+    assert merged.scenario.friction == 0.6 and merged.scenario.payload_kg == 3.0 and merged.scenario.pushes
