@@ -37,7 +37,9 @@ def scorecard(probe: list[dict], nominal: list[dict], atlas: dict[str, dict] | N
 
 
 # ------------------------------------------------------------------ svg
-def _polar(series: dict[str, dict[str, float]], size: int = 300, vmax: float = 40.0) -> str:
+def _polar(series: dict[str, dict[str, float]], size: int = 300, vmax: float | None = None) -> str:
+    peak = max((v for vals in series.values() for v in vals.values()), default=0.0)
+    vmax = vmax or max(5.0, 5.0 * math.ceil(peak * 1.15 / 5.0))
     c = size / 2
     rad = c - 34
     order = ["front", "front-left", "left", "rear-left", "rear", "rear-right", "right", "front-right"]
@@ -48,7 +50,7 @@ def _polar(series: dict[str, dict[str, float]], size: int = 300, vmax: float = 4
     for name in order:
         ang = math.radians(PUSH_DIRS[name])
         # screen: robot faces up. A push *from* the front comes from the top.
-        sx, sy = -math.sin(ang), math.cos(ang)
+        sx, sy = -math.sin(ang), -math.cos(ang)
         parts.append(f'<line x1="{c}" y1="{c}" x2="{c + rad * sx:.1f}" y2="{c - rad * sy:.1f}" class="grid"/>')
         parts.append(f'<text x="{c + (rad + 18) * sx:.1f}" y="{c - (rad + 18) * sy + 4:.1f}" class="lbl" text-anchor="middle">{name}</text>')
     for i, (label, vals) in enumerate(series.items()):
@@ -56,7 +58,7 @@ def _polar(series: dict[str, dict[str, float]], size: int = 300, vmax: float = 4
         for name in order:
             ang = math.radians(PUSH_DIRS[name])
             r = rad * min(1.0, vals.get(name, 0.0) / vmax)
-            pts.append(f"{c - r * math.sin(ang):.1f},{c - r * math.cos(ang):.1f}")
+            pts.append(f"{c - r * math.sin(ang):.1f},{c + r * math.cos(ang):.1f}")
         parts.append(f'<polygon points="{" ".join(pts)}" class="s{i}"><title>{html.escape(label)}</title></polygon>')
     parts.append("</svg>")
     return "".join(parts)
@@ -86,9 +88,9 @@ def _bars(probes: dict[str, list[dict]]) -> str:
 
 
 CSS = """
-:root{--bg:#f6f5f1;--fg:#1d1d1f;--muted:#6b6b70;--card:#fff;--line:#e3e1da;--s0:#9aa0a6;--s1:#e8590c;--ok:#2b8a3e;--warn:#e67700;--bad:#c92a2a}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#121214;--fg:#ececf0;--muted:#9a9aa3;--card:#1c1c20;--line:#2c2c33;--s0:#6c7178;--s1:#ff7a2e}}
-:root[data-theme=dark]{--bg:#121214;--fg:#ececf0;--muted:#9a9aa3;--card:#1c1c20;--line:#2c2c33;--s0:#6c7178;--s1:#ff7a2e}
+:root{--bg:#f6f5f1;--fg:#1d1d1f;--muted:#6b6b70;--card:#fff;--line:#e3e1da;--s0:#9aa0a6;--s1:#1c7ed6;--s2:#7048e8;--s3:#e8590c;--ok:#2b8a3e;--warn:#e67700;--bad:#c92a2a}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#121214;--fg:#ececf0;--muted:#9a9aa3;--card:#1c1c20;--line:#2c2c33;--s0:#6c7178;--s1:#4dabf7;--s2:#9775fa;--s3:#ff7a2e}}
+:root[data-theme=dark]{--bg:#121214;--fg:#ececf0;--muted:#9a9aa3;--card:#1c1c20;--line:#2c2c33;--s0:#6c7178;--s1:#4dabf7;--s2:#9775fa;--s3:#ff7a2e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
 main{max-width:980px;margin:0 auto;padding:32px 16px 64px}h1{font-size:28px;margin:0 0 4px}h2{font-size:18px;margin:32px 0 12px}
 .muted{color:var(--muted)}.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
@@ -96,7 +98,8 @@ main{max-width:980px;margin:0 auto;padding:32px 16px 64px}h1{font-size:28px;marg
 .score{font-size:56px;font-weight:700;line-height:1}.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:600;font-size:13px;color:#fff}
 .chart{width:100%;height:auto}.chart .grid{fill:none;stroke:var(--line)}.chart .tick,.chart .lbl,.chart .val{fill:var(--muted);font-size:11px}
 .chart .val{fill:var(--fg)}.chart .track{fill:var(--line);opacity:.5}.s0{fill:var(--s0);fill-opacity:.35;stroke:var(--s0);stroke-width:2}
-.s1{fill:var(--s1);fill-opacity:.35;stroke:var(--s1);stroke-width:2}rect.s0,rect.s1{fill-opacity:.9;stroke:none}
+.s1{fill:var(--s1);fill-opacity:.35;stroke:var(--s1);stroke-width:2}.s2{fill:var(--s2);fill-opacity:.25;stroke:var(--s2);stroke-width:2}
+.s3{fill:var(--s3);fill-opacity:.25;stroke:var(--s3);stroke-width:2}rect.s0,rect.s1,rect.s2,rect.s3{fill-opacity:.9;stroke:none}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
 .key{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}code{font-size:12px}
 .tablewrap{overflow-x:auto}
@@ -107,7 +110,7 @@ def _heatmap(bm: dict) -> str:
     xs, ys, grid = bm["x"]["values"], bm["y"]["values"], bm["pass_rate"]
     cw, ch, ml, mb = 56, 34, 70, 40
     w, h = ml + cw * len(xs) + 10, ch * len(ys) + mb + 10
-    out = [f'<svg viewBox="0 0 {w} {h}" class="chart" role="img" aria-label="Failure boundary">']
+    out = [f'<svg viewBox="0 0 {w} {h}" class="chart" style="max-width:520px" role="img" aria-label="Failure boundary">']
     for j, yv in enumerate(ys):
         y = 5 + (len(ys) - 1 - j) * ch
         out.append(f'<text x="{ml - 6}" y="{y + ch / 2 + 4}" class="lbl" text-anchor="end">{yv:g}</text>')
@@ -123,10 +126,10 @@ def _heatmap(bm: dict) -> str:
     return "".join(out)
 
 
-def _compound_section(extras: dict | None) -> str:
+def _compound_section(extras: dict | None, who: str = "") -> str:
     if not extras:
         return ""
-    parts = ['<h2>Compound stress</h2><p class="muted">Pairs of the weakest axes, each set to a fraction of its '
+    parts = [f'<h2>Compound stress · {html.escape(who)}</h2><p class="muted">Pairs of the weakest axes, each set to a fraction of its '
              'own breaking point. Single-axis margins cannot see these failures.</p><div class="card tablewrap"><table>'
              '<tr><th>Stressor A</th><th>Stressor B</th><th>Each at</th><th>Pass rate</th></tr>']
     for c in extras.get("interactions", []):
@@ -154,7 +157,8 @@ def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]
                 atlas: dict[str, dict] | None, hunt_meta: dict | None, notes: list[str] | None = None,
                 extras: dict | None = None) -> str:
     names = list(probes)
-    final = cards[names[-1]]
+    best = max(names, key=lambda n: cards[n]["score"])
+    final = cards[best]
     color = {"FIELD-READY": "var(--ok)", "SUPERVISED": "var(--ok)", "LAB-ONLY": "var(--warn)"}.get(final["grade"], "var(--bad)")
     legend = "".join(f'<span class="muted" style="margin-right:14px"><span class="key s{i}" '
                      f'style="background:var(--s{i})"></span>{html.escape(n)}</span>' for i, n in enumerate(names))
@@ -189,7 +193,7 @@ def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]
 <p class="muted">Breakpoint readiness report · {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}</p>
 <h1>{html.escape(title)}</h1>
 <div class="grid2" style="margin-top:20px">
- <div class="card"><div class="muted">Readiness score · {html.escape(names[-1])}</div>
+ <div class="card"><div class="muted">Readiness score · {html.escape(best)}{" (best)" if len(names) > 1 else ""}</div>
   <div class="score">{final['score']}</div>
   <p><span class="badge" style="background:{color}">{final['grade']}</span></p><p>{html.escape(final['verdict'])}</p></div>
  <div class="card"><div class="muted">Weakest axes</div><ol>{''.join(f'<li>{html.escape(a)}</li>' for a in final['weakest_axes'])}</ol>
@@ -200,7 +204,7 @@ def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]
 <div class="grid2"><div class="card">{polar}</div><div class="card"><p class="muted">How to read: the robot faces up. A dent in the shape is a direction where a shove topples it. Side pushes are usually the weakest because a trotting quadruped has a narrow support polygon laterally.</p></div></div>
 <h2>Breaking points</h2><p class="muted">Bar = fraction of the tested range survived on every seed. {legend}</p><div class="card">{_bars(probes)}</div>
 <h2>Failure atlas</h2>{budget}<div class="card tablewrap"><table><tr><th>Mode</th><th>Severity</th><th>Outcome</th><th>Mildest world that breaks it</th></tr>{''.join(atlas_rows) or '<tr><td colspan=4>No failures found.</td></tr>'}</table></div>
-{_compound_section(extras)}
+{_compound_section(extras, names[-1])}
 <h2>Method</h2><div class="card"><ul>
 <li>Score = 45% margin index (push envelope 40%, other stressors 60%) + 40% nominal pass rate under domain-randomised conditions + 15% adversarial (penalises failure modes found at severity ≤ 0.5).</li>
 <li>Pass = no fall (tilt &gt; 65° or body clearance &lt; 11 cm) and ≥ 35% of commanded distance covered.</li>

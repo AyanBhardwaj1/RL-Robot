@@ -128,6 +128,23 @@ def cmd_audit(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_leaderboard(a: argparse.Namespace) -> int:
+    specs = [None if p == "cpg" else p for p in a.policies][:4]
+    labels: list[str] = []
+    for sp in specs:
+        lab = "cpg-baseline" if sp is None else Path(sp).stem
+        labels.append(lab if lab not in labels else f"{Path(sp).parent.name}/{lab}")
+    audits = [audit(sp, lab, a.hunt_gens, a.workers) for sp, lab in zip(specs, labels)]
+    notes = ["All policies audited in one run with identical code, seeds and search budget."]
+    path = _write_report(Path(a.out), a.title, audits, notes)
+    for x in audits:
+        c = x["card"]
+        print(f"{x['label']:>20}  {c['score']:5.1f}  {c['grade']:<11}  margin {c['margin_index']:.2f}  "
+              f"pass {c['nominal_pass_rate']:.0%}  compound {c['compound_failures']}  redteam {c['redteam_failures']}")
+    print(f"report: {path}")
+    return 0
+
+
 def cmd_harden(a: argparse.Namespace) -> int:
     out = Path(a.out)
     before = audit(a.policy, "before", a.hunt_gens, a.workers)
@@ -138,7 +155,7 @@ def cmd_harden(a: argparse.Namespace) -> int:
     pol.name = "hardened"
     train(pol, ScenarioSampler(failures=failures, seed=a.seed + 1), PPOConfig(total_steps=a.steps, lr=2e-4),
           seed=a.seed + 1, log=_log)
-    hardened = out / "policy_hardened.npz"
+    hardened = out / f"policy_{out.name}.npz"
     pol.save(hardened)
     after = audit(str(hardened), "after", a.hunt_gens, a.workers)
     reg = evaluate_many(str(hardened), failures, seeds=[0, 1])
@@ -229,6 +246,14 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--policy")
     g.add_argument("--suite", required=True)
     g.set_defaults(fn=cmd_regress)
+
+    lb = sub.add_parser("leaderboard", help="audit up to 4 policies side by side ('cpg' = baseline)")
+    lb.add_argument("policies", nargs="+")
+    lb.add_argument("--out", default="runs/leaderboard")
+    lb.add_argument("--title", default="Policy leaderboard")
+    lb.add_argument("--hunt-gens", type=int, default=5)
+    lb.add_argument("--workers", type=int, default=3)
+    lb.set_defaults(fn=cmd_leaderboard)
 
     rt = sub.add_parser("redteam", help="compound-stress + red-team attacks on a policy")
     rt.add_argument("--policy")
