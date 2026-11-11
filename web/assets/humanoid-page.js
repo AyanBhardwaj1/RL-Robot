@@ -18,7 +18,20 @@
   let shownCom = null; // screen position of the drawn centre of mass, for click-to-shove
   let last = { dir: -90, result: null };
 
-  function body() { return document.querySelector('input[name="body"]:checked').value; }
+  // Design levers (mirrors breakpoint/design.py): applied to the biped only.
+  const LEVERS = {
+    swing: (r) => ({ min_swing: r.min_swing * 0.85 }),
+    lateral: (r) => ({ max_lateral_step: r.max_lateral_step + 0.10 }),
+    foot: (r) => ({ foot_half_length: r.foot_half_length + 0.02 }),
+    reach: (r) => ({ max_step: r.max_step + 0.10 }),
+    ankle: (r) => ({ ankle_torque: r.ankle_torque * 1.25 }),
+  };
+  function biped() {
+    const on = [...document.querySelectorAll('input[name="lever"]:checked')].map((i) => i.value);
+    return on.reduce((r, k) => Object.assign(r, LEVERS[k](r)), Object.assign({}, H.BIPED, { kind: "biped" }));
+  }
+  function bodyKind() { return document.querySelector('input[name="body"]:checked').value; }
+  function body() { return bodyKind() === "wheeled" ? "wheeled" : biped(); }
   function cond() {
     return { payload_kg: +$("#payload").value, friction: +$("#friction").value, latency_s: +$("#latency").value / 1000,
       actuator_strength: +$("#strength").value, floor_step_m: +$("#step").value };
@@ -37,7 +50,7 @@
     for (let gy = -10; gy <= 10; gy++) { const [, sy] = toScreen(gy * 0.25, 0, origin); ctx.fillRect(0, sy, W, 1); }
     k = Math.max(0, k);
     const t = res.com.length ? res.com[Math.min(k, res.com.length - 1)][0] : 0;
-    const wheeled = body() === "wheeled";
+    const wheeled = bodyKind() === "wheeled";
     if (wheeled) {
       const b = res.footsteps.length ? res.footsteps[Math.max(0, Math.min(k, res.footsteps.length - 1))] : [0, 0, 0];
       const [cx, cy] = toScreen(b[1], b[2], origin);
@@ -122,7 +135,7 @@
   function describe(r, dir, imp) {
     const gap = (d) => Math.abs(((dir - d + 540) % 360) - 180);
     const side = Object.entries(H.DIRECTIONS).reduce((best, e) => (gap(e[1]) < gap(best[1]) ? e : best))[0];
-    if (r.recovered) return [r.steps ? `Saved in ${r.steps} step${r.steps > 1 ? "s" : ""}` : "Held", `${n0.format(imp)} N·s from the ${side}: ${r.steps ? "it stepped where the capture point was heading" : "ankles alone kept the capture point inside the support"}${body() === "wheeled" ? " (the base drove under it)" : ""}.`];
+    if (r.recovered) return [r.steps ? `Saved in ${r.steps} step${r.steps > 1 ? "s" : ""}` : "Held", `${n0.format(imp)} N·s from the ${side}: ${r.steps ? "it stepped where the capture point was heading" : "ankles alone kept the capture point inside the support"}${bodyKind() === "wheeled" ? " (the base drove under it)" : ""}.`];
     const reason = r.reason.charAt(0).toUpperCase() + r.reason.slice(1);
     return [r.reason.startsWith("blocked") ? "Blocked" : "Fell", `${n0.format(imp)} N·s from the ${side}. ${reason}.`];
   }
@@ -192,7 +205,7 @@
 
   function refreshEnvelope() {
     clearTimeout(envTimer);
-    envTimer = setTimeout(() => { polar(H.envelope("biped", cond(), 9), H.envelope("wheeled", cond(), 9)); drawCapMap(); }, 60);
+    envTimer = setTimeout(() => { polar(H.envelope(biped(), cond(), 9), H.envelope("wheeled", cond(), 9)); drawCapMap(); }, 60);
   }
 
   // ---------- jobs table (from the Python run) ----------
@@ -254,6 +267,7 @@
     el.addEventListener("input", () => { $(`#${id}-out`).textContent = outs[id](el.value); if (id !== "imp") refreshEnvelope(); });
   });
   document.querySelectorAll('input[name="body"]').forEach((r) => r.addEventListener("change", () => { shove(last.dir); drawCapMap(); }));
+  document.querySelectorAll('input[name="lever"]').forEach((c) => c.addEventListener("change", () => { refreshEnvelope(); shove(last.dir); }));
   document.querySelectorAll(".dir-pad button").forEach((b) => b.addEventListener("click", () => shove(+b.dataset.d)));
   canvas.addEventListener("click", (e) => {
     const r = canvas.getBoundingClientRect();

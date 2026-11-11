@@ -120,10 +120,17 @@ def load_policy(spec: str | None) -> Policy:
         return LatencyGatedPolicy(load_policy(spec[6:]))
     if spec.startswith("py:"):
         import importlib
+        import os
+        import sys
 
         mod_name, _, attr = spec[3:].partition(":")
         if not mod_name or not attr:
             raise ValueError("py: policy spec must look like py:package.module:factory")
+        # The installed `breakpoint` command (and plain `pytest`) do not put the working directory on the
+        # import path; a user's own module next to them should still load. Appended, so it never shadows
+        # an installed package.
+        if os.getcwd() not in sys.path:
+            sys.path.append(os.getcwd())
         obj = getattr(importlib.import_module(mod_name), attr)()
         return obj if isinstance(obj, Policy) else CallablePolicy(obj, name=attr)
     path = Path(spec)

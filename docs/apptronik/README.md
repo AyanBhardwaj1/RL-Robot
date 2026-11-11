@@ -103,6 +103,8 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
      unloading: wheeled fails 25% (blocked), biped 17% (heavy cases on ramps).
    - Scroll to “Which spec change helps most”. Say: “If you had one spec to improve, the data says swing
      speed: 25 shifts saved, none lost, p < 0.001. Ankle torque buys nothing; the foot is the limit.”
+   - Scroll back up and tick “Swing 15% faster” and “Side-step reach +10 cm”. The side limit goes from
+     44 to 73 N·s and recoverable shoves on the map from 26% to 49%, recomputed live in the browser.
    - Show the capturability map, then drag latency to 150 ms. Say: “This map caught a bug in my own
      latency model that bisection missed, and an independent review caught two more. Each fix made the
      biped look worse and the numbers more honest.”

@@ -62,3 +62,15 @@ def test_js_capturability_map_matches_python():
     flat = [c for row in py for c in row]
     assert flat[len(flat) // 2] == 0  # standing still: ankles only
     assert -1 in flat and max(flat) >= 1  # some shoves need steps, the fastest fail
+
+
+def test_js_design_lever_overrides_match_python():
+    from dataclasses import replace
+
+    js = run_js('[H.breakingPoint(Object.assign({}, H.BIPED, {kind: "biped", min_swing: H.BIPED.min_swing * 0.85}), -90, {}, 200, 10),'
+                ' H.breakingPoint(Object.assign({}, H.BIPED, {kind: "biped", max_lateral_step: 0.5}), -90, {}, 200, 10)]')
+    r = Humanoid()
+    py = [breaking_point(-90.0, replace(r, min_swing=r.min_swing * 0.85), iters=10),
+          breaking_point(-90.0, replace(r, max_lateral_step=0.5), iters=10)]
+    assert js == pytest.approx(py, abs=0.05)
+    assert py[0] > breaking_point(-90.0, r, iters=10)

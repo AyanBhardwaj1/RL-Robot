@@ -182,8 +182,12 @@
     return result(ok, 0, ok ? "came to rest" : "still moving at the end of the horizon", t, rec);
   }
 
+  // `body` is "biped", "wheeled", or { kind: "biped" | "wheeled", ...robot overrides } (e.g. a design lever).
+  const kindOf = (body) => (typeof body === "string" ? body : body.kind);
+  const overridesOf = (body) => (typeof body === "string" ? {} : body);
   function recover(body, impulse, dirDeg, cond, record) {
-    return body === "wheeled" ? recoverWheeled(impulse, dirDeg, {}, cond, record) : recoverBiped(impulse, dirDeg, {}, cond, record);
+    return kindOf(body) === "wheeled" ? recoverWheeled(impulse, dirDeg, overridesOf(body), cond, record)
+      : recoverBiped(impulse, dirDeg, overridesOf(body), cond, record);
   }
 
   function breakingPoint(body, dirDeg, cond, maxImpulse, iters) {
@@ -206,7 +210,7 @@
   // Row 0 = +vMax forward, column 0 = +vMax toward the robot's left (mirrors capturability_map in Python).
   function capturabilityMap(body, cond, n, vMax) {
     n = n || 41; vMax = vMax || 2;
-    const robot = body === "wheeled" ? WHEELED : BIPED;
+    const robot = Object.assign({}, kindOf(body) === "wheeled" ? WHEELED : BIPED, overridesOf(body));
     const m = robot.mass_kg + Object.assign({}, CONDITIONS, cond).payload_kg;
     const grid = [];
     for (let i = 0; i < n; i++) {
