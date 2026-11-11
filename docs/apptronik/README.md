@@ -127,8 +127,8 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
   run moved the score by 0.7. Report scores with their spread.
 - **Not a model of Apollo:** the 72 kg, 0.95 m robot is generic. Its numbers compare designs; they do not
   certify a product.
-- **Process:** I built this with an AI coding agent, which the DevEx intern posting asks about. Three
-  independent code reviews found 26 issues. The worst were mirrored push directions, caught after the
+- **Process:** I built this with an AI coding agent, which the DevEx intern posting asks about. Four
+  independent code reviews found 31 issues. The worst were mirrored push directions, caught after the
   results were published (fixed, migrated, and pinned by a physical regression test), and a swing foot
   that still held weight, which made side shoves look about twice as survivable as they are.
 
