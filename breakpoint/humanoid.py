@@ -213,7 +213,7 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
             if cond.friction < GRIPPY:
                 grippy = recover(impulse, direction_deg, robot, replace(cond, friction=GRIPPY), horizon_s=horizon_s)
                 if not grippy.recovered:  # the cause comes first; the event (steps, time) is this run's slip
-                    rec.reason = f"{grippy.reason}: the foot slipped first, at {t:.2f} s; ample grip would not have saved it"
+                    rec.reason = f"{grippy.reason}: the foot slipped first, {t:.2f} s after the shove; ample grip would not have saved it"
             break
         if latency_steps:
             j = tick % latency_steps
