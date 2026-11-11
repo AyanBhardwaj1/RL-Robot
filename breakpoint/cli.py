@@ -333,6 +333,31 @@ def cmd_certify(a: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+def cmd_humanoid(a: argparse.Namespace) -> int:
+    from .humanoid import JOBS, Conditions, Humanoid, WheeledBase, envelope, job_risk
+
+    cond = Conditions(payload_kg=a.payload, friction=a.friction, latency_s=a.latency_ms / 1000.0)
+    bodies = {"biped": Humanoid(), "wheeled": WheeledBase()}
+    out = {"conditions": cond.to_dict(), "envelope": {}, "jobs": {}}
+    print(f"Push-recovery envelope (largest survivable shove, N·s) · payload {a.payload} kg, μ {a.friction}, "
+          f"latency {a.latency_ms:.0f} ms")
+    for name, body in bodies.items():
+        env = envelope(body, cond)
+        out["envelope"][name] = env
+        print(f"  {name:>8}: " + "  ".join(f"{k} {v:.0f}" for k, v in env.items()))
+    print(f"\nFailure odds by job ({a.trials} sampled shifts each, 95% upper bound in brackets)")
+    for job in JOBS:
+        row = {n: job_risk(job, b, trials=a.trials, seed=a.seed) for n, b in bodies.items()}
+        out["jobs"][job] = row
+        cells = "   ".join(f"{n} {r['failure_rate']:.1%} (≤{r['failure_rate_upper_95']:.1%})" for n, r in row.items())
+        print(f"  {job:<30} {cells}")
+    if a.out:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(json.dumps(out, indent=1))
+        print(f"\nwrote {a.out}")
+    return 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     import uvicorn
 
@@ -412,6 +437,15 @@ def main(argv: list[str] | None = None) -> int:
     dp.add_argument("--workers", type=int, default=3)
     dp.add_argument("--out")
     dp.set_defaults(fn=cmd_deploy)
+
+    hu = sub.add_parser("humanoid", help="humanoid push recovery: biped vs wheeled envelopes and job odds")
+    hu.add_argument("--payload", type=float, default=0.0, help="tote held in front (kg)")
+    hu.add_argument("--friction", type=float, default=0.8)
+    hu.add_argument("--latency-ms", type=float, default=0.0)
+    hu.add_argument("--trials", type=int, default=200)
+    hu.add_argument("--seed", type=int, default=0)
+    hu.add_argument("--out")
+    hu.set_defaults(fn=cmd_humanoid)
 
     rt = sub.add_parser("redteam", help="compound-stress + red-team attacks on a policy")
     rt.add_argument("--policy")

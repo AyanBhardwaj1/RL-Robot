@@ -1,0 +1,132 @@
+{
+ "conditions": {
+  "payload_kg": 0.0,
+  "payload_reach": 0.35,
+  "payload_height": 1.05,
+  "friction": 0.8,
+  "latency_s": 0.0,
+  "actuator_strength": 1.0,
+  "floor_slope_deg": 0.0,
+  "floor_step_m": 0.0
+ },
+ "envelope": {
+  "biped": {
+   "front": 92.72,
+   "front-left": 103.81,
+   "left": 76.9,
+   "rear-left": 103.81,
+   "rear": 92.72,
+   "rear-right": 103.81,
+   "right": 76.9,
+   "front-right": 103.81
+  },
+  "wheeled": {
+   "front": 145.85,
+   "front-left": 166.21,
+   "left": 128.91,
+   "rear-left": 166.21,
+   "rear": 145.85,
+   "rear-right": 166.21,
+   "right": 128.91,
+   "front-right": 166.21
+  }
+ },
+ "jobs": {
+  "line-side kitting": {
+   "biped": {
+    "job": "line-side kitting",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   },
+   "wheeled": {
+    "job": "line-side kitting",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   }
+  },
+  "tote handling": {
+   "biped": {
+    "job": "tote handling",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   },
+   "wheeled": {
+    "job": "tote handling",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   }
+  },
+  "trailer unloading": {
+   "biped": {
+    "job": "trailer unloading",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   },
+   "wheeled": {
+    "job": "trailer unloading",
+    "trials": 150,
+    "failures": 24,
+    "failure_rate": 0.16,
+    "failure_rate_upper_95": 0.2152,
+    "causes": {
+     "blocked": 24
+    }
+   }
+  },
+  "home care": {
+   "biped": {
+    "job": "home care",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   },
+   "wheeled": {
+    "job": "home care",
+    "trials": 150,
+    "failures": 70,
+    "failure_rate": 0.4666666666666667,
+    "failure_rate_upper_95": 0.5337,
+    "causes": {
+     "blocked": 70
+    }
+   }
+  },
+  "teleoperated data collection": {
+   "biped": {
+    "job": "teleoperated data collection",
+    "trials": 150,
+    "failures": 1,
+    "failure_rate": 0.006666666666666667,
+    "failure_rate_upper_95": 0.0293,
+    "causes": {
+     "needed more than 3 steps": 1
+    }
+   },
+   "wheeled": {
+    "job": "teleoperated data collection",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   }
+  }
+ }
+}
