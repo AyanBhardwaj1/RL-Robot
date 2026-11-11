@@ -5,3 +5,5 @@ runs/*.log
 .ruff_cache/
 .vercel/
 build-cpp/
+.claude/settings.local.json
+.playwright-cli/

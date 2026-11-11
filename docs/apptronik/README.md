@@ -58,7 +58,7 @@ originals before quoting it**. Items marked *(unverified)* came from a single ag
 | ML systems / ML Ops | Profiling, quantizing, distilling RL and VLA policies for onboard compute; ONNX, TensorRT | `quantize.py`: INT8 is 3.6× smaller with no readiness loss |
 | Perception | Detection, SLAM, sensor fusion, ROS 2, edge GPUs | photo-to-scenario, sensor-noise axis |
 | Embedded / firmware | Motor control (FOC), EtherCAT, CAN, embedded Linux | latency and actuator-strength axes; C++17 controller and real-time loop benchmark |
-| Platform / dev tools | Bazel, CI/CD, developer experience, AI coding agents | CI, 90 tests, three implementations (Python, JS, C++) held equal by tests, CLI |
+| Platform / dev tools | Bazel, CI/CD, developer experience, AI coding agents | CI, over 90 tests, three implementations (Python, JS, C++) held equal by tests, CLI |
 | Fleet Connect / integration | gRPC, protobuf, REST, MQTT, Kafka, WMS/ERP integration | stateless HTTP API, deployment profiles |
 | Test / TestOps | HIL and simulation testing, regression, coverage | `regress`, `certify`, shrunk counterexamples |
 | Safety | IEC 61508, ISO 13849, ISO 10218, R15.06/R15.08, HARA, FMEA | failure bounds, evidence-based explanations, biped vs wheeled odds |
