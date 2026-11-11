@@ -78,7 +78,7 @@ A third-party count put open roles at about 86 in Oct 2026 *(unverified)*.
 |---|---|---|
 | **SWE Intern – Developer Experience** ([Built In](https://builtin.com/job/software-engineering-intern-developer-experience/8766589)) | C++, Python or TypeScript; CI/CD, Docker; using coding agents | CLI, CI, tests, the serverless site, and how an AI agent was used and then checked by reviews |
 | **SWE Intern – ML Systems / ML Ops** ([Greenhouse](https://job-boards.greenhouse.io/apptronik/jobs/6128057004)) | Profile, quantize and distill RL/VLA policies; PyTorch, ONNX, TensorRT | `python -m breakpoint quantize`: compression measured by robustness, not only by action error |
-| **Robotics Software Intern – Real-Time Controls** ([Greenhouse](https://job-boards.greenhouse.io/apptronik/jobs/5985132004)) | Real-time C++, unit tests, actuators, encoders, IMUs | `cpp/capture_point.hpp`: an allocation-free 2 ms controller step, parity tests against Python, a 500 Hz benchmark (0.8 µs step, worst wake-up 1.9–15 ms on a stock kernel across five runs) |
+| **Robotics Software Intern – Real-Time Controls** ([Greenhouse](https://job-boards.greenhouse.io/apptronik/jobs/5985132004)) | Real-time C++, unit tests, actuators, encoders, IMUs | `cpp/capture_point.hpp`: an allocation-free 2 ms controller step, parity tests against Python, a 500 Hz benchmark (0.7 µs median step, worst wake-up 1.9–15 ms on a stock kernel across five runs) |
 | **Autonomy Software Intern** ([Built In](https://builtin.com/job/autonomy-software-intern-humanoid-robotics/8601758)) | Behaviour execution in sim and on hardware; ROS 2, MuJoCo, Pinocchio | scenario-driven evaluation, job profiles |
 | **Motion Control and Planning Intern** ([Built In](https://www.builtinaustin.com/job/motion-control-and-planning-intern/8816589)) | RL, robot dynamics, PyTorch or JAX, MuJoCo or Drake | LIP and capture point, PPO from scratch |
 | **Perception Software Intern** ([Built In](https://builtin.com/job/perception-software-intern-humanoid-robotics/8376319)) | OpenCV, ROS 2, 3D vision | photo-to-scenario |
@@ -160,6 +160,12 @@ Short answers, each backed by a file you can open on the spot.
 - **How do you keep three implementations honest?** Python is the reference; the browser and C++ ports
   are run from the Python tests (Node and g++) on fixed cases, including outcome, steps and time to rest.
   A reviewer fuzzed 400 random cases with zero mismatches. (`tests/test_humanoid_js.py`, `tests/test_cpp.py`)
+- **What would you do about bad teleop data?** `breakpoint episodes` tags each demonstration: it replays
+  every recorded contact through the humanoid model at the latency measured at that second. Falls are
+  dropped; link stalls (100 ms above the episode's own median), a blind link (median over 200 ms) and
+  near-falls (a 25% harder shove would have toppled it) are flagged for recovery training, not nominal
+  demos. On 200 sample episodes it keeps 52%. A natural follow-up to ask them: does a policy trained on
+  clean episodes only beat one trained on everything? (`breakpoint/episodes.py`)
 - **What would you do with a real robot?** Replace the reduced model with whole-body simulation of the
   real robot, keep the audit, levers and hazard log on top, and fit the job profiles from fleet logs
   (`breakpoint/fleet.py` already does this from shift telemetry).
