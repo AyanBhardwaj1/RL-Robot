@@ -21,6 +21,8 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
 Breakpoint's method also applies to full-size humanoids (`breakpoint/humanoid.py`, `python -m breakpoint humanoid`,
 and the browser lab at `/humanoid`):
 
+![humanoid lab](docs/humanoid.png)
+
 - **Model.** A 72 kg humanoid balances as a linear inverted pendulum. It recovers from shoves by
   capture-point stepping, bounded by:
   - ankle torque,
@@ -51,6 +53,8 @@ and the browser lab at `/humanoid`):
   big shoves instantly. A real controller sees the robot still standing for those first milliseconds. After
   the fix, the region shrinks steadily outward again, and the job odds became less flattering to the biped
   (trailer unloading 0% → 8%). Bisection had missed the bug because it only finds the inner boundary.
+
+![capturability map](docs/capturability.png)
 
 ## Policy compression with a robustness check
 
