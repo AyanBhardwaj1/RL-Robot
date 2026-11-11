@@ -382,3 +382,23 @@ def test_deterministic_score_and_checkpoint_callback():
     train(pol, ScenarioSampler(seed=0), PPOConfig(total_steps=256, rollout_steps=128, minibatch=64, epochs=1),
           checkpoint=lambda p, row: seen.append(row["det_score"]), eval_every=1)
     assert len(seen) == 2 and all(0.0 <= v <= 1.25 for v in seen)
+
+
+def test_profiles_sample_valid_worlds_matching_their_terrain_mix():
+    from breakpoint.profiles import PROFILES
+
+    rng = np.random.default_rng(0)
+    for prof in PROFILES.values():
+        worlds = [prof.sample(rng) for _ in range(40)]
+        assert {w.terrain for w in worlds} <= set(prof.terrains)
+        assert all(prof.friction[0] - 1e-9 <= w.friction <= prof.friction[1] + 1e-9 for w in worlds)
+
+
+def test_deployment_check_reports_rate_and_bound():
+    from breakpoint.profiles import deployment_check
+
+    r = deployment_check(None, "home", trials=6, workers=1)
+    assert r["trials"] == 6 and 0 <= r["failures"] <= 6
+    assert r["failure_rate_upper_95"] >= r["failure_rate"]
+    with pytest.raises(ValueError):
+        deployment_check(None, "moon", trials=1)

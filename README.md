@@ -39,6 +39,7 @@ hand-written backprop, and that backprop is checked against finite differences i
 | `probe.py` | Breaking-point bisection on 17 axes: 8 push directions, friction, payload, motor weakness, latency, sensor noise, uphill, downhill, stairs and roughness. Every push is tested at 4 gait phases, and a push margin is only as good as its worst phase. |
 | `hunt.py` | Cross-entropy search for the score `margin + λ·severity`, so it finds *cheap* failures. A MAP-Elites atlas keeps the mildest failure per (stressor × severity band) cell. `shrink()` bisects each failure toward nominal, like property-based testing. |
 | `redteam.py` | Compound-stress tests (pairs of the weakest axes at 50%/75% of their breaking points), a 2-D failure-boundary heatmap, and an LLM red team that proposes realistic multi-stressor situations from the measured weak spots. Offline, deterministic templates are used instead. |
+| `profiles.py` | Deployment profiles (warehouse, sidewalk, home, construction) as distributions over conditions. `deploy` estimates the failure probability under each, with a 95% bound and the dominant causes. |
 | `report.py` | Readiness score (0–100), a grade (FIELD-READY / SUPERVISED / LAB-ONLY / NOT READY), a push-recovery polar plot, breaking-point bars, the failure atlas, and the search budget. Failure-rate bounds use the exact binomial (rule of three) or Wilson. Self-contained HTML. |
 | `server.py`, `static/` | FastAPI and a three.js playground. You can compile a scenario, watch the replay, or use **Shove mode**, where you push the robot live over a WebSocket and score how much impulse it absorbs before it falls. A **ghost** mode replays a second policy as a translucent overlay in the same world. |
 
@@ -52,6 +53,7 @@ python -m breakpoint train --steps 240000 --out runs/policy_v1.npz     # ~5 min 
 python -m breakpoint audit --policy runs/policy_v1.npz --baseline     # report: runs/audit/report.html
 python -m breakpoint harden --policy runs/policy_v1.npz --out runs/hardened
 python -m breakpoint regress --policy runs/hardened/policy_hardened.npz --suite runs/hardened/suite  # CI gate
+python -m breakpoint deploy --policy runs/hardened/policy_hardened.npz --profile warehouse --max-fail 0.10
 python -m breakpoint redteam --policy runs/hardened/policy_hardened.npz   # compound + red-team attacks
 python -m breakpoint leaderboard cpg runs/policy_v1.npz runs/hardened/policy_hardened.npz
 python -m breakpoint serve                                            # http://127.0.0.1:8000
@@ -98,6 +100,26 @@ What the lab found:
   it also can't make forward progress at all, so it still fails the cell with no push.
 
 ![compound stress](docs/report_compound.png)
+
+### Deployment check: "if we ship it there, how often does it fall?"
+
+`python -m breakpoint deploy --policy <p> --trials 60` samples 60 worlds from each deployment
+profile (a distribution over terrain, friction, payload, latency, noise and pushes). It reports
+the failure rate with a 95% upper bound and the dominant causes. It exits non-zero if the bound
+exceeds `--max-fail`, so it can gate a release.
+
+| Profile | CPG gait alone | Hardened PPO (round 1) | Dominant causes (hardened) |
+|---|---|---|---|
+| warehouse | 10.0% (UB 18.2%) | **3.3% (UB 9.6%)** | latency, low friction |
+| construction | 33.3% (UB 43.9%) | **20.0% (UB 29.7%)** | latency, low friction, payload |
+| home | 6.7% (UB 14.0%) | 6.7% (UB 14.0%) | low friction, terrain |
+| sidewalk | **3.3% (UB 9.6%)** | 11.7% (UB 20.2%) | latency, low friction |
+
+The learned policy is better where payloads and shoves dominate, but worse on sidewalks. The
+cause is **latency**: the open-loop gait ignores observations so delay can't hurt it, while the
+closed-loop residual reacts to stale state. Single-axis margins rated the hardened policy at only
+2 steps (40 ms) of latency tolerance. The deployment check shows why that matters, and the next
+hardening round should target latency.
 
 ## The hardening loop
 

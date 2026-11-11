@@ -22,6 +22,7 @@ from .hunt import hunt, shrink
 from .policy import ResidualPolicy, load_policy
 from .ppo import PPOConfig, ScenarioSampler, deterministic_score, train
 from .probe import probe
+from .profiles import PROFILES, deployment_check
 from .redteam import boundary_map, interactions, red_team
 from .report import render_html, scorecard
 from .scenario import Scenario
@@ -212,6 +213,19 @@ def cmd_redteam(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_deploy(a: argparse.Namespace) -> int:
+    names = sorted(PROFILES) if a.profile == "all" else [a.profile]
+    rows = []
+    for name in names:
+        r = deployment_check(a.policy, name, trials=a.trials, seed=a.seed, workers=a.workers)
+        rows.append(r)
+        print(f"{name:>13}: {r['failures']}/{r['trials']} fail  ({r['failure_rate']:.1%}, 95% UB {r['failure_rate_upper_95']:.1%})"
+              f"  causes {r['failures_by_dominant_stressor']}")
+    if a.out:
+        Path(a.out).write_text(json.dumps(rows, indent=1))
+    return 0 if all(r["failure_rate_upper_95"] <= a.max_fail for r in rows) else 1
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     import uvicorn
 
@@ -271,6 +285,16 @@ def main(argv: list[str] | None = None) -> int:
     lb.add_argument("--hunt-gens", type=int, default=5)
     lb.add_argument("--workers", type=int, default=3)
     lb.set_defaults(fn=cmd_leaderboard)
+
+    dp = sub.add_parser("deploy", help="failure probability under a deployment profile (exit 1 if over budget)")
+    dp.add_argument("--policy")
+    dp.add_argument("--profile", default="all", choices=["all", *sorted(PROFILES)])
+    dp.add_argument("--trials", type=int, default=60)
+    dp.add_argument("--max-fail", type=float, default=0.10, help="allowed 95%% upper bound on failure rate")
+    dp.add_argument("--seed", type=int, default=0)
+    dp.add_argument("--workers", type=int, default=3)
+    dp.add_argument("--out")
+    dp.set_defaults(fn=cmd_deploy)
 
     rt = sub.add_parser("redteam", help="compound-stress + red-team attacks on a policy")
     rt.add_argument("--policy")
