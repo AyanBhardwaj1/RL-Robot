@@ -10,4 +10,5 @@ jobs:
           python-version: "3.12"
       - run: pip install -e '.[dev]'
       - run: ruff check .
+      - run: cmake -S cpp -B build-cpp && cmake --build build-cpp
       - run: pytest -q --cov=breakpoint --cov-report=term

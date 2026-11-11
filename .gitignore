@@ -4,3 +4,4 @@ __pycache__/
 runs/*.log
 .ruff_cache/
 .vercel/
+build-cpp/
