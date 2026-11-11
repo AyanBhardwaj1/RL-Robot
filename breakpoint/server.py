@@ -100,7 +100,9 @@ def policies() -> dict:
 
 @app.get("/api/reports")
 def reports() -> dict:
-    return {"reports": sorted(str(p.relative_to(RUNS).parent) for p in RUNS.glob("*/report.html"))}
+    # oldest -> newest, so the UI can link the most recent report
+    found = sorted(RUNS.glob("*/report.html"), key=lambda p: p.stat().st_mtime)
+    return {"reports": [str(p.relative_to(RUNS).parent) for p in found]}
 
 
 @app.get("/reports/{name}")
