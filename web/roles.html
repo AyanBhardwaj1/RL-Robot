@@ -180,7 +180,7 @@
       <ul>
         <li>A teleoperated data-collection job profile with 50–250 ms of network lag.</li>
         <li>Finding: learned policies are the latency-sensitive part; gating them on measured link latency removed every teleop failure.</li>
-        <li><code>breakpoint/episodes.py</code>: a demonstration filter. Each recorded contact is replayed through the humanoid model at the latency measured at that moment. Of 200 sample episodes, 52% come back clean; 11% are falls to drop, and the rest are flagged for stalls, a blind link or near-falls (fine for recovery training, not as nominal demos).</li>
+        <li><code>breakpoint/episodes.py</code>: a demonstration filter. Each recorded contact is replayed through the humanoid model at the latency measured at that moment. Of 200 sample episodes, 52% come back clean; 11% are falls to drop, and the rest are flagged for stalls, a blind link or near-falls (fine for recovery training, not as nominal demos). It also runs in the browser on the humanoid page, on the sample log or your own, with nothing uploaded.</li>
       </ul>
       <h3>Next I’d build</h3>
       <p>Run the filter on real episode logs, then check whether a policy trained only on clean episodes beats one trained on everything, on the same breaking-point audit.</p>

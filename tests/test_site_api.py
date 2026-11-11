@@ -87,7 +87,8 @@ def test_committed_web_build_is_in_sync_with_sources():
              and (not (web / p.relative_to(ROOT / "site")).is_file()
                   or (web / p.relative_to(ROOT / "site")).read_bytes() != p.read_bytes())]
     for src, dst in (("runs/humanoid/baseline.json", "assets/data/humanoid.json"),
-                     ("runs/humanoid/levers.json", "assets/data/levers.json")):
+                     ("runs/humanoid/levers.json", "assets/data/levers.json"),
+                     ("runs/episodes/teleop-demo.jsonl", "assets/data/teleop-episodes.jsonl")):
         if (ROOT / src).is_file() and (web / dst).read_bytes() != (ROOT / src).read_bytes():
             stale.append(dst)
     assert not stale, f"run python3 scripts/build_site.py; stale in web/: {stale[:10]}"

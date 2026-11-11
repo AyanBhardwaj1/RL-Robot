@@ -74,3 +74,11 @@
 .copy-link { margin-top: 6px; padding: 10px 12px; background: var(--char-3); color: var(--ink-on-dark); border: 0; font: 600 var(--step-small) "Schibsted Grotesk", sans-serif; cursor: pointer; text-align: left; }
 .copy-link:hover { background: var(--char); }
 .copy-link:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+.hum-episodes .row { display: flex; flex-wrap: wrap; gap: 10px; }
+.file-pick { position: relative; display: inline-block; }
+.file-pick input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.file-pick:focus-within { outline: 2px solid var(--orange); outline-offset: 2px; }
+#eps-table { width: 100%; border-collapse: collapse; font-size: var(--step-small); }
+#eps-table th, #eps-table td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--char-3); vertical-align: top; }
+#eps-table td.num { font-weight: 800; white-space: nowrap; }
+#eps-table td.bad { color: #ffb08a; }

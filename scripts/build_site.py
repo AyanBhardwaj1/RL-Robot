@@ -117,6 +117,9 @@ def main(out: Path | None = None, replays: bool = True) -> int:
     humanoid = ROOT / "runs" / "humanoid" / "baseline.json"
     if humanoid.is_file():
         shutil.copy2(humanoid, data / "humanoid.json")
+    episodes = ROOT / "runs" / "episodes" / "teleop-demo.jsonl"
+    if episodes.is_file():
+        shutil.copy2(episodes, data / "teleop-episodes.jsonl")
     levers = ROOT / "runs" / "humanoid" / "levers.json"
     if levers.is_file():
         shutil.copy2(levers, data / "levers.json")

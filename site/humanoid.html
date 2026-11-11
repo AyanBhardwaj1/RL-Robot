@@ -113,6 +113,15 @@
     <p class="lever-note" id="levers-note"></p>
   </section>
 
+  <section class="hum-jobs hum-episodes" aria-labelledby="eps-title">
+    <h2 id="eps-title">Which demonstrations to learn from</h2>
+    <p>Teleoperated demonstrations train robot foundation models, and two things quietly poison them: a link that stalls, so the recorded action answers a stale picture, and a shove the robot barely survived. Each recorded contact is replayed through this model at the latency measured at that second. Falls are dropped; stalls, a blind link and near-falls are flagged. Everything runs in this page; nothing is uploaded. (<code>python -m breakpoint episodes</code> does the same from the command line.)</p>
+    <p class="row"><button type="button" class="copy-link" id="eps-sample">Tag the 200-episode sample log</button>
+      <label class="copy-link file-pick">Tag your own log (.jsonl)<input type="file" id="eps-file" accept=".jsonl,.json,.txt,application/json"></label></p>
+    <p class="cap-stats" id="eps-summary" aria-live="polite"></p>
+    <div class="tablewrap"><table id="eps-table" hidden><thead><tr><th scope="col">Episode</th><th scope="col">Tag</th><th scope="col">Why</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
   <section class="hum-how" aria-labelledby="how-h">
     <h2 id="how-h">How it decides where to step</h2>
     <div class="how-cols">
@@ -126,5 +135,7 @@
 
 <script src="/assets/humanoid.js" defer></script>
 <script src="/assets/humanoid-page.js" defer></script>
+<script src="/assets/episodes.js" defer></script>
+<script src="/assets/episodes-page.js" defer></script>
 </body>
 </html>

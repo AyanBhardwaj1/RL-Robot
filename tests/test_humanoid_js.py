@@ -74,3 +74,21 @@ def test_js_design_lever_overrides_match_python():
           breaking_point(-90.0, replace(r, max_lateral_step=0.5), iters=10)]
     assert js == pytest.approx(py, abs=0.05)
     assert py[0] > breaking_point(-90.0, r, iters=10)
+
+
+def test_js_episode_filter_matches_python():
+    from breakpoint.episodes import filter_episodes, synthetic_episodes
+
+    eps = synthetic_episodes(60, seed=3)
+    eps.append({"episode": "gap", "latency_ms": [20, None, 400, 20], "contacts": [{"t_s": 1, "impulse_ns": 40, "direction_deg": -90}]})
+    ep_js = Path(__file__).resolve().parent.parent / "site" / "assets" / "episodes.js"
+    node = shutil.which("node")
+    if node is None:
+        pytest.fail("node is required to check the browser port")
+    script = (f"const E = require({json.dumps(str(ep_js))}); const eps = {json.dumps(eps)};"
+              " console.log(JSON.stringify(E.filterEpisodes(eps).verdicts.map((v) => v.tag)));"
+              " let err = ''; try { E.filterEpisodes([{contacts: [{impulse_ns: null}]}]); } catch (e) { err = e.message; }"
+              " console.log(JSON.stringify(err));")
+    out = subprocess.run([node, "-e", script], capture_output=True, text=True, timeout=60, check=True).stdout.splitlines()
+    assert json.loads(out[0]) == [v["tag"] for v in filter_episodes(eps)["verdicts"]]
+    assert "record 1" in json.loads(out[1]) and "impulse_ns" in json.loads(out[1])
