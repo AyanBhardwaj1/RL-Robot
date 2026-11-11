@@ -67,6 +67,7 @@ class CapturePointController {
     bias_x_ = slope_acc_ / (w_ * w_);
     cop_reach_ = r.ankle_torque * strength / (m * kG);
     x_ = {c.payload_kg * c.payload_reach / m, 0.0};
+    pre_push_ = x_ + Vec2{bias_x_, 0};
     const double a = direction_deg * kPi / 180.0;
     v_ = Vec2{std::cos(a), std::sin(a)} * (impulse / m);
     lat_ = static_cast<std::size_t>(std::lround(c.latency_s / kDt));
@@ -85,7 +86,7 @@ class CapturePointController {
     // latency: the controller acts on the capture point from `lat_` ticks ago (the first sample until then)
     ring_[head_] = xi;
     ++count_;
-    const Vec2 seen = count_ > lat_ ? ring_[(head_ + 1) % ring_.size()] : ring_[0];
+    const Vec2 seen = count_ > lat_ ? ring_[(head_ + 1) % ring_.size()] : pre_push_;  // stale view = standing still
     head_ = (head_ + 1) % ring_.size();
 
     const double hw = dbl_ ? r_.stance_half_width + r_.foot_half_width : r_.foot_half_width;
@@ -145,7 +146,7 @@ class CapturePointController {
   Humanoid r_;
   Conditions c_;
   double z_ = 0, w_ = 1, swing_ = 0, slope_acc_ = 0, bias_x_ = 0, cop_reach_ = 0, t_ = 0, swing_until_ = -1;
-  Vec2 x_, v_, stance_, target_;
+  Vec2 x_, v_, stance_, target_, pre_push_;
   bool dbl_ = true, planned_ = false, done_ = false;
   int steps_ = 0;
   std::size_t lat_ = 0, head_ = 0, count_ = 0;

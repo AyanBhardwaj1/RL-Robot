@@ -37,13 +37,20 @@ and the browser lab at `/humanoid`):
 
   | Job | Biped | Wheeled |
   |---|---|---|
-  | Line-side kitting, tote handling | 0% | 0% |
-  | Trailer unloading | 0% | 16% |
+  | Line-side kitting | 0% | 0% |
+  | Tote handling | 0.7% | 0% |
+  | Trailer unloading | 8.0% (slips) | 16.0% (blocked) |
   | Home care | 0% | 47% |
-  | Teleoperated data collection | 0.7% | 0% |
+  | Teleoperated data collection | 2.0% | 0% |
 
 - **Browser parity.** The browser version is a line-for-line JavaScript port, and `tests/test_humanoid_js.py`
   runs it under Node to check it against Python.
+- **A bug the map caught.** The capturability map (every shove velocity, coloured by steps needed) showed an
+  island at 150 ms of latency: harder shoves were recoverable while softer ones were not. The cause was the
+  latency model. Before the delay elapsed, the controller was handed the first *post*-push sample, so it saw
+  big shoves instantly. A real controller sees the robot still standing for those first milliseconds. After
+  the fix, the region shrinks steadily outward again, and the job odds became less flattering to the biped
+  (trailer unloading 0% → 8%). Bisection had missed the bug because it only finds the inner boundary.
 
 ## Policy compression with a robustness check
 

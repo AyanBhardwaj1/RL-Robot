@@ -164,9 +164,35 @@
       dl.append(dt, dd);
     }
   }
+  // ---------- capturability map ----------
+  const CAP_N = 37, CAP_V = 1.6;
+  const CAP_COLORS = { "-1": "#0b0a0d", 0: "#3a3641", 1: "#7b4a2c", 2: "#b55e22", 3: "#f99a55" };
+  function drawCapMap() {
+    const cv = $("#cap-canvas");
+    if (!cv) return;
+    const g = H.capturabilityMap(body(), cond(), CAP_N, CAP_V);
+    const c2 = cv.getContext("2d");
+    const cell = cv.width / CAP_N;
+    const counts = { "-1": 0, 0: 0, 1: 0, 2: 0, 3: 0 };
+    g.forEach((row, i) => row.forEach((v, j) => {
+      counts[v] = (counts[v] || 0) + 1;
+      c2.fillStyle = CAP_COLORS[v] || CAP_COLORS[3];
+      c2.fillRect(Math.floor(j * cell), Math.floor(i * cell), Math.ceil(cell), Math.ceil(cell));
+    }));
+    // axes through the centre (standing still) and speed rings every 0.5 m/s
+    c2.strokeStyle = "rgba(243,238,232,.35)"; c2.lineWidth = 1;
+    c2.beginPath(); c2.moveTo(cv.width / 2, 0); c2.lineTo(cv.width / 2, cv.height); c2.moveTo(0, cv.height / 2); c2.lineTo(cv.width, cv.height / 2); c2.stroke();
+    for (const v of [0.5, 1.0, 1.5]) { c2.beginPath(); c2.arc(cv.width / 2, cv.height / 2, v / CAP_V * cv.width / 2, 0, Math.PI * 2); c2.stroke(); }
+    c2.fillStyle = "#f3eee8"; c2.font = "600 15px Schibsted Grotesk, sans-serif"; c2.textAlign = "center";
+    c2.fillText("forward", cv.width / 2, 18); c2.fillText("backward", cv.width / 2, cv.height - 8);
+    c2.textAlign = "left"; c2.fillText("left", 8, cv.height / 2 - 8); c2.textAlign = "right"; c2.fillText("right", cv.width - 8, cv.height / 2 - 8);
+    const total = CAP_N * CAP_N, ok = total - counts["-1"];
+    $("#cap-stats").textContent = `${pct.format(ok / total)} of shoves up to 1.6 m/s are recoverable: ${counts[0]} with ankles only, ${counts[1]} with 1 step, ${counts[2]} with 2, ${counts[3]} with 3.`;
+  }
+
   function refreshEnvelope() {
     clearTimeout(envTimer);
-    envTimer = setTimeout(() => polar(H.envelope("biped", cond(), 9), H.envelope("wheeled", cond(), 9)), 60);
+    envTimer = setTimeout(() => { polar(H.envelope("biped", cond(), 9), H.envelope("wheeled", cond(), 9)); drawCapMap(); }, 60);
   }
 
   // ---------- jobs table (from the Python run) ----------
@@ -197,7 +223,7 @@
     const el = $("#" + id);
     el.addEventListener("input", () => { $(`#${id}-out`).textContent = outs[id](el.value); if (id !== "imp") refreshEnvelope(); });
   });
-  document.querySelectorAll('input[name="body"]').forEach((r) => r.addEventListener("change", () => shove(last.dir)));
+  document.querySelectorAll('input[name="body"]').forEach((r) => r.addEventListener("change", () => { shove(last.dir); drawCapMap(); }));
   document.querySelectorAll(".dir-pad button").forEach((b) => b.addEventListener("click", () => shove(+b.dataset.d)));
   canvas.addEventListener("click", (e) => {
     const r = canvas.getBoundingClientRect();

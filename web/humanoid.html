@@ -71,6 +71,25 @@
     </section>
   </div>
 
+  <section class="hum-cap" aria-labelledby="cap-title">
+    <div class="cap-words">
+      <h2 id="cap-title">Capturability map</h2>
+      <p>Every shove, as the velocity it gives the centre of mass, coloured by what it takes to recover with the current conditions. The centre is standing still; up is a push forward, left is a push toward the robot’s left. It is recomputed live: 1,369 simulations each time you move a slider.</p>
+      <ul class="cap-legend">
+        <li><span class="k" style="background:#3a3641"></span>Ankles only</li>
+        <li><span class="k" style="background:#7b4a2c"></span>1 step</li>
+        <li><span class="k" style="background:#b55e22"></span>2 steps</li>
+        <li><span class="k" style="background:#f99a55"></span>3 steps</li>
+        <li><span class="k" style="background:#0b0a0d;outline:1px solid #5d5866"></span>Falls or blocked</li>
+      </ul>
+      <p class="cap-stats" id="cap-stats" aria-live="polite"></p>
+    </div>
+    <figure class="cap-fig">
+      <canvas id="cap-canvas" width="640" height="640" role="img" aria-label="Capturability map: steps needed to recover for each initial centre-of-mass velocity"></canvas>
+      <figcaption>Axes: ±1.6 m/s of centre-of-mass velocity after the shove.</figcaption>
+    </figure>
+  </section>
+
   <section class="hum-jobs" aria-labelledby="jobs-title">
     <h2 id="jobs-title">Legs or wheels, by job</h2>
     <p>Failure rate over 150 sampled shifts per job from the Python lab (<code>python -m breakpoint humanoid</code>). The wheeled base shrugs off bigger shoves; it cannot climb a curb, a trailer lip or a stair.</p>

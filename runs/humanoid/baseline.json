@@ -21,14 +21,14 @@
    "front-right": 103.81
   },
   "wheeled": {
-   "front": 145.85,
-   "front-left": 166.21,
-   "left": 128.91,
-   "rear-left": 166.21,
-   "rear": 145.85,
-   "rear-right": 166.21,
-   "right": 128.91,
-   "front-right": 166.21
+   "front": 137.01,
+   "front-left": 156.98,
+   "left": 120.07,
+   "rear-left": 156.98,
+   "rear": 137.01,
+   "rear-right": 156.98,
+   "right": 120.07,
+   "front-right": 156.98
   }
  },
  "jobs": {
@@ -54,10 +54,12 @@
    "biped": {
     "job": "tote handling",
     "trials": 150,
-    "failures": 0,
-    "failure_rate": 0.0,
-    "failure_rate_upper_95": 0.0198,
-    "causes": {}
+    "failures": 1,
+    "failure_rate": 0.006666666666666667,
+    "failure_rate_upper_95": 0.0293,
+    "causes": {
+     "slipped": 1
+    }
    },
    "wheeled": {
     "job": "tote handling",
@@ -72,10 +74,13 @@
    "biped": {
     "job": "trailer unloading",
     "trials": 150,
-    "failures": 0,
-    "failure_rate": 0.0,
-    "failure_rate_upper_95": 0.0198,
-    "causes": {}
+    "failures": 12,
+    "failure_rate": 0.08,
+    "failure_rate_upper_95": 0.1243,
+    "causes": {
+     "slipped": 11,
+     "needed more than 3 steps": 1
+    }
    },
    "wheeled": {
     "job": "trailer unloading",
@@ -112,11 +117,12 @@
    "biped": {
     "job": "teleoperated data collection",
     "trials": 150,
-    "failures": 1,
-    "failure_rate": 0.006666666666666667,
-    "failure_rate_upper_95": 0.0293,
+    "failures": 3,
+    "failure_rate": 0.02,
+    "failure_rate_upper_95": 0.049,
     "causes": {
-     "needed more than 3 steps": 1
+     "slipped": 1,
+     "needed more than 3 steps": 2
     }
    },
    "wheeled": {

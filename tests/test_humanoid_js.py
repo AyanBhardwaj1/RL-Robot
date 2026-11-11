@@ -46,3 +46,14 @@ def test_js_breaking_points_match_python():
           breaking_point(0.0, Humanoid(), Conditions(latency_s=0.1), iters=8)]
     for a, b in zip(js, py):
         assert a == pytest.approx(b, abs=0.05)
+
+
+def test_js_capturability_map_matches_python():
+    from breakpoint.humanoid import capturability_map
+
+    js = run_js('H.capturabilityMap("biped", {"latency_s": 0.05}, 9, 1.6)')
+    py = capturability_map(Humanoid(), Conditions(latency_s=0.05), n=9, v_max=1.6)
+    assert js == py
+    flat = [c for row in py for c in row]
+    assert flat[len(flat) // 2] == 0  # standing still: ankles only
+    assert -1 in flat and max(flat) >= 1  # some shoves need steps, the fastest fail

@@ -31,6 +31,16 @@
 #h-polar .lbl { fill: var(--ink-on-dark); font: 600 9px "Schibsted Grotesk", sans-serif; }
 #h-polar .biped { fill: rgba(244, 123, 37, .35); stroke: var(--orange); stroke-width: 2; }
 #h-polar .wheel { fill: rgba(143, 183, 232, .18); stroke: #8fb7e8; stroke-width: 2; }
+.hum-cap { background: var(--char-2); padding: clamp(20px, 3vw, 40px) var(--margin); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: clamp(20px, 4vw, 56px); align-items: center; }
+.hum-cap h2 { font-size: var(--step-lead); letter-spacing: -0.02em; }
+.cap-words { display: grid; gap: 14px; }
+.cap-words p { max-width: 60ch; line-height: 1.5; }
+.cap-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-weight: 600; font-size: var(--step-small); }
+.cap-stats { font-weight: 800; font-size: var(--step-body); }
+.cap-fig { margin: 0; }
+#cap-canvas { width: 100%; height: auto; aspect-ratio: 1; display: block; background: #0b0a0d; }
+.cap-fig figcaption { margin-top: 8px; font-size: var(--step-small); }
+@media (max-width: 900px) { .hum-cap { grid-template-columns: minmax(0, 1fr); } }
 .hum-jobs, .hum-how { background: var(--char-2); padding: clamp(20px, 3vw, 40px) var(--margin); display: grid; gap: 14px; }
 .hum-jobs h2, .hum-how h2 { font-size: var(--step-lead); letter-spacing: -0.02em; }
 .hum-jobs p { max-width: 80ch; }

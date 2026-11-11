@@ -96,8 +96,10 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
 2. **The product question (60 s).**
    - Switch to the wheeled base. It survives about 1.6× bigger shoves.
    - Raise the curb slider to 10 cm and it is blocked.
-   - Scroll to “Legs or wheels, by job”: wheeled fails 47% of home-care routes and 16% of trailer jobs;
-     the biped fails 0%.
+   - Scroll to “Legs or wheels, by job”. Home care: wheeled fails 47%, biped 0%. Trailer
+     unloading: wheeled fails 16% (blocked), biped 8% (slips).
+   - Show the capturability map, then drag latency to 150 ms. Say: “This map caught a bug in my own
+     latency model that bisection missed.”
    - Say: “This is the biped-versus-wheeled trade-off you shipped in Apollo 2, made measurable.”
 3. **Readiness, honestly (90 s).** Open the quadruped report.
    - The first trained policy looked fine in training but scored below the gait it was built on.

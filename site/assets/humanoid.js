@@ -41,6 +41,7 @@
     let sx = 0, sy = 0;
     const supportHalfW = robot.stance_half_width + robot.foot_half_width;
     let x = offset, y = 0;
+    const prePush = [offset + biasX, 0];
     const a = dirDeg * Math.PI / 180;
     let vx = (impulse / m) * Math.cos(a), vy = (impulse / m) * Math.sin(a);
     let t = 0, steps = 0, dbl = true, swingUntil = -1, planned = null;
@@ -53,7 +54,7 @@
     while (t < horizon) {
       const xix = x + vx / w + biasX, xiy = y + vy / w;
       hist.push([xix, xiy]);
-      const seen = hist.length > lat ? hist[hist.length - 1 - lat] : hist[0];
+      const seen = hist.length > lat ? hist[hist.length - 1 - lat] : prePush; // stale view is the pre-push state
       const hw = dbl ? supportHalfW : robot.foot_half_width;
       const hx = Math.min(robot.foot_half_length, copReach);
       const lox = sx - hx, hix = sx + hx, loy = sy - hw, hiy = sy + hw;
@@ -102,6 +103,7 @@
     const slopeAcc = G * Math.sin(cond.floor_slope_deg * Math.PI / 180);
     const biasX = slopeAcc / (w * w);
     let x = offset, y = 0, bx = 0, by = 0, bvx = 0, bvy = 0;
+    const prePush = [offset + biasX, 0];
     const a = dirDeg * Math.PI / 180;
     let vx = (impulse / m) * Math.cos(a), vy = (impulse / m) * Math.sin(a);
     const hx = base.half_length, hy = base.half_width;
@@ -112,7 +114,7 @@
     while (t < horizon) {
       const xix = x + vx / w + biasX, xiy = y + vy / w;
       hist.push([xix - bx, xiy - by]);
-      const seen = hist.length > delay ? hist[hist.length - 1 - delay] : hist[0];
+      const seen = hist.length > delay ? hist[hist.length - 1 - delay] : prePush;
       const px = clamp(xix, bx - hx, bx + hx), py = clamp(xiy, by - hy, by + hy);
       const dn = norm(x - px, y - py);
       if (dn > cond.friction * z) return result(false, 0, `slipped: needed friction ${(dn / z).toFixed(2)} > ${cond.friction.toFixed(2)}`, t, rec);
@@ -160,6 +162,27 @@
     return out;
   }
 
-  const api = { DIRECTIONS, BIPED, WHEELED, CONDITIONS, recover, recoverBiped, recoverWheeled, breakingPoint, envelope, effective };
+  // Steps needed to recover from an initial CoM velocity on an n x n grid; -1 = fell or blocked.
+  // Row 0 = +vMax forward, column 0 = +vMax toward the robot's left (mirrors capturability_map in Python).
+  function capturabilityMap(body, cond, n, vMax) {
+    n = n || 41; vMax = vMax || 2;
+    const robot = body === "wheeled" ? WHEELED : BIPED;
+    const m = robot.mass_kg + Object.assign({}, CONDITIONS, cond).payload_kg;
+    const grid = [];
+    for (let i = 0; i < n; i++) {
+      const vx = vMax - 2 * vMax * i / (n - 1);
+      const row = [];
+      for (let j = 0; j < n; j++) {
+        const vy = vMax - 2 * vMax * j / (n - 1);
+        const speed = Math.hypot(vx, vy);
+        const r = recover(body, speed * m, Math.atan2(vy, vx) * 180 / Math.PI, cond, false);
+        row.push(r.recovered ? r.steps : -1);
+      }
+      grid.push(row);
+    }
+    return grid;
+  }
+
+  const api = { capturabilityMap, DIRECTIONS, BIPED, WHEELED, CONDITIONS, recover, recoverBiped, recoverWheeled, breakingPoint, envelope, effective };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Humanoid = api;
 })(typeof window !== "undefined" ? window : globalThis);

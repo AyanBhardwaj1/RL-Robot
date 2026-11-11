@@ -133,6 +133,7 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
     stance = np.array([0.0, 0.0])
     support_half_w = robot.stance_half_width + robot.foot_half_width
     x = np.array([offset, 0.0])
+    pre_push = x + bias  # capture point while standing, before the shove lands
     ang = math.radians(direction_deg)
     v = (impulse / m) * np.array([math.cos(ang), math.sin(ang)])
     t, steps = 0.0, 0
@@ -151,7 +152,8 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
     while t < horizon_s:
         xi = x + v / w + bias
         history.append(xi.copy())
-        seen = history[-1 - latency_steps] if len(history) > latency_steps else history[0]
+        # Until the delay has elapsed the controller still sees the robot standing still (pre-push state).
+        seen = history[-1 - latency_steps] if len(history) > latency_steps else pre_push
         half_w = support_half_w if double_support else robot.foot_half_width
         lo, hi = foot_box(stance, half_w)
         p = np.clip(xi, lo, hi)
@@ -242,6 +244,7 @@ def recover_wheeled(impulse: float, direction_deg: float, base: WheeledBase = Wh
     slope_acc = G * math.sin(math.radians(cond.floor_slope_deg))
     bias = np.array([slope_acc / (w * w), 0.0])
     x = np.array([offset, 0.0])
+    pre_push = x + bias  # relative to the base, which starts at the origin
     b = np.zeros(2)
     bv = np.zeros(2)
     ang = math.radians(direction_deg)
@@ -254,7 +257,7 @@ def recover_wheeled(impulse: float, direction_deg: float, base: WheeledBase = Wh
     while t < horizon_s:
         xi = x + v / w + bias
         history.append(xi - b)
-        seen = history[-1 - delay] if len(history) > delay else history[0]
+        seen = history[-1 - delay] if len(history) > delay else pre_push
         p = np.clip(xi, b - half, b + half)
         if float(np.linalg.norm(x - p)) > cond.friction * z:
             rec.reason = f"slipped: needed friction {float(np.linalg.norm(x - p)) / z:.2f} > {cond.friction:.2f}"
@@ -331,6 +334,28 @@ def zero_step_limit(direction_deg: float, robot: Humanoid = Humanoid(), cond: Co
     ty = (half_y / abs(s)) if abs(s) > 1e-9 else math.inf
     reach = max(0.0, min(tx, ty))
     return m * w * reach
+
+
+def capturability_map(robot: Humanoid | WheeledBase = Humanoid(), cond: Conditions = Conditions(), n: int = 41,
+                      v_max: float = 2.0) -> list[list[int]]:
+    """Steps needed to recover from an initial CoM velocity on an n x n grid (row = forward speed, col = sideways).
+
+    Cell values: 0..max_steps = steps taken to recover, -1 = fell or blocked. Row 0 is +v_max forward,
+    column 0 is +v_max to the robot's left (screen left), so the grid reads like the top-view lab.
+    """
+    z, offset, m = effective(robot, cond) if isinstance(robot, Humanoid) else (None, None, robot.mass_kg + cond.payload_kg)
+    sim = recover_wheeled if isinstance(robot, WheeledBase) else recover
+    grid = []
+    for i in range(n):
+        vx = v_max - 2 * v_max * i / (n - 1)
+        row = []
+        for j in range(n):
+            vy = v_max - 2 * v_max * j / (n - 1)
+            speed = math.hypot(vx, vy)
+            r = sim(speed * m, math.degrees(math.atan2(vy, vx)), robot, cond)
+            row.append(r.steps if r.recovered else -1)
+        grid.append(row)
+    return grid
 
 
 # ------------------------------------------------------------------ deployment profiles
