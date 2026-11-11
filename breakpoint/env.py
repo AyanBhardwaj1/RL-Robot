@@ -106,7 +106,8 @@ class QuadrupedEnv:
         self.data.qpos[2] = ground_height(self.scenario, 0.0, 0.0, self.seed) + 0.28
         mujoco.mj_forward(self.model, self.data)
         self.t = 0.0
-        self.phase = float(self.rng.uniform(0, 2 * np.pi))
+        rand_phase = float(self.rng.uniform(0, 2 * np.pi))  # always draw: keeps seeds reproducible
+        self.phase = np.radians(self.scenario.phase0_deg) if self.scenario.phase0_deg >= 0 else rand_phase
         self.prev_action = np.zeros(ACT_DIM)
         latency = int(self.scenario.latency_steps)
         self.action_queue: deque[np.ndarray] = deque(

@@ -38,7 +38,8 @@ pre{margin:0;font-size:11px;max-height:180px;overflow:auto;white-space:pre-wrap}
   <div class="chips" id="examples"></div>
   <div class="row"><button id="compile">Compile scenario</button><label class="ghost" style="text-align:center;border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer">Photo<input id="photo" type="file" accept="image/*" hidden></label></div>
   <div class="card"><div class="muted" id="source">scenario</div><pre id="scn"></pre></div>
-  <label class="muted" for="policy">Policy</label><select id="policy"></select>
+  <div class="row"><div><label class="muted" for="policy">Policy</label><select id="policy"></select></div>
+  <div><label class="muted" for="ghost">Compare with (ghost)</label><select id="ghost"><option value="">none</option></select></div></div>
   <div class="row"><button id="sim">Simulate</button><button id="play" class="ghost">Shove mode</button></div>
   <div class="card" id="shovecard" style="display:none">
     <div class="muted">Shove the robot (0.1 s impulse). Force: <b id="fval">120</b> N</div>
@@ -57,7 +58,7 @@ pre{margin:0;font-size:11px;max-height:180px;overflow:auto;white-space:pre-wrap}
 <script src="/static/three.min.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
-let scenario = null, specs = null, meshes = [], world = null, anim = null, ws = null;
+let scenario = null, specs = null, meshes = [], ghostMeshes = [], world = null, anim = null, ws = null;
 const EXAMPLES = ["muddy forest trail in the rain", "walk up a 12 degree hill with worn motors at 55% and 80ms wifi lag",
   "stairs with 7 cm steps", "windy rooftop", "carrying 5kg front-heavy, kicked from the right at 2s with 150 N"];
 for (const e of EXAMPLES) { const c = document.createElement("span"); c.className = "chip"; c.textContent = e; c.onclick = () => { $("desc").value = e; compile(); }; $("examples").appendChild(c); }
@@ -75,7 +76,18 @@ addEventListener("resize", resize);
 function bg() { const dark = matchMedia("(prefers-color-scheme: dark)").matches; scene.background = new THREE.Color(dark ? 0x17171a : 0xeef0f2); }
 bg();
 
-function buildWorld(sp, terrain) {
+function makeMeshes(sp, ghost) {
+  return sp.map((s) => {
+    let geo;
+    if (s.type === "box") geo = new THREE.BoxGeometry(s.size[0] * 2, s.size[1] * 2, s.size[2] * 2);
+    else if (s.type === "capsule") { geo = new THREE.CylinderGeometry(s.size[0], s.size[0], s.size[1] * 2 + s.size[0], 12); geo.rotateX(Math.PI / 2); }
+    else geo = new THREE.SphereGeometry(s.size[0], 16, 12);
+    const mat = ghost ? new THREE.MeshStandardMaterial({ color: 0x7aa7ff, transparent: true, opacity: 0.35, depthWrite: false })
+                      : new THREE.MeshStandardMaterial({ color: new THREE.Color(s.rgba[0], s.rgba[1], s.rgba[2]), roughness: 0.5 });
+    const m = new THREE.Mesh(geo, mat); world.add(m); return m;
+  });
+}
+function buildWorld(sp, terrain, ghostSp) {
   if (world) scene.remove(world);
   world = new THREE.Group(); world.rotation.x = -Math.PI / 2; scene.add(world); // MuJoCo is Z-up
   const g = new THREE.PlaneGeometry(terrain.half_x * 2, terrain.half_y * 2, terrain.cols - 1, terrain.rows - 1);
@@ -87,17 +99,13 @@ function buildWorld(sp, terrain) {
   g.computeVertexNormals();
   const icy = terrain.friction < 0.3;
   world.add(new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: icy ? 0xbfe3ff : 0x8a9a85, roughness: icy ? 0.15 : 0.95, metalness: 0, flatShading: true })));
-  meshes = sp.map((s) => {
-    let geo;
-    if (s.type === "box") geo = new THREE.BoxGeometry(s.size[0] * 2, s.size[1] * 2, s.size[2] * 2);
-    else if (s.type === "capsule") { geo = new THREE.CylinderGeometry(s.size[0], s.size[0], s.size[1] * 2 + s.size[0], 12); geo.rotateX(Math.PI / 2); }
-    else geo = new THREE.SphereGeometry(s.size[0], 16, 12);
-    const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: new THREE.Color(s.rgba[0], s.rgba[1], s.rgba[2]), roughness: 0.5 }));
-    world.add(m); return m;
-  });
+  meshes = makeMeshes(sp, false);
+  ghostMeshes = ghostSp ? makeMeshes(ghostSp, true) : [];
 }
-function applyPose(poses) {
-  poses.forEach((p, i) => { const m = meshes[i]; if (!m) return; m.position.set(p[0], p[1], p[2]); m.quaternion.set(p[4], p[5], p[6], p[3]); });
+function setPoses(list, poses) { poses.forEach((p, i) => { const m = list[i]; if (!m) return; m.position.set(p[0], p[1], p[2]); m.quaternion.set(p[4], p[5], p[6], p[3]); }); }
+function applyPose(poses, ghostPoses) {
+  setPoses(meshes, poses);
+  if (ghostPoses) setPoses(ghostMeshes, ghostPoses);
   const t = poses[0];
   const target = new THREE.Vector3(t[0], t[2], -t[1]);
   camera.position.lerp(new THREE.Vector3(t[0] - 1.1, t[2] + 0.7, -t[1] + 1.3), 0.15);
@@ -130,13 +138,19 @@ $("sim").onclick = async () => {
   if (ws) ws.close();
   $("banner").style.display = "none"; $("sim").disabled = true; $("out").textContent = "simulating…";
   try {
-    const res = await post("/api/simulate", { scenario, policy: $("policy").value, seed: 0 });
-    buildWorld(res.specs, res.terrain);
-    $("out").textContent = JSON.stringify(res.outcome, null, 1);
+    const g = $("ghost").value;
+    const [res, gres] = await Promise.all([post("/api/simulate", { scenario, policy: $("policy").value, seed: 0 }),
+      g ? post("/api/simulate", { scenario, policy: g, seed: 0 }) : Promise.resolve(null)]);
+    buildWorld(res.specs, res.terrain, gres && gres.specs);
+    const verdict = (o) => o.passed ? "PASSED" : (o.fell ? "FELL" : "STALLED");
+    $("out").textContent = JSON.stringify(gres ? { [$("policy").value]: res.outcome, ["ghost: " + g]: gres.outcome } : res.outcome, null, 1);
+    const n = Math.max(res.frames.length, gres ? gres.frames.length : 0);
     let i = 0; clearInterval(anim);
     anim = setInterval(() => {
-      if (i >= res.frames.length) { clearInterval(anim); banner(res.outcome.passed ? "PASSED" : (res.outcome.fell ? "FELL" : "STALLED"), res.outcome.passed); return; }
-      applyPose(res.frames[i]); $("hud").textContent = `t = ${(i * res.dt).toFixed(1)} s · x = ${res.frames[i][0][0].toFixed(2)} m`; i++;
+      if (i >= n) { clearInterval(anim); banner(`${$("policy").value}: ${verdict(res.outcome)}` + (gres ? `  ·  ghost ${g}: ${verdict(gres.outcome)}` : ""), res.outcome.passed); return; }
+      const f = res.frames[Math.min(i, res.frames.length - 1)];
+      applyPose(f, gres && gres.frames[Math.min(i, gres.frames.length - 1)]);
+      $("hud").textContent = `t = ${(i * res.dt).toFixed(1)} s · x = ${f[0][0].toFixed(2)} m`; i++;
     }, res.dt * 1000);
   } catch (e) { $("out").textContent = "error: " + e.message; }
   $("sim").disabled = false;
@@ -161,7 +175,7 @@ $("play").onclick = async () => {
 };
 (async () => {
   const p = await (await fetch("/api/policies")).json();
-  for (const n of p.policies) { const o = document.createElement("option"); o.value = o.textContent = n; $("policy").appendChild(o); }
+  for (const n of p.policies) { for (const sel of ["policy", "ghost"]) { const o = document.createElement("option"); o.value = o.textContent = n; $(sel).appendChild(o); } }
   $("policy").value = p.policies[p.policies.length - 1];
   const r = await (await fetch("/api/reports")).json();
   if (r.reports.length) { $("reportlink").textContent = "readiness report →"; $("reportlink").href = "/reports/" + r.reports[r.reports.length - 1]; }

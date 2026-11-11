@@ -289,3 +289,21 @@ def test_report_renders_compound_sections():
     card = scorecard(PROBE_FIXTURE, [{"passed": True}], {})
     page = render_html("t", {"a": card}, {"a": PROBE_FIXTURE}, {}, None, extras=extras)
     assert "Compound stress" in page and "Failure boundary" in page and "&lt;b&gt;x" in page
+
+
+def test_fixed_gait_phase_overrides_seed_randomisation():
+    scn = Scenario(duration_s=1.0, phase0_deg=90.0)
+    a = QuadrupedEnv(scn, seed=0)
+    a.reset(seed=1)
+    b = QuadrupedEnv(scn, seed=0)
+    b.reset(seed=2)
+    assert a.phase == pytest.approx(np.radians(90.0)) == pytest.approx(b.phase)
+
+
+def test_push_probe_sweeps_gait_phases():
+    from breakpoint.probe import PUSH_PHASES, push_phase_at_impact
+
+    assert len(PUSH_PHASES) == 4
+    assert 0.0 <= push_phase_at_impact(0.0) < 360.0
+    r = probe_axis((None, Scenario().to_dict(), "push_rear", [0], 2))
+    assert r["rollouts"] % len(PUSH_PHASES) == 0

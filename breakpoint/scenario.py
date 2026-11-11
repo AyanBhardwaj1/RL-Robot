@@ -28,6 +28,7 @@ BOUNDS: dict[str, tuple[float, float, float]] = {
     "obs_noise": (0.0, 0.5, 0.0),  # std of gaussian noise on observations
     "target_speed": (0.0, 1.0, 0.5),  # commanded forward speed m/s
     "duration_s": (1.0, 30.0, 8.0),
+    "phase0_deg": (-1.0, 359.0, -1.0),  # initial gait phase; <0 = randomised by seed
 }
 
 PUSH_BOUNDS: dict[str, tuple[float, float, float]] = {
@@ -83,6 +84,7 @@ class Scenario:
     obs_noise: float = 0.0
     target_speed: float = 0.5
     duration_s: float = 8.0
+    phase0_deg: float = -1.0
     pushes: tuple[Push, ...] = field(default_factory=tuple)
     notes: str = ""
 

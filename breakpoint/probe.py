@@ -19,6 +19,9 @@ from .scenario import Push, Scenario
 
 PUSH_DURATION = 0.1
 PUSH_TIME = 2.0
+# Pushes land at these gait phases (deg). Recovery depends strongly on stance/swing timing,
+# so a push margin is only as good as its worst phase.
+PUSH_PHASES = (0.0, 90.0, 180.0, 270.0)
 
 
 @dataclass(frozen=True)
@@ -66,9 +69,19 @@ def apply_axis(base: Scenario, key: str, value: float) -> Scenario:
     return base.with_(**{key: value})
 
 
+def push_phase_at_impact(phase0_deg: float) -> float:
+    from .env import GAIT_FREQ
+
+    return (phase0_deg + 360.0 * GAIT_FREQ * PUSH_TIME) % 360.0
+
+
 def _passes(spec: str | None, base: Scenario, key: str, value: float, seeds: list[int]) -> bool:
     policy = load_policy(spec)
     scn = apply_axis(base, key, value)
+    if key.startswith("push_"):
+        # sweep the gait phase at which the push lands (phase at impact = PUSH_PHASES)
+        worlds = [scn.with_(phase0_deg=(ph - push_phase_at_impact(0.0)) % 360.0) for ph in PUSH_PHASES]
+        return all(rollout(policy, w, seed=seeds[0])[0].passed for w in worlds)
     return all(rollout(policy, scn, seed=s)[0].passed for s in seeds)
 
 
@@ -79,24 +92,25 @@ def probe_axis(args: tuple[str | None, dict, str, list[int], int]) -> dict:
     if not _passes(spec, base, key, ax.lo, seeds):
         return {"key": key, "label": ax.label, "unit": ax.unit, "breaking_point": ax.lo,
                 "fraction": 0.0, "fails_nominal": True, "rollouts": len(seeds)}
-    rollouts = len(seeds)
+    per_check = len(PUSH_PHASES) if key.startswith("push_") else len(seeds)
+    rollouts = per_check
     if ax.integer:
         good = ax.lo
         for v in np.arange(ax.lo + 1, ax.hi + 1):
-            rollouts += len(seeds)
+            rollouts += per_check
             if not _passes(spec, base, key, float(v), seeds):
                 break
             good = float(v)
     else:
         if _passes(spec, base, key, ax.hi, seeds):
             good = ax.hi
-            rollouts += len(seeds)
+            rollouts += per_check
         else:
-            rollouts += len(seeds)
+            rollouts += per_check
             good, bad = ax.lo, ax.hi
             for _ in range(iters):
                 mid = 0.5 * (good + bad)
-                rollouts += len(seeds)
+                rollouts += per_check
                 if _passes(spec, base, key, mid, seeds):
                     good = mid
                 else:
