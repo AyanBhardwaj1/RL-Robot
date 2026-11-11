@@ -1,7 +1,8 @@
-"""Assemble the deployable Vercel site in site_dist/.
+"""Assemble the deployable Vercel site in web/ (committed, so a Vercel Git import works).
 
-    python scripts/build_site.py            # build
-    vercel deploy site_dist --prod          # deploy
+    python scripts/build_site.py            # build into web/
+    vercel deploy web --prod                # deploy with the CLI, or import the repo in Vercel
+                                            # with Root Directory = web
 
 The output holds the static pages from site/, the Python API (site/api), the `breakpoint`
 package, the committed policies, the readiness reports, product screenshots, a vendored
@@ -11,6 +12,7 @@ three.js, and pre-rendered replays so the hero robot works before the API answer
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -18,13 +20,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from breakpoint.env import CONTROL_DT, QuadrupedEnv  # noqa: E402
-from breakpoint.evaluate import rollout  # noqa: E402
-from breakpoint.explain import explain  # noqa: E402
-from breakpoint.policy import load_policy  # noqa: E402
-from breakpoint.scenario import Scenario  # noqa: E402
+from breakpoint.env import CONTROL_DT, QuadrupedEnv
+from breakpoint.evaluate import rollout
+from breakpoint.explain import explain
+from breakpoint.policy import load_policy
+from breakpoint.scenario import Scenario
 
-DIST = ROOT / "site_dist"
+DIST = ROOT / "web"
 POLICIES = {
     "policy_v2field.npz": ROOT / "runs/v2field/policy_v2field.npz",
     "policy_v2.npz": ROOT / "runs/v2/policy_v2.npz",
@@ -68,7 +70,28 @@ def build_replays(out_dir: Path) -> None:
                                                     separators=(",", ":")))
 
 
-def main() -> int:
+SITEMAP_PATHS = ("/", "/app", "/docs", "/reports/final")
+
+
+def write_seo(dist: Path, site_url: str | None) -> None:
+    """Sitemaps need absolute URLs: written only when SITE_URL (e.g. https://example.vercel.app) is known."""
+    sitemap = dist / "sitemap.xml"
+    robots = dist / "robots.txt"
+    if not site_url:
+        sitemap.unlink(missing_ok=True)
+        robots.write_text("User-agent: *\nAllow: /\n")
+        return
+    base = site_url.rstrip("/")
+    urls = "".join(f"  <url><loc>{base}{p}</loc></url>\n" for p in SITEMAP_PATHS)
+    sitemap.write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n'
+                       f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n')
+    robots.write_text(f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n")
+    for page in dist.glob("*.html"):
+        page.write_text(page.read_text().replace('content="/assets/og.png"', f'content="{base}/assets/og.png"'))
+
+
+def main(out: Path | None = None, replays: bool = True) -> int:
+    DIST = out or globals()["DIST"]
     if DIST.exists():
         shutil.rmtree(DIST)
     shutil.copytree(ROOT / "site", DIST)
@@ -88,7 +111,9 @@ def main() -> int:
     shutil.copy2(ROOT / "breakpoint/static/three.LICENSE", DIST / "assets" / "three.LICENSE.txt")
     data = DIST / "assets" / "data"
     data.mkdir(parents=True, exist_ok=True)
-    build_replays(data)
+    if replays:
+        build_replays(data)
+    write_seo(DIST, os.environ.get("SITE_URL"))
     size = sum(p.stat().st_size for p in DIST.rglob("*") if p.is_file())
     print(f"built {DIST} ({size / 1e6:.1f} MB)")
     return 0

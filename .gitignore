@@ -3,5 +3,4 @@ __pycache__/
 .pytest_cache/
 runs/*.log
 .ruff_cache/
-site_dist/
 .vercel/

@@ -15,19 +15,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from fastapi import FastAPI, HTTPException  # noqa: E402
-from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
-from pydantic import BaseModel, Field  # noqa: E402
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.gzip import GZipMiddleware
+from pydantic import BaseModel, Field
 
-from breakpoint.compiler import compile_image, compile_text  # noqa: E402
-from breakpoint.env import CONTROL_DT, QuadrupedEnv  # noqa: E402
-from breakpoint.evaluate import rollout  # noqa: E402
-from breakpoint.explain import explain  # noqa: E402
-from breakpoint.policy import load_policy  # noqa: E402
-from breakpoint.probe import AXIS_BY_KEY, probe_axis  # noqa: E402
-from breakpoint.profiles import PROFILES, deployment_check  # noqa: E402
-from breakpoint.scenario import Scenario  # noqa: E402
-from breakpoint.world import BASE_HEIGHT, HFIELD_HALF_X, HFIELD_HALF_Y, heightfield  # noqa: E402
+from breakpoint.compiler import compile_image, compile_text
+from breakpoint.env import CONTROL_DT, QuadrupedEnv
+from breakpoint.evaluate import rollout
+from breakpoint.explain import explain
+from breakpoint.policy import load_policy
+from breakpoint.probe import AXIS_BY_KEY, probe_axis
+from breakpoint.profiles import PROFILES, deployment_check
+from breakpoint.scenario import Scenario
+from breakpoint.world import BASE_HEIGHT, HFIELD_HALF_X, HFIELD_HALF_Y, heightfield
 
 POLICY_DIR = ROOT / "policies"
 MAX_SIM_SECONDS = 10.0
@@ -135,7 +135,7 @@ def api_compile_image(req: ImageReq) -> dict:
         raise HTTPException(413, "The image is larger than 3 MB. Upload a smaller photo.")
     try:
         c = compile_image(raw, caption=req.caption)
-    except Exception as e:  # noqa: BLE001 - decoder errors vary by format; report them as a client error
+    except Exception as e:
         raise HTTPException(400, f"Could not read the image ({str(e)[:80]}). Try a JPEG or PNG.") from e
     return {"source": c.source, "matched": list(c.matched), "scenario": c.scenario.to_dict()}
 

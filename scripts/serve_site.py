@@ -1,6 +1,6 @@
 """Local preview of the built Vercel site: static files with clean URLs plus the Python API.
 
-    python scripts/build_site.py && python scripts/serve_site.py   # http://127.0.0.1:3000
+    python scripts/build_site.py && python scripts/serve_site.py   # http://127.0.0.1:3000 (serves web/)
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from pathlib import Path
 import uvicorn
 from fastapi.responses import FileResponse, HTMLResponse
 
-DIST = Path(__file__).resolve().parent.parent / "site_dist"
+DIST = Path(__file__).resolve().parent.parent / "web"
 
 
 def load_app():
@@ -32,9 +32,8 @@ def static(path: str):
     candidates = [root / path, root / f"{path}.html", root / path / "index.html"] if path else [root / "index.html"]
     for c in candidates:
         c = c.resolve()
-        if root in c.parents or c == root / "index.html":
-            if c.is_file():
-                return FileResponse(c)
+        if (root in c.parents or c == root / "index.html") and c.is_file():
+            return FileResponse(c)
     missing = root / "404.html"
     if missing.is_file():
         return HTMLResponse(missing.read_text(), status_code=404)

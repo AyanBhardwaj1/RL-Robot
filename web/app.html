@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Breakpoint lab</title>
+<meta name="description" content="Describe a world in plain English or a photo, run the simulated quadruped through it, shove it, find its breaking points and its failure odds by place.">
+<meta name="theme-color" content="#17161b">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/app.css">
+</head>
+<body class="app">
+<a class="skip" href="#lab-main">Skip to the lab</a>
+<header class="app-bar">
+  <a class="wordmark" href="/" translate="no">Breakpoint</a>
+  <nav aria-label="Main">
+    <a href="/docs">Docs</a>
+    <a href="/reports/final">Report</a>
+    <a href="https://github.com/AyanBhardwaj1/RL-Robot" rel="noopener">Source</a>
+  </nav>
+</header>
+
+<main id="lab-main" class="lab">
+  <section class="panel" aria-label="Controls">
+    <form id="world-form" class="block" novalidate>
+      <h1 class="panel-title">Describe a world</h1>
+      <label for="desc" class="field-label">Conditions, in plain English</label>
+      <textarea id="desc" name="desc" rows="3" autocomplete="off" spellcheck="true"
+        placeholder="e.g. icy loading dock, carrying a 3 kg box, shoved hard from the left at 3s…">icy loading dock, carrying a 3 kg box, shoved hard from the left at 3s</textarea>
+      <div class="chips" role="list" aria-label="Examples">
+        <button type="button" class="chip" role="listitem">muddy forest trail in the rain</button>
+        <button type="button" class="chip" role="listitem">walk up a 12 degree hill with worn motors at 55% and 80ms wifi lag</button>
+        <button type="button" class="chip" role="listitem">stairs with 7 cm steps</button>
+        <button type="button" class="chip" role="listitem">carrying 10 lbs front-heavy, kicked from the right at 2s with 150 N</button>
+      </div>
+      <div class="row">
+        <button class="btn btn-light" type="submit" id="compile-btn">Build the world</button>
+        <label class="btn btn-ghost file-btn" for="photo">From a photo<input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" class="visually-hidden"></label>
+      </div>
+      <p class="hint" id="compile-status" aria-live="polite"></p>
+    </form>
+
+    <details class="block" id="scenario-box">
+      <summary>World settings <span class="muted" id="scenario-summary"></span></summary>
+      <pre id="scenario-json" tabindex="0"></pre>
+    </details>
+
+    <div class="block">
+      <h2 class="block-title">Shoves</h2>
+      <ul class="shove-list" id="shove-list" aria-live="polite"></ul>
+      <div class="shove-add">
+        <div class="field"><label for="shove-dir" class="field-label">From</label>
+        <select id="shove-dir" name="shove-dir" autocomplete="off">
+          <option value="-90">Left</option><option value="90">Right</option><option value="180">Front</option><option value="0">Rear</option>
+          <option value="-45">Rear-left</option><option value="45">Rear-right</option><option value="-135">Front-left</option><option value="135">Front-right</option>
+        </select></div>
+        <div class="field"><label for="shove-imp" class="field-label">Strength, N·s</label>
+        <input id="shove-imp" name="shove-imp" type="number" inputmode="decimal" min="1" max="40" step="0.5" value="8" autocomplete="off"></div>
+        <div class="field"><label for="shove-t" class="field-label">At, seconds</label>
+        <input id="shove-t" name="shove-t" type="number" inputmode="decimal" min="0.5" max="9" step="0.1" value="2" autocomplete="off"></div>
+        <button type="button" class="btn btn-ghost btn-tight" id="shove-add">Add shove</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2 class="block-title">Policy</h2>
+      <div class="row two">
+        <div><label for="policy" class="field-label">Run</label><select id="policy" name="policy" autocomplete="off"></select></div>
+        <div><label for="ghost" class="field-label">Compare with (ghost)</label><select id="ghost" name="ghost" autocomplete="off"><option value="">None</option></select></div>
+      </div>
+      <button class="btn btn-light btn-wide" type="button" id="run-btn">Run the simulation</button>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Simulation">
+    <div class="viewer" id="viewer">
+      <p class="viewer-empty" id="viewer-empty">Build a world, then run it. The robot appears here.</p>
+      <div class="hud" id="hud" aria-hidden="true"></div>
+      <div class="viewer-controls">
+        <button type="button" class="btn btn-ghost btn-tight" id="replay-btn" disabled>Replay</button>
+        <label class="visually-hidden" for="scrub">Playback position</label>
+        <input id="scrub" type="range" min="0" max="0" value="0" disabled autocomplete="off">
+      </div>
+    </div>
+    <div class="verdict" id="verdict" aria-live="polite">
+      <p class="verdict-word" id="verdict-word">Waiting</p>
+      <p class="verdict-why" id="verdict-why">The explanation of what happened will appear here, computed from the run, not guessed.</p>
+      <dl class="metrics" id="metrics"></dl>
+    </div>
+
+    <div class="tools">
+      <section class="tool" aria-labelledby="bp-title">
+        <h2 id="bp-title" class="block-title">Find a breaking point</h2>
+        <p class="hint">Bisects one stress until the selected policy stops passing. Takes about 2 seconds.</p>
+        <div class="row">
+          <label class="visually-hidden" for="axis">Stress</label>
+          <select id="axis" name="axis" autocomplete="off"></select>
+          <button type="button" class="btn btn-ghost btn-tight" id="probe-btn">Find it</button>
+        </div>
+        <p class="tool-result" id="probe-result" aria-live="polite"></p>
+      </section>
+      <section class="tool" aria-labelledby="odds-title">
+        <h2 id="odds-title" class="block-title">Failure odds by place</h2>
+        <p class="hint">Samples 12 independent worlds from a deployment profile. Takes about 5 seconds.</p>
+        <div class="row">
+          <label class="visually-hidden" for="profile">Place</label>
+          <select id="profile" name="profile" autocomplete="off"></select>
+          <button type="button" class="btn btn-ghost btn-tight" id="odds-btn">Check odds</button>
+        </div>
+        <div class="tool-result" id="odds-result" aria-live="polite"></div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<script src="/assets/three.min.js" defer></script>
+<script src="/assets/robot-view.js" defer></script>
+<script src="/assets/app.js" defer></script>
+</body>
+</html>

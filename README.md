@@ -16,6 +16,22 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
 
 ![playground](docs/playground.png)
 
+## Product site
+
+`web/` is the deployable site: a landing page, the hosted lab (`/app`), docs, readiness reports, and
+a Python serverless API that runs the same simulator. It is built from `site/` by
+`python scripts/build_site.py`. Preview it locally with `python scripts/serve_site.py`
+(http://127.0.0.1:3000).
+
+To deploy on Vercel, either:
+
+- **Git:** import this repository in Vercel and set **Root Directory** to `web` (framework:
+  Other), or
+- **CLI:** run `vercel deploy web --prod`.
+
+Set `SITE_URL=https://<your-domain>` when building so the sitemap and preview-image URLs are
+absolute.
+
 ## Why
 
 A locomotion policy that looks fine in a demo usually fails somewhere specific: a side shove
