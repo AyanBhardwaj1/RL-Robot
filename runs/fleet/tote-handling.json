@@ -1,0 +1,54 @@
+{
+ "profile": {
+  "name": "demo: tote handling",
+  "description": "Fitted from 300 logged shifts.",
+  "payload": [
+   5.6775,
+   24.207
+  ],
+  "friction": [
+   0.308,
+   0.8776
+  ],
+  "latency": [
+   0.002,
+   0.039
+  ],
+  "slope": [
+   0.05,
+   1.4005
+  ],
+  "push_prob": 0.33,
+  "push_impulse": [
+   15.78,
+   57.01
+  ],
+  "strength": [
+   0.9,
+   1.0
+  ],
+  "floor_step": [
+   0.0,
+   0.0
+  ],
+  "step_prob": 0.0
+ },
+ "odds": {
+  "biped": {
+   "job": "__fleet__demo: tote handling",
+   "trials": 150,
+   "failures": 0,
+   "failure_rate": 0.0,
+   "failure_rate_upper_95": 0.0198,
+   "causes": {}
+  },
+  "wheeled": {
+   "job": "__fleet__demo: tote handling",
+   "trials": 150,
+   "failures": 0,
+   "failure_rate": 0.0,
+   "failure_rate_upper_95": 0.0198,
+   "causes": {}
+  }
+ }
+}

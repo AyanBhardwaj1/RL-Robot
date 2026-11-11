@@ -397,6 +397,30 @@ def cmd_hazards(a: argparse.Namespace) -> int:
     return 1 if any(r["risk"] == "high" for r in rows) and a.fail_on_high else 0
 
 
+def cmd_fleet(a: argparse.Namespace) -> int:
+    from .fleet import read_log, site_odds, synthetic_log
+
+    if a.log:
+        records, name = read_log(a.log), Path(a.log).stem
+    else:
+        records, name = synthetic_log(a.demo, shifts=a.shifts, seed=a.seed), f"demo: {a.demo}"
+        if a.write_demo:
+            Path(a.write_demo).parent.mkdir(parents=True, exist_ok=True)
+            Path(a.write_demo).write_text("\n".join(json.dumps(r) for r in records) + "\n")
+    res = site_odds(records, name, trials=a.trials, seed=a.seed)
+    p = res["profile"]
+    print(f"Fitted profile from {len(records)} shifts ({name})")
+    for k in ("payload", "friction", "latency", "slope", "push_impulse", "floor_step"):
+        print(f"  {k:<13} {p[k][0]:g} … {p[k][1]:g}")
+    print(f"  contact rate  {p['push_prob']:.0%} of shifts · steps on {p['step_prob']:.0%} of routes")
+    for body, r in res["odds"].items():
+        print(f"  {body:<8} fails {r['failure_rate']:.1%} (≤ {r['failure_rate_upper_95']:.1%})  causes {r['causes']}")
+    if a.out:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(json.dumps(res, indent=1))
+    return 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     import uvicorn
 
@@ -484,6 +508,17 @@ def main(argv: list[str] | None = None) -> int:
     qz.add_argument("--trials", type=int, default=30)
     qz.add_argument("--workers", type=int, default=3)
     qz.set_defaults(fn=cmd_quantize)
+
+    fl = sub.add_parser("fleet", help="fit a site profile from shift telemetry (JSONL) and re-run humanoid odds")
+    src = fl.add_mutually_exclusive_group(required=True)
+    src.add_argument("--log", help="JSON Lines file, one record per shift")
+    src.add_argument("--demo", help="generate a synthetic log from a built-in job profile")
+    fl.add_argument("--shifts", type=int, default=300)
+    fl.add_argument("--trials", type=int, default=150)
+    fl.add_argument("--seed", type=int, default=0)
+    fl.add_argument("--write-demo", help="also save the synthetic log here")
+    fl.add_argument("--out")
+    fl.set_defaults(fn=cmd_fleet)
 
     hz = sub.add_parser("hazards", help="hazard log with measured frequencies from the humanoid lab")
     hz.add_argument("--trials", type=int, default=150)

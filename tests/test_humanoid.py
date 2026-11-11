@@ -106,3 +106,28 @@ def test_hazard_log_reports_measured_rates():
     for r in rows:
         assert 0 <= r["rate"] <= r["rate_upper_95"] <= 1 and r["risk"] in ("low", "medium", "high")
     assert any(r["hazard"] == "H4" and r["body"] == "wheeled" for r in rows)
+
+
+def test_fleet_fit_recovers_profile_and_ignores_glitches(tmp_path):
+    import json as _json
+
+    from breakpoint.fleet import fit_profile, read_log, site_odds, synthetic_log
+
+    recs = synthetic_log("tote handling", shifts=400, seed=3)
+    assert any(r["friction"] == 9.99 for r in recs)  # glitched readings are present
+    prof = fit_profile(recs)
+    true = JOBS["tote handling"]
+    assert prof.friction[1] < 1.2  # quantiles ignore the 9.99 glitch
+    assert abs(prof.payload[0] - true.payload[0]) < 2.5 and abs(prof.payload[1] - true.payload[1]) < 2.5
+    assert abs(prof.push_prob - true.push_prob) < 0.08
+    path = tmp_path / "log.jsonl"
+    path.write_text("\n".join(_json.dumps(r) for r in recs[:50]) + "\n")
+    assert len(read_log(path)) == 50
+    res = site_odds(read_log(path), "t", trials=20)
+    assert set(res["odds"]) == {"biped", "wheeled"} and "__fleet__t" not in JOBS
+    bad = tmp_path / "bad.jsonl"
+    bad.write_text("{not json}\n")
+    with pytest.raises(ValueError):
+        read_log(bad)
+    with pytest.raises(ValueError):
+        synthetic_log("moon")

@@ -134,9 +134,10 @@
         <li>Deployment profiles turn a site into a distribution of conditions; failure odds come with a 95% upper bound and causes.</li>
         <li>A stateless HTTP API (<code>/api/simulate</code>, <code>/api/deploy</code>, <code>/api/probe</code>) with validation, size caps and caching.</li>
         <li>Humanoid job odds: biped 0% vs wheeled 47% on home-care routes (stairs), wheeled 16% on trailer unloading (lips and debris).</li>
+        <li><code>fleet.py</code>: fits a site profile from per-shift telemetry (JSON Lines) using robust quantiles. A deliberately glitched sensor doesn’t move it. It then re-runs the odds for both bodies; on 300 synthetic shifts it recovers the true payload, friction and contact rate.</li>
       </ul>
       <h3>Next I’d build</h3>
-      <p>Fleet telemetry in, deployment profile out: fit a site’s profile from logged pushes, slips and lag, then re-run the odds nightly.</p>
+      <p>Drift alerts: compare tonight’s fitted profile with last week’s and flag when the odds move past their confidence bounds.</p>
     </article>
 
     <article class="role" id="test">
