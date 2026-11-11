@@ -276,6 +276,63 @@ def cmd_deploy(a: argparse.Namespace) -> int:
     return 0 if all(r["failure_rate_upper_95"] <= a.max_fail for r in rows) else 1
 
 
+def _sha256(path: str) -> str:
+    import hashlib
+
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 16), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _git_commit() -> str | None:
+    import subprocess
+
+    try:
+        out = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5, check=True)
+        return out.stdout.strip() or None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def certificate(spec: str | None, result: dict) -> dict:
+    """Traceable readiness certificate: what was tested, with what, and what it scored."""
+    import platform
+    from datetime import datetime, timezone
+
+    import mujoco
+
+    from . import __version__
+
+    file_part = spec.split(":")[-1] if spec else None
+    return {
+        "policy": policy_label(spec), "policy_spec": spec or "cpg",
+        "policy_sha256": _sha256(file_part) if file_part and file_part.endswith(".npz") else None,
+        "issued_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "toolchain": {"breakpoint": __version__, "mujoco": mujoco.__version__, "numpy": np.__version__,
+                      "python": platform.python_version(), "git_commit": _git_commit()},
+        "card": result["card"],
+        "margins": {r["key"]: {"breaking_point": r["breaking_point"], "unit": r["unit"]} for r in result["probe"]},
+        "deployment": result.get("deploy", {}),
+        "search_budget": {"adversarial_rollouts": result["hunt"]["evaluations"],
+                          "nominal_trials": result["card"]["nominal_trials"]},
+    }
+
+
+def cmd_certify(a: argparse.Namespace) -> int:
+    spec = None if a.policy in (None, "cpg") else a.policy
+    load_policy(spec)  # fail fast
+    result = audit(spec, policy_label(spec), a.hunt_gens, a.workers, deploy_trials=a.deploy_trials)
+    cert = certificate(spec, result)
+    Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(a.out).write_text(json.dumps(cert, indent=1))
+    ok = cert["card"]["score"] >= a.min_score
+    print(f"{cert['policy']}: {cert['card']['score']} {cert['card']['grade']} -> "
+          f"{'PASS' if ok else 'FAIL'} (min {a.min_score}); certificate: {a.out}")
+    return 0 if ok else 1
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     import uvicorn
 
@@ -336,6 +393,15 @@ def main(argv: list[str] | None = None) -> int:
     lb.add_argument("--hunt-gens", type=int, default=5)
     lb.add_argument("--workers", type=int, default=3)
     lb.set_defaults(fn=cmd_leaderboard)
+
+    ce = sub.add_parser("certify", help="audit + traceable readiness certificate (exit 1 below --min-score)")
+    ce.add_argument("--policy")
+    ce.add_argument("--out", default="runs/certificate.json")
+    ce.add_argument("--min-score", type=float, default=70.0)
+    ce.add_argument("--hunt-gens", type=int, default=5)
+    ce.add_argument("--deploy-trials", type=int, default=DEPLOY_TRIALS)
+    ce.add_argument("--workers", type=int, default=3)
+    ce.set_defaults(fn=cmd_certify)
 
     dp = sub.add_parser("deploy", help="failure probability under a deployment profile (exit 1 if over budget)")
     dp.add_argument("--policy")

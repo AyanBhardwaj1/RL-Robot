@@ -634,3 +634,18 @@ def test_report_deploy_section_bolds_best_and_escapes():
     out = _deploy_section(d)
     assert "Deployment risk" in out and out.count("<b>") == 1 and "&lt;x&gt;" in out
     assert _deploy_section({}) == ""
+
+
+def test_certificate_records_hash_versions_and_results(tmp_path):
+    from breakpoint.cli import certificate
+
+    p = ResidualPolicy(seed=1)
+    path = tmp_path / "p.npz"
+    p.save(path)
+    fake = {"card": {"score": 80.0, "grade": "SUPERVISED", "nominal_trials": 24},
+            "probe": [{"key": "friction", "breaking_point": 0.3, "unit": "μ"}],
+            "hunt": {"evaluations": 100}, "deploy": {"home": {"failure_rate": 0.0}}}
+    cert = certificate(f"gated:{path}", fake)
+    assert len(cert["policy_sha256"]) == 64 and cert["policy"] == "gated-p"
+    assert cert["toolchain"]["mujoco"] and cert["margins"]["friction"]["breaking_point"] == 0.3
+    assert certificate(None, fake)["policy_sha256"] is None

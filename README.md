@@ -47,6 +47,7 @@ hand-written backprop, and that backprop is checked against finite differences i
 | `policy.py` | Policy specs: `cpg`, `*.npz` (residual PPO), `gated:<spec>` (latency-adaptive fallback to the gait), `py:module:factory` (bring your own). |
 | `explain.py` | Evidence-based failure explanations, e.g. "Fell 0.7 s after a 12.0 N·s shove from the right: it tipped over with slippery ground (μ=0.20) and a 3.0 kg payload." Every clause is computed from the scenario and outcome. |
 | `gym_env.py` | Gymnasium adapter for external RL libraries. |
+| `cli.py` | `compile`, `run`, `train`, `audit`, `harden`, `regress`, `deploy`, `redteam`, `leaderboard`, `serve`, and `certify`. `certify` writes a traceable readiness certificate (policy SHA-256, toolchain versions, git commit, scorecard, margins, deployment risk, search budget) and exits non-zero below `--min-score`. |
 | `server.py`, `static/` | FastAPI and a three.js playground. You can compile a scenario, watch the replay, or use **Shove mode**, where you push the robot live over a WebSocket and score how much impulse it absorbs before it falls. A **ghost** mode replays a second policy as a translucent overlay in the same world. |
 
 ## Quick start
@@ -62,6 +63,7 @@ python -m breakpoint regress --policy runs/hardened/policy_hardened.npz --suite 
 python -m breakpoint deploy --policy runs/hardened/policy_hardened.npz --profile warehouse --max-fail 0.10
 python -m breakpoint redteam --policy runs/hardened/policy_hardened.npz   # compound + red-team attacks
 python -m breakpoint leaderboard cpg runs/policy_v1.npz runs/hardened/policy_hardened.npz
+python -m breakpoint certify --policy gated:runs/v2field/policy_v2field.npz --min-score 80   # release gate
 python -m breakpoint serve                                            # http://127.0.0.1:8000
 pytest -q
 ```
