@@ -191,4 +191,6 @@ a unit-test suite.
 - Static search cannot prove the absence of failures. The report always states the search budget.
 - The image heuristic is a cheap, explainable prior, not 3D reconstruction. A vision LLM improves it.
 
-See `reports/Legged robot robustness platform.md` for the research behind these design choices.
+See `reports/Legged robot robustness platform.md` for the research behind these design choices
+(the notes it draws on are in `research_notes/`). `scripts/reproduce.sh` re-runs every committed
+result.
