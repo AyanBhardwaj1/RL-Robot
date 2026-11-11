@@ -358,6 +358,32 @@ def cmd_humanoid(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_quantize(a: argparse.Namespace) -> int:
+    from .quantize import sample_observations, save_compressed, stats
+
+    base = ResidualPolicy.load(a.policy)
+    obs = sample_observations()
+    out_dir = Path(a.out)
+    rows = []
+    print(f"{'mode':<6}{'weights':>10}{'mean |Δa|':>12}{'max |Δa|':>11}{'µs/act':>9}{'score':>8}{'grade':>12}{'teleop fail':>13}")
+    for mode in ("fp32", "fp16", "int8"):
+        st = stats(base, mode, obs)
+        path = save_compressed(a.policy, mode, out_dir)
+        spec = f"gated:{path}" if a.gated else str(path)
+        pr = probe(spec, workers=a.workers)
+        nom = nominal_trials(spec)
+        card = scorecard(pr, nom, {})
+        dep = deployment_check(spec, "teleop", trials=a.trials, workers=a.workers)
+        row = {**st.__dict__, "score": card["score"], "grade": card["grade"], "margin_index": card["margin_index"],
+               "teleop_failure_rate": dep["failure_rate"], "breaking_points": {r["key"]: r["breaking_point"] for r in pr}}
+        rows.append(row)
+        print(f"{mode:<6}{st.weight_bytes:>10}{st.mean_abs_action_error:>12.5f}{st.max_abs_action_error:>11.5f}"
+              f"{st.act_us:>9.1f}{card['score']:>8.1f}{card['grade']:>12}{dep['failure_rate']:>13.1%}")
+    (out_dir / "quantize.json").write_text(json.dumps(rows, indent=1))
+    print(f"wrote {out_dir / 'quantize.json'}")
+    return 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     import uvicorn
 
@@ -437,6 +463,14 @@ def main(argv: list[str] | None = None) -> int:
     dp.add_argument("--workers", type=int, default=3)
     dp.add_argument("--out")
     dp.set_defaults(fn=cmd_deploy)
+
+    qz = sub.add_parser("quantize", help="FP16/INT8 policy compression with a robustness check")
+    qz.add_argument("--policy", required=True)
+    qz.add_argument("--out", default="runs/quantize")
+    qz.add_argument("--gated", action="store_true", help="audit behind the latency gate")
+    qz.add_argument("--trials", type=int, default=30)
+    qz.add_argument("--workers", type=int, default=3)
+    qz.set_defaults(fn=cmd_quantize)
 
     hu = sub.add_parser("humanoid", help="humanoid push recovery: biped vs wheeled envelopes and job odds")
     hu.add_argument("--payload", type=float, default=0.0, help="tote held in front (kg)")

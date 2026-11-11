@@ -657,3 +657,21 @@ def test_explain_mentions_a_survived_shove():
     scn = Scenario(duration_s=4.0).with_(pushes=[{"t": 1.2, "force": 40, "direction_deg": -90, "duration": 0.1}])
     text = explain(scn, {"passed": True, "fell": False, "distance": 1.0, "time_s": 4.0})
     assert text.startswith("Took a 4.0 N·s shove from the left at 1.2 s and kept walking")
+
+
+# -------------------------------------------------------------- quantize
+def test_int8_quantization_roundtrip_and_compression():
+    from breakpoint.quantize import compress, quantize_int8, weight_bytes
+
+    rng = np.random.default_rng(0)
+    w = rng.standard_normal((47, 64))
+    q, scale = quantize_int8(w)
+    assert q.dtype == np.int8 and np.abs(q).max() <= 127
+    assert np.max(np.abs(q * scale - w)) <= scale.max() / 2 + 1e-9
+    pol = ResidualPolicy(seed=2)
+    assert weight_bytes(pol, "int8") < weight_bytes(pol, "fp16") < weight_bytes(pol, "fp32")
+    q8 = compress(pol, "int8")
+    o = np.random.default_rng(1).standard_normal(OBS_DIM)
+    assert np.allclose(q8.act(o), pol.act(o), atol=0.05) and q8.name.endswith("int8")
+    with pytest.raises(ValueError):
+        compress(pol, "int4")
