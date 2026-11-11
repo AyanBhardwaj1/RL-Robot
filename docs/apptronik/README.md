@@ -1,6 +1,7 @@
 # Breakpoint × Apptronik: application pack
 
-This folder is for my software engineering internship application to Apptronik. It holds four things:
+This folder is for my software engineering internship application to Apptronik. A one-page brief to hand
+over or attach is in [`breakpoint-one-pager.pdf`](breakpoint-one-pager.pdf) (source: `one-pager.html`). It holds four things:
 
 - a research brief on the company and its roles (sources linked),
 - a map from each team and intern posting to what Breakpoint already shows,
