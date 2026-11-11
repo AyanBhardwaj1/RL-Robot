@@ -31,3 +31,10 @@ done
 
 # 4. regression gate on the shrunk counterexamples
 python -m breakpoint regress --policy runs/v2field/policy_v2field.npz --suite runs/v2field/suite || true
+
+# 5. humanoid lab: envelopes and job odds, hazard log, design levers, fleet fit, teleop episode filter
+python -m breakpoint humanoid --trials 150 --out runs/humanoid/baseline.json
+python -m breakpoint hazards  --out runs/humanoid/hazards.md
+python -m breakpoint design   --trials 150 --out runs/humanoid/levers.json
+python -m breakpoint fleet    --log runs/fleet/tote-handling.jsonl --out runs/fleet/tote-handling.json
+python -m breakpoint episodes --demo 200 --write-demo runs/episodes/teleop-demo.jsonl --out runs/episodes/teleop-demo.json
