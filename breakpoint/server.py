@@ -6,17 +6,16 @@ import asyncio
 import base64
 import binascii
 import json
+import math
 import re
 from pathlib import Path
-
-import math
 from urllib.parse import urlparse
 
 import numpy as np
-from PIL import Image
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from PIL import Image
 from pydantic import BaseModel, Field
 
 from .compiler import compile_image, compile_text

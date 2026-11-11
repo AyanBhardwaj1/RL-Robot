@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 import gymnasium as gym
 import numpy as np
@@ -17,7 +17,7 @@ from .scenario import Scenario
 
 
 class BreakpointEnv(gym.Env):
-    metadata = {"render_modes": []}
+    metadata: ClassVar[dict] = {"render_modes": []}
 
     def __init__(self, scenario: dict | Scenario | None = None, sampler=None):
         super().__init__()

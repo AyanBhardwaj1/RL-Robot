@@ -20,9 +20,9 @@ import re
 import urllib.error
 import urllib.request
 import warnings
-from urllib.parse import urlparse
 from dataclasses import dataclass
 from io import BytesIO
+from urllib.parse import urlparse
 
 import numpy as np
 

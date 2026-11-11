@@ -8,8 +8,8 @@ from datetime import datetime, timezone
 
 from .evaluate import failure_upper_bound
 from .explain import explain
-from .scenario import Scenario
 from .probe import PUSH_DIRS
+from .scenario import Scenario
 
 GRADES = ((85, "FIELD-READY", "Cleared for unsupervised field trials in the tested envelope."),
           (70, "SUPERVISED", "Cleared for supervised trials with a spotter and kill switch."),
@@ -158,9 +158,9 @@ def _atlas_grid(atlas: dict[str, dict] | None) -> str:
 def _compound_section(extras: dict | None, who: str = "") -> str:
     if not extras:
         return ""
-    parts = [f'<h2>Compound stress · {html.escape(who)}</h2><p class="muted">Pairs of the weakest axes, each set to a fraction of its '
-             'own breaking point. Single-axis margins cannot see these failures.</p><div class="card tablewrap"><table>'
-             '<tr><th>Stressor A</th><th>Stressor B</th><th>Each at</th><th>Pass rate</th></tr>']
+    parts = [(f'<h2>Compound stress · {html.escape(who)}</h2><p class="muted">Pairs of the weakest axes, each set to a fraction '
+              'of its own breaking point. Single-axis margins cannot see these failures.</p><div class="card tablewrap"><table>'
+              '<tr><th>Stressor A</th><th>Stressor B</th><th>Each at</th><th>Pass rate</th></tr>')]
     for c in extras.get("interactions", []):
         flag = ' style="color:var(--bad);font-weight:600"' if c["compound_failure"] else ""
         parts.append(f"<tr><td>{html.escape(c['a'])}</td><td>{html.escape(c['b'])}</td><td>{c['fraction']:.0%}</td>"

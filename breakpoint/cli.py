@@ -14,9 +14,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 import numpy as np
-from pathlib import Path
 
 from .compiler import compile_image, compile_text
 from .evaluate import evaluate_many, rollout
@@ -193,8 +193,8 @@ def cmd_harden(a: argparse.Namespace) -> int:
     after = audit(str(hardened), "after", a.hunt_gens, a.workers)
     reg = evaluate_many(str(hardened), failures, seeds=[0, 1])
     fixed = sum(all(r["passed"] for r in rs) for rs in reg)
-    notes = [f"Hardening replayed {len(failures)} shrunk counterexamples (30% of episodes) for {a.steps} PPO steps; "
-             f"{fixed}/{len(failures)} now pass on both seeds."]
+    notes = [(f"Hardening replayed {len(failures)} shrunk counterexamples (30% of episodes) for {a.steps} PPO steps; "
+              f"{fixed}/{len(failures)} now pass on both seeds.")]
     path = _write_report(out, a.title, [before, after], notes)
     print(notes[0])
     print(f"report: {path}")

@@ -21,8 +21,8 @@ from .world import (
     NOMINAL,
     TORQUE_LIMIT,
     build_xml,
-    heightfield,
     height_at,
+    heightfield,
 )
 
 CONTROL_DT = 0.02
@@ -177,7 +177,7 @@ class QuadrupedEnv:
             self.t += self.model.opt.timestep
         self.phase = (self.phase + 2 * np.pi * GAIT_FREQ * CONTROL_DT) % (2 * np.pi)
 
-        R, lin, ang, grav = self._torso_state()
+        R, lin, ang, _ = self._torso_state()
         x, y, z = self.data.qpos[0:3]
         clearance = float(z - height_at(self._hfield, float(x), float(y)))
         upright = float(R[2, 2])

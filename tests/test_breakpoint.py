@@ -174,7 +174,7 @@ def test_mlp_backward_matches_finite_difference():
     net = MLP([5, 7, 3], rng)
     x = rng.standard_normal((4, 5))
     g_out = rng.standard_normal((4, 3))
-    y, acts = net.forward(x)
+    _, acts = net.forward(x)
     grads = net.backward(acts, g_out)
     eps = 1e-6
     w = net.W[0]
@@ -285,9 +285,8 @@ def test_websocket_ignores_nan_shoves_and_rejects_foreign_origin():
         for _ in range(5):
             frame = json.loads(ws.receive_text())
         assert frame["type"] == "frame" and frame["shoves"] == 0 and frame["impulse"] == 0.0
-    with pytest.raises(WebSocketDisconnect):
-        with c.websocket_connect("/ws/play", headers={"origin": "https://evil.example"}) as ws:
-            ws.receive_text()
+    with pytest.raises(WebSocketDisconnect), c.websocket_connect("/ws/play", headers={"origin": "https://evil.example"}) as ws:
+        ws.receive_text()
 
 
 # ---------------------------------------------------------------- red team
@@ -445,10 +444,10 @@ def test_gymnasium_adapter_api():
 
     env = BreakpointEnv({"duration_s": 1.0})
     check_env(env, skip_render_check=True)
-    obs, _ = env.reset(seed=0)
+    env.reset(seed=0)
     total_steps, done = 0, False
     while not done:
-        obs, r, term, trunc, info = env.step(env.action_space.sample())
+        _, _, term, trunc, info = env.step(env.action_space.sample())
         total_steps += 1
         done = term or trunc
     assert total_steps <= 50 and "x" in info

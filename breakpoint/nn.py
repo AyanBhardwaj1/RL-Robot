@@ -7,6 +7,8 @@ by physics, not by the learner.
 
 from __future__ import annotations
 
+from itertools import pairwise
+
 import numpy as np
 
 
@@ -14,7 +16,7 @@ class MLP:
     def __init__(self, sizes: list[int], rng: np.random.Generator, out_scale: float = 1.0):
         self.W: list[np.ndarray] = []
         self.b: list[np.ndarray] = []
-        for i, (n_in, n_out) in enumerate(zip(sizes[:-1], sizes[1:])):
+        for i, (n_in, n_out) in enumerate(pairwise(sizes)):
             gain = out_scale if i == len(sizes) - 2 else np.sqrt(2.0)
             w = rng.standard_normal((n_in, n_out))
             q, _ = np.linalg.qr(w if n_in >= n_out else w.T)

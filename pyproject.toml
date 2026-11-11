@@ -16,3 +16,9 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 130
+
+[tool.ruff.lint]
+# TRY004: untrusted-input validation raises ValueError on purpose (callers map it to HTTP 422).
+# B008: PPOConfig is a frozen dataclass, so a shared default instance is safe.
+# S110: LLM failures deliberately degrade to deterministic rules/templates.
+ignore = ["TRY004", "B008", "S110"]
