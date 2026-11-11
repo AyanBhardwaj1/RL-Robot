@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -87,7 +88,7 @@ def write_seo(dist: Path, site_url: str | None) -> None:
                        f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n')
     robots.write_text(f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n")
     for page in dist.glob("*.html"):
-        page.write_text(page.read_text().replace('content="/assets/og.png"', f'content="{base}/assets/og.png"'))
+        page.write_text(re.sub(r'(property="og:image" content=")/', rf"\g<1>{base}/", page.read_text()))
 
 
 def main(out: Path | None = None, replays: bool = True) -> int:
