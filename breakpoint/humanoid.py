@@ -139,7 +139,7 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
     double_support = True
     swing_until = -1.0
     planned = None
-    latency_steps = int(round(cond.latency_s / DT))
+    latency_steps = round(cond.latency_s / DT)
     history: list[np.ndarray] = []
     rec = Recovery(False, 0, "", 0.0)
     max_offset = cond.friction * z  # friction cone: horizontal force <= mu * m * g
@@ -187,7 +187,7 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
         v = v + a * DT
         x = x + v * DT
         t += DT
-        if record and int(round(t / DT)) % 10 == 0:
+        if record and round(t / DT) % 10 == 0:
             rec.com.append((round(t, 3), round(float(x[0]), 4), round(float(x[1]), 4)))
             rec.capture.append((round(t, 3), round(float(xi[0]), 4), round(float(xi[1]), 4)))
         speed = float(np.linalg.norm(v))
@@ -247,7 +247,7 @@ def recover_wheeled(impulse: float, direction_deg: float, base: WheeledBase = Wh
     ang = math.radians(direction_deg)
     v = (impulse / m) * np.array([math.cos(ang), math.sin(ang)])
     half = np.array([base.half_length, base.half_width])
-    delay = int(round((cond.latency_s + base.reaction_s) / DT))
+    delay = round((cond.latency_s + base.reaction_s) / DT)
     history: list[np.ndarray] = []
     rec = Recovery(False, 0, "", 0.0)
     t = 0.0
@@ -273,7 +273,7 @@ def recover_wheeled(impulse: float, direction_deg: float, base: WheeledBase = Wh
         v = v + a * DT
         x = x + v * DT
         t += DT
-        if record and int(round(t / DT)) % 10 == 0:
+        if record and round(t / DT) % 10 == 0:
             rec.com.append((round(t, 3), round(float(x[0]), 4), round(float(x[1]), 4)))
             rec.capture.append((round(t, 3), round(float(xi[0]), 4), round(float(xi[1]), 4)))
             rec.footsteps.append((round(t, 3), round(float(b[0]), 4), round(float(b[1]), 4), 2))

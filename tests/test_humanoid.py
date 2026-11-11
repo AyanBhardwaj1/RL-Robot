@@ -49,7 +49,7 @@ def test_tote_in_front_hurts_forward_pushes_more_than_backward():
     forward = breaking_point(DIRECTIONS["rear"], cond=cond, iters=8)   # shove from the rear -> falls forward
     backward = breaking_point(DIRECTIONS["front"], cond=cond, iters=8)
     assert forward < backward
-    z, offset, m = effective(Humanoid(), cond)
+    z, offset, _ = effective(Humanoid(), cond)
     assert offset == pytest.approx(20 * 0.35 / 92) and z > Humanoid().com_height
 
 
