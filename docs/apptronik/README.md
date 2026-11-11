@@ -134,7 +134,40 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
   results were published (fixed, migrated, and pinned by a physical regression test), and a swing foot
   that still held weight, which made side shoves look about twice as survivable as they are.
 
-## 6. Questions to ask them
+## 6. Questions they may ask you
+
+Short answers, each backed by a file you can open on the spot.
+
+- **What is the capture point, and why step there?** For a linear inverted pendulum, `ξ = x + ẋ/ω` with
+  `ω = √(g/z)`. It obeys `ξ̇ = ω(ξ − p)`, so if the centre of pressure `p` sits on `ξ`, the robot comes to
+  rest; anywhere else, `ξ` runs away exponentially. Stepping puts the new foot where `ξ` will be at
+  touchdown. (`breakpoint/humanoid.py`, `recover`)
+- **Why are side shoves the weak spot?** While one foot swings, only the other carries weight, and the
+  swing leg cannot cross the stance leg. The support during the swing is one foot on the wrong side.
+  The model said 77 N·s from the side until a review caught that the swinging foot still held weight;
+  the honest number is 44.
+- **How do you handle latency?** A Smith predictor: the controller measures `ξ` late but knows the centre
+  of pressure it commanded since, so it rolls the measurement forward with the discrete LIP map. It is
+  O(1) per tick, using a running sum and a ring buffer, and allocation-free in C++. What lag then costs is
+  the time a shove goes unseen; the front limit falls by about `e^(−ωL)` (92 → 41 N·s at 250 ms).
+- **Why a sign test, and why "paired"?** Every design lever runs on the same sampled shifts as the
+  baseline (common random numbers). A shift either flips from fall to finish, the other way, or not at all.
+  Only the flips carry information, and the exact sign test on them is McNemar's test. That is far more
+  sensitive than comparing two failure rates with independent samples. (`breakpoint/design.py`)
+- **How do you know a failure was a slip?** A falling robot's foot always slips in the end, so the friction
+  check fires first on many falls. The lab re-runs the same shove with ample grip; only if that recovers is
+  it called a slip. In trailer unloading all 18 "slips" turned out to be falls.
+- **How do you keep three implementations honest?** Python is the reference; the browser and C++ ports
+  are run from the Python tests (Node and g++) on fixed cases, including outcome, steps and time to rest.
+  A reviewer fuzzed 400 random cases with zero mismatches. (`tests/test_humanoid_js.py`, `tests/test_cpp.py`)
+- **What would you do with a real robot?** Replace the reduced model with whole-body simulation of the
+  real robot, keep the audit, levers and hazard log on top, and fit the job profiles from fleet logs
+  (`breakpoint/fleet.py` already does this from shift telemetry).
+- **What is wrong with it?** A constant-height pendulum with no angular momentum and no swing-leg
+  dynamics; a heuristic tip-over threshold for the wheeled base, which also gets no latency predictor;
+  150 shifts per job, so rates are good to a few points. All of this is stated in the README.
+
+## 7. Questions to ask them
 
 - How do you decide when a pilot task is ready to run unsupervised? Is there an internal readiness metric?
 - Where does the biped beat the wheeled Apollo 2 in your customers’ sites today, and where is it the reverse?
@@ -142,7 +175,7 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
 - What does the sim-to-real gap look like for your actuators: friction, backlash, thermal limits?
 - How is a compressed policy validated before it goes on the robot?
 
-## 7. A short outreach note (edit before sending)
+## 8. A short outreach note (edit before sending)
 
 > Hi [name], I’m applying for Apptronik’s software engineering internship ([team]). I built Breakpoint,
 > an open-source robustness lab for legged-robot policies. It finds the exact shove, slope, load and lag
