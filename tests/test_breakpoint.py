@@ -436,3 +436,31 @@ def test_explain_cites_push_direction_and_factors():
     assert explain(Scenario(), {"passed": True, "distance": 3.0, "time_s": 6.0}).startswith("Walked 3.0 m")
     stalled = explain(Scenario(motor_strength=0.3), {"passed": False, "fell": False, "distance": 0.1, "time_s": 8})
     assert "stalled" in stalled and "too weak" in stalled
+
+
+def test_gymnasium_adapter_api():
+    from gymnasium.utils.env_checker import check_env
+
+    from breakpoint.gym_env import BreakpointEnv
+
+    env = BreakpointEnv({"duration_s": 1.0})
+    check_env(env, skip_render_check=True)
+    obs, _ = env.reset(seed=0)
+    total_steps, done = 0, False
+    while not done:
+        obs, r, term, trunc, info = env.step(env.action_space.sample())
+        total_steps += 1
+        done = term or trunc
+    assert total_steps <= 50 and "x" in info
+
+
+def test_bring_your_own_policy_spec():
+    from breakpoint.policy import CallablePolicy, load_policy
+
+    pol = load_policy("py:examples.my_controller:make_policy")
+    assert isinstance(pol, CallablePolicy)
+    assert pol.act(np.zeros(OBS_DIM)).shape == (12,)
+    with pytest.raises(ValueError):
+        load_policy("py:nocolon")
+    out, _ = rollout(pol, Scenario(duration_s=2.0), seed=0)
+    assert out.survived

@@ -41,6 +41,8 @@ hand-written backprop, and that backprop is checked against finite differences i
 | `redteam.py` | Compound-stress tests (pairs of the weakest axes at 50%/75% of their breaking points), a 2-D failure-boundary heatmap, and an LLM red team that proposes realistic multi-stressor situations from the measured weak spots. Offline, deterministic templates are used instead. |
 | `profiles.py` | Deployment profiles (warehouse, sidewalk, home, construction) as distributions over conditions. `deploy` estimates the failure probability under each, with a 95% bound and the dominant causes. |
 | `report.py` | Readiness score (0–100), a grade (FIELD-READY / SUPERVISED / LAB-ONLY / NOT READY), a push-recovery polar plot, breaking-point bars, the failure atlas, and the search budget. Failure-rate bounds use the exact binomial (rule of three) or Wilson. Self-contained HTML. |
+| `explain.py` | Evidence-based failure explanations, e.g. "Fell 0.7 s after a 12.0 N·s shove from the right: it tipped over with slippery ground (μ=0.20) and a 3.0 kg payload." Every clause is computed from the scenario and outcome. |
+| `gym_env.py` | Gymnasium adapter for external RL libraries. |
 | `server.py`, `static/` | FastAPI and a three.js playground. You can compile a scenario, watch the replay, or use **Shove mode**, where you push the robot live over a WebSocket and score how much impulse it absorbs before it falls. A **ghost** mode replays a second policy as a translucent overlay in the same world. |
 
 ## Quick start
@@ -120,6 +122,17 @@ cause is **latency**: the open-loop gait ignores observations so delay can't hur
 closed-loop residual reacts to stale state. Single-axis margins rated the hardened policy at only
 2 steps (40 ms) of latency tolerance. The deployment check shows why that matters, and the next
 hardening round should target latency.
+
+## Bring your own policy / library
+
+- **Audit any controller.** `--policy py:package.module:factory` loads `factory()`, which returns
+  an `obs -> action` callable or a `Policy`. That covers an SB3 model, an ONNX session or a
+  hand-written controller. `examples/my_controller.py` is a lateral-balance reflex. Auditing it
+  shows the intuition is only half right: it raises the left-push margin from 4.4 to 5.0 N·s but
+  lowers right push (3.8), rear-left push (3.8) and payload (2.3 kg vs 3.3 kg).
+- **Train with any RL library.** `breakpoint.gym_env.BreakpointEnv` is a Gymnasium env (it passes
+  `check_env`). It reports `terminated` for falls and `truncated` for time limits, and can take a
+  `ScenarioSampler` for domain randomisation.
 
 ## The hardening loop
 

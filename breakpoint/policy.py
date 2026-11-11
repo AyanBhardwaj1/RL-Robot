@@ -66,10 +66,35 @@ class ResidualPolicy(Policy):
         return p
 
 
+class CallablePolicy(Policy):
+    """Wraps any ``obs -> action`` callable (an SB3 model, an ONNX session, a hand-written controller)."""
+
+    def __init__(self, fn, name: str = "external"):
+        self.fn = fn
+        self.name = name
+
+    def act(self, obs: np.ndarray, deterministic: bool = True) -> np.ndarray:
+        return np.clip(np.asarray(self.fn(obs), dtype=np.float64).reshape(ACT_DIM), -1.0, 1.0)
+
+
 def load_policy(spec: str | None) -> Policy:
-    """'cpg' / None -> baseline, otherwise a path to a saved .npz residual policy."""
+    """Resolve a policy spec.
+
+    * ``None`` / ``"cpg"``          -> the open-loop CPG baseline
+    * ``path/to/policy.npz``        -> a saved residual PPO policy
+    * ``py:package.module:factory`` -> ``factory()`` returns an ``obs -> action`` callable or a Policy
+      (bring your own controller; only for trusted local code, never exposed by the web server)
+    """
     if not spec or spec == "cpg":
         return CPGPolicy()
+    if spec.startswith("py:"):
+        import importlib
+
+        mod_name, _, attr = spec[3:].partition(":")
+        if not mod_name or not attr:
+            raise ValueError("py: policy spec must look like py:package.module:factory")
+        obj = getattr(importlib.import_module(mod_name), attr)()
+        return obj if isinstance(obj, Policy) else CallablePolicy(obj, name=attr)
     path = Path(spec)
     if not path.is_file():
         raise FileNotFoundError(f"policy file not found: {spec}")
