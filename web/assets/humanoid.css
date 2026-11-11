@@ -1,0 +1,50 @@
+/* Humanoid push lab. */
+.hum main { padding: var(--gap); display: grid; gap: var(--gap); }
+.hum-intro { background: var(--orange); color: var(--ink-on-orange); padding: clamp(24px, 4vw, 48px) var(--margin); display: grid; gap: 12px; }
+.hum-intro h1 { font-size: var(--step-head); }
+.hum-intro p { max-width: 70ch; font-size: var(--step-lead); line-height: 1.3; }
+.hum-grid { display: grid; grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) minmax(260px, 320px); gap: var(--gap); align-items: start; }
+.seg { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.seg label { --cut: 10px; position: relative; display: flex; align-items: center; min-height: 44px; padding: 0 14px; background: var(--char-3); font-weight: 600; cursor: pointer;
+  clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
+  transition: background-color .15s var(--ease), color .15s var(--ease); }
+.seg input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.seg label:has(input:checked) { background: var(--orange); color: var(--ink-on-orange); }
+.seg label:has(input:focus-visible) { outline: 3px solid var(--orange); outline-offset: 2px; }
+.slider { display: grid; gap: 4px; }
+.slider label { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-size: var(--step-small); }
+.slider input { width: 100%; }
+.dir-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.dir-pad button { min-height: 44px; border: 0; background: var(--char-3); color: var(--ink-on-dark); font: 600 var(--step-small)/1.1 "Schibsted Grotesk", sans-serif; cursor: pointer; transition: background-color .15s var(--ease), color .15s var(--ease); }
+.dir-pad button:hover { background: var(--orange); color: var(--ink-on-orange); }
+.hum-stage { background: var(--char); position: relative; }
+#hum-canvas { display: block; width: 100%; height: auto; aspect-ratio: 9 / 7; cursor: crosshair; touch-action: manipulation; }
+.hum-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 10px 14px; font-size: var(--step-small); font-weight: 600; }
+.k { display: inline-block; width: 12px; height: 12px; margin-right: 2px; vertical-align: -1px; }
+.k-com { background: #f3eee8; border-radius: 50%; }
+.k-cp { background: var(--orange); border-radius: 50%; }
+.k-foot { background: #5d5866; }
+.k-biped { background: var(--orange); }
+.k-wheel { background: #8fb7e8; }
+#h-polar { width: 100%; height: auto; }
+#h-polar .ring { fill: none; stroke: var(--char-3); }
+#h-polar .lbl { fill: var(--ink-on-dark); font: 600 9px "Schibsted Grotesk", sans-serif; }
+#h-polar .biped { fill: rgba(244, 123, 37, .35); stroke: var(--orange); stroke-width: 2; }
+#h-polar .wheel { fill: rgba(143, 183, 232, .18); stroke: #8fb7e8; stroke-width: 2; }
+.hum-jobs, .hum-how { background: var(--char-2); padding: clamp(20px, 3vw, 40px) var(--margin); display: grid; gap: 14px; }
+.hum-jobs h2, .hum-how h2 { font-size: var(--step-lead); letter-spacing: -0.02em; }
+.hum-jobs p { max-width: 80ch; }
+.tablewrap { overflow-x: auto; }
+#jobs-table { width: 100%; border-collapse: collapse; font-size: var(--step-small); }
+#jobs-table th, #jobs-table td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--char-3); vertical-align: top; }
+#jobs-table td.num { font-weight: 800; font-size: var(--step-body); white-space: nowrap; }
+#jobs-table td.bad { color: #ffb08a; }
+.how-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); }
+.how-cols p { line-height: 1.55; }
+@media (max-width: 1100px) {
+  .hum-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hum-stage { grid-column: 1 / -1; order: -1; }
+}
+@media (max-width: 720px) {
+  .hum-grid, .how-cols { grid-template-columns: minmax(0, 1fr); }
+}

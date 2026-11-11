@@ -70,7 +70,7 @@ def build_replays(out_dir: Path) -> None:
                                                     separators=(",", ":")))
 
 
-SITEMAP_PATHS = ("/", "/app", "/docs", "/reports/final")
+SITEMAP_PATHS = ("/", "/app", "/humanoid", "/roles", "/docs", "/reports/final")
 
 
 def write_seo(dist: Path, site_url: str | None) -> None:
@@ -113,6 +113,9 @@ def main(out: Path | None = None, replays: bool = True) -> int:
     data.mkdir(parents=True, exist_ok=True)
     if replays:
         build_replays(data)
+    humanoid = ROOT / "runs" / "humanoid" / "baseline.json"
+    if humanoid.is_file():
+        shutil.copy2(humanoid, data / "humanoid.json")
     write_seo(DIST, os.environ.get("SITE_URL"))
     size = sum(p.stat().st_size for p in DIST.rglob("*") if p.is_file())
     print(f"built {DIST} ({size / 1e6:.1f} MB)")

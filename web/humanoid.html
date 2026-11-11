@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Humanoid push lab · Breakpoint</title>
+<meta name="description" content="Shove a full-size humanoid in your browser and watch capture-point stepping save it, or not. Compare a walking biped with a wheeled base under payload, friction, latency and floor steps.">
+<meta name="theme-color" content="#17161b">
+<meta property="og:title" content="Humanoid push lab">
+<meta property="og:description" content="Capture-point push recovery for a full-size humanoid: biped vs wheeled base, live in the browser.">
+<meta property="og:image" content="/assets/og-humanoid.png">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/humanoid.css">
+</head>
+<body class="app hum">
+<a class="skip" href="#hum-main">Skip to the lab</a>
+<header class="app-bar">
+  <a class="wordmark" href="/" translate="no">Breakpoint</a>
+  <nav aria-label="Main"><a href="/app">Quadruped lab</a><a href="/roles">Roles</a><a href="/docs">Docs</a><a href="https://github.com/AyanBhardwaj1/RL-Robot" rel="noopener">Source</a></nav>
+</header>
+
+<main id="hum-main">
+  <section class="hum-intro">
+    <h1>Humanoid push lab</h1>
+    <p>A full-size humanoid, 72 kg and 0.95 m to its centre of mass, balancing like a linear inverted pendulum. Click anywhere around it to shove it from that side. Watch the capture point (orange) run, and the footsteps chase it.</p>
+  </section>
+
+  <div class="hum-grid">
+    <section class="block hum-controls" aria-label="Conditions">
+      <fieldset class="seg">
+        <legend class="block-title">Body</legend>
+        <label><input type="radio" name="body" value="biped" checked> Walking biped</label>
+        <label><input type="radio" name="body" value="wheeled"> Wheeled base</label>
+      </fieldset>
+      <div class="slider"><label for="imp">Shove <output id="imp-out">60 N·s</output></label>
+        <input id="imp" name="imp" type="range" min="0" max="200" step="1" value="60" autocomplete="off"></div>
+      <div class="slider"><label for="payload">Tote held in front <output id="payload-out">0 kg</output></label>
+        <input id="payload" name="payload" type="range" min="0" max="25" step="1" value="0" autocomplete="off"></div>
+      <div class="slider"><label for="friction">Floor friction <output id="friction-out">μ 0.80</output></label>
+        <input id="friction" name="friction" type="range" min="0.1" max="1" step="0.05" value="0.8" autocomplete="off"></div>
+      <div class="slider"><label for="latency">Control latency <output id="latency-out">0 ms</output></label>
+        <input id="latency" name="latency" type="range" min="0" max="250" step="10" value="0" autocomplete="off"></div>
+      <div class="slider"><label for="strength">Actuator strength <output id="strength-out">100%</output></label>
+        <input id="strength" name="strength" type="range" min="0.5" max="1" step="0.05" value="1" autocomplete="off"></div>
+      <div class="slider"><label for="step">Curb or stair on the route <output id="step-out">0 cm</output></label>
+        <input id="step" name="step" type="range" min="0" max="0.2" step="0.01" value="0" autocomplete="off"></div>
+      <div class="dir-pad" role="group" aria-label="Shove from a side">
+        <button type="button" data-d="-135">↘</button><button type="button" data-d="180">From front</button><button type="button" data-d="135">↙</button>
+        <button type="button" data-d="-90">From left</button><span></span><button type="button" data-d="90">From right</button>
+        <button type="button" data-d="-45">↗</button><button type="button" data-d="0">From rear</button><button type="button" data-d="45">↖</button>
+      </div>
+    </section>
+
+    <section class="hum-stage" aria-label="Top view of the robot">
+      <canvas id="hum-canvas" width="900" height="700" aria-label="Top view: robot body, feet, capture point and footsteps. Click to shove from that side." role="img" tabindex="0"></canvas>
+      <p class="hum-legend"><span class="k k-com"></span>Centre of mass <span class="k k-cp"></span>Capture point <span class="k k-foot"></span>Feet or base</p>
+    </section>
+
+    <section class="block hum-result" aria-live="polite">
+      <p class="verdict-word" id="h-verdict">Ready</p>
+      <p class="verdict-why" id="h-why">Click around the robot, or use the side buttons, to shove it.</p>
+      <h2 class="block-title">Push envelope, live</h2>
+      <svg id="h-polar" viewBox="-110 -110 220 220" role="img" aria-label="Largest survivable shove in 8 directions for the biped and the wheeled base"></svg>
+      <p class="hum-legend"><span class="k k-biped"></span>Biped <span class="k k-wheel"></span>Wheeled · N·s, robot faces up</p>
+      <dl class="metrics" id="h-env"></dl>
+    </section>
+  </div>
+
+  <section class="hum-jobs" aria-labelledby="jobs-title">
+    <h2 id="jobs-title">Legs or wheels, by job</h2>
+    <p>Failure rate over 150 sampled shifts per job from the Python lab (<code>python -m breakpoint humanoid</code>). The wheeled base shrugs off bigger shoves; it cannot climb a curb, a trailer lip or a stair.</p>
+    <div class="tablewrap"><table id="jobs-table"><thead><tr><th scope="col">Job</th><th scope="col">Walking biped</th><th scope="col">Wheeled base</th><th scope="col">What sets the odds</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="hum-how" aria-labelledby="how-h">
+    <h2 id="how-h">How it decides where to step</h2>
+    <div class="how-cols">
+      <p>The centre of mass moves like an inverted pendulum over the centre of pressure p: <code>x″ = ω²(x − p)</code>, with <code>ω = √(g / z₀)</code>. Its capture point <code>ξ = x + ẋ/ω</code> is where the robot must put its centre of pressure to come to rest, and it runs away from p: <code>ξ′ = ω(ξ − p)</code>.</p>
+      <p>Ankles first: the centre of pressure goes to the point of the foot nearest ξ, capped by ankle torque and by friction (<code>|x − p| ≤ μz</code>). If the capture point, as seen through the control latency, leaves the foot, the robot steps where ξ will be at touchdown, capped by leg reach, lateral reach and swing time. More than 3 steps, or a slip, is a fall.</p>
+      <p>The wheeled base has a big footprint and no steps: it drives under the capture point with bounded acceleration and speed, and traction falls with friction. It tips over if ξ escapes faster than it can follow, and is blocked by anything taller than a threshold.</p>
+    </div>
+  </section>
+</main>
+
+<script src="/assets/humanoid.js" defer></script>
+<script src="/assets/humanoid-page.js" defer></script>
+</body>
+</html>
