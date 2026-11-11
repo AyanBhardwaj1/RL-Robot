@@ -74,6 +74,7 @@ and the browser lab at `/humanoid`):
 
   | Change | Shifts fixed / broken | Sign test p |
   |---|---|---|
+  | Faster swing + side-step reach | 33 / 0 | < 0.001 |
   | Swing 15% faster | 25 / 0 | < 0.001 |
   | Side-step reach +10 cm | 14 / 0 | < 0.001 |
   | 20 ms less control latency | 11 / 0 | 0.001 |
@@ -82,7 +83,8 @@ and the browser lab at `/humanoid`):
   | Sole grip +15% | 0 / 0 | 1 |
   | Ankle torque +25% | 0 / 0 | 1 |
 
-  Ankle torque is a control that cannot move: in every job, even at the weakest sampled strength, the
+  The two largest wins overlap: together they save 33 shifts, not 25 + 14, because both fix the hardest
+  side shoves. Ankle torque is a control that cannot move: in every job, even at the weakest sampled strength, the
   foot edge limits the centre of pressure before the ankle does. Grip buys nothing because none of the
   failures were really slips. A wider stance cuts both ways, because the loaded foot sits further out
   during the swing.

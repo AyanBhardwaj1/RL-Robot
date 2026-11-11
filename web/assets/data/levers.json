@@ -39,6 +39,47 @@
  },
  "levers": [
   {
+   "key": "swing_and_lateral",
+   "title": "Faster swing + side-step reach",
+   "owner": "Actuators, mechanical and controls",
+   "jobs": {
+    "line-side kitting": {
+     "failure_rate": 0.0,
+     "fixed": 3,
+     "broken": 0
+    },
+    "tote handling": {
+     "failure_rate": 0.0,
+     "fixed": 9,
+     "broken": 0
+    },
+    "trailer unloading": {
+     "failure_rate": 0.0867,
+     "fixed": 13,
+     "broken": 0
+    },
+    "home care": {
+     "failure_rate": 0.0,
+     "fixed": 0,
+     "broken": 0
+    },
+    "teleoperated data collection": {
+     "failure_rate": 0.02,
+     "fixed": 8,
+     "broken": 0
+    }
+   },
+   "fixed": 33,
+   "broken": 0,
+   "net": 33,
+   "p_value": 0.0,
+   "envelope": {
+    "front": 109.23,
+    "left": 73.29,
+    "front-left": 95.85
+   }
+  },
+  {
    "key": "swing_time",
    "title": "Swing 15% faster",
    "owner": "Actuators and controls",

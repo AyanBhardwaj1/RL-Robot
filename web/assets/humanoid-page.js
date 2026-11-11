@@ -249,11 +249,17 @@
         td(`${delta("left")} / ${delta("front")} N·s`, "num"));
       tb.appendChild(tr);
     });
-    const top = d.levers[0];
+    const singles = d.levers.filter((l) => !l.key.includes("_and_"));
+    const combo = d.levers.find((l) => l.key.includes("_and_"));
+    const top = singles[0];
     const lost = top.broken ? `${top.broken} lost` : "none lost";
     const ankle = d.levers.find((l) => l.key === "ankle_torque");
     const stance = d.levers.find((l) => l.key === "stance_width");
     let note = `Biggest single win: ${top.title.toLowerCase()} (${top.fixed} shifts saved, ${lost}).`;
+    if (combo && singles[1]) {
+      const sum = top.fixed + singles[1].fixed;
+      note += ` With ${singles[1].title.toLowerCase()} as well: ${combo.fixed} saved, ${combo.fixed < sum ? `not ${sum}; they overlap on the hardest side shoves` : "the gains add up"}.`;
+    }
     if (ankle && ankle.fixed + ankle.broken === 0) note += " Ankle torque is a control that can’t move: in every job the foot edge, not the ankle, limits the centre of pressure.";
     if (stance && stance.fixed && stance.broken) note += ` A wider stance cuts both ways (${stance.fixed} saved, ${stance.broken} lost): the loaded foot sits further out during the swing.`;
     $("#levers-note").textContent = note;

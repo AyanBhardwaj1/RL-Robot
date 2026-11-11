@@ -49,6 +49,9 @@ LEVERS = (
           cond=lambda c: replace(c, latency_s=max(0.0, c.latency_s - 0.020))),
     Lever("grip", "Sole grip +15%", "Mechanical",
           cond=lambda c: replace(c, friction=c.friction * 1.15)),
+    # Do the two largest single wins add up, or do they fix the same shifts?
+    Lever("swing_and_lateral", "Faster swing + side-step reach", "Actuators, mechanical and controls",
+          robot=lambda r: replace(r, min_swing=r.min_swing * 0.85, max_lateral_step=r.max_lateral_step + 0.10)),
 )
 
 
