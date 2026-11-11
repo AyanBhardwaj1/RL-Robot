@@ -1,0 +1,330 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - link "Source" [ref=e4] [cursor=pointer]:
+      - /url: https://github.com/AyanBhardwaj1/RL-Robot
+    - link "Breakpoint" [ref=e5] [cursor=pointer]:
+      - /url: /
+    - link "Open the lab" [ref=e6] [cursor=pointer]:
+      - /url: /app
+  - main [ref=e7]:
+    - region [ref=e8]:
+      - generic [ref=e9]:
+        - heading "Breakpoint" [level=1] [ref=e10]
+        - paragraph [ref=e11]: "Find the shove, slope, load and lag where your walking robot’s policy breaks: on a laptop, before the real world finds it."
+      - navigation "Sections" [ref=e12]:
+        - link "Breaking points" [ref=e13] [cursor=pointer]:
+          - /url: "#certificate"
+        - link "How it hunts" [ref=e15] [cursor=pointer]:
+          - /url: "#how"
+        - link "Odds by place" [ref=e17] [cursor=pointer]:
+          - /url: "#odds"
+        - link "What it caught" [ref=e19] [cursor=pointer]:
+          - /url: "#caught"
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - heading "Push it until it falls" [level=2] [ref=e25]
+          - generic [ref=e26]:
+            - button "Shove the robot" [ref=e27] [cursor=pointer]
+            - group "Shove from" [ref=e28]:
+              - generic [ref=e30] [cursor=pointer]:
+                - radio "Left" [checked] [ref=e31]
+                - text: Left
+              - generic [ref=e32] [cursor=pointer]:
+                - radio "Right" [ref=e33]
+                - text: Right
+              - generic [ref=e34] [cursor=pointer]:
+                - radio "Front" [ref=e35]
+                - text: Front
+              - generic [ref=e36] [cursor=pointer]:
+                - radio "Rear" [ref=e37]
+                - text: Rear
+            - generic [ref=e38]:
+              - text: Strength
+              - status [ref=e39]: 8 N·s
+            - slider "Strength" [ref=e40] [cursor=pointer]: "8"
+          - paragraph [ref=e41]: It walks at 0.3 m/s. Its measured limit from the left is 5.6 N·s.
+          - paragraph [ref=e42]: This is the best policy Breakpoint produced, running live in MuJoCo. Pick a side and a strength; the shove lands 1.2 seconds into its stride.
+        - figure [ref=e43]:
+          - button "Pause the robot animation" [ref=e46] [cursor=pointer]: Pause
+    - region [ref=e47]:
+      - generic [ref=e48]:
+        - paragraph [ref=e49]: "84.1"
+        - img "The robot carrying a 6 kg block up a 12° slope" [ref=e50]
+        - paragraph [ref=e51]: Readiness score of the best policy, up from 66.8 for the bare walking gait it was built on.
+      - heading "One number per stress" [level=2] [ref=e52]
+      - generic [ref=e53]:
+        - paragraph [ref=e54]: 120 ms
+        - paragraph [ref=e55]: "Control lag it tolerates after the latency gate. Before it: 60 ms."
+      - generic [ref=e56]:
+        - paragraph [ref=e57]: 0 of 60
+        - paragraph [ref=e58]: Remote-operated worlds where it fell. The policy before the gate fell in 1 of every 10.
+    - region [ref=e59]:
+      - generic [ref=e60]:
+        - heading "Probe every stress" [level=2] [ref=e61]
+        - paragraph [ref=e62]: 17 stresses, from a shove at 4 points in the stride to 120 ms of lag. Each one is pushed until the robot stops passing, then halved back to the exact edge.
+      - generic [ref=e64]:
+        - paragraph [ref=e65]: Breaking points · best policy
+        - list [ref=e66]:
+          - listitem [ref=e67]:
+            - generic [ref=e68]: Uphill
+            - generic [ref=e71]: 20°
+          - listitem [ref=e72]:
+            - generic [ref=e73]: Payload
+            - generic [ref=e76]: 8 kg
+          - listitem [ref=e77]:
+            - generic [ref=e78]: Stairs
+            - generic [ref=e81]: 9.4 cm
+          - listitem [ref=e82]:
+            - generic [ref=e83]: Downhill
+            - generic [ref=e86]: 12.2°
+          - listitem [ref=e87]:
+            - generic [ref=e88]: Shove from front
+            - generic [ref=e91]: 13.8 N·s
+          - listitem [ref=e92]:
+            - generic [ref=e93]: Shove from left
+            - generic [ref=e96]: 5.6 N·s
+      - generic [ref=e97]:
+        - generic [ref=e98]: Stage of the hardening loop
+        - slider "Stage of the hardening loop" [ref=e99] [cursor=pointer]: "0"
+        - list [ref=e100]:
+          - listitem [ref=e101]: Probe
+          - listitem [ref=e102]: Hunt
+          - listitem [ref=e103]: Shrink
+          - listitem [ref=e104]: Harden
+    - region [ref=e105]:
+      - generic [ref=e106]:
+        - heading "Odds by place" [level=2] [ref=e107]
+        - paragraph [ref=e108]: Failure rate of the best policy over 30 independently seeded worlds per place. The number in brackets is the 95% upper bound.
+      - generic [ref=e109]:
+        - img "The robot on a flat floor, mid-shove from the side" [ref=e110]
+        - heading "Warehouse" [level=3] [ref=e111]
+        - paragraph [ref=e112]: 0%
+        - paragraph [ref=e113]: (≤ 9.5%) · spills, totes up to 4 kg, cart bumps
+      - generic [ref=e114]:
+        - img "The robot climbing 8 cm stairs" [ref=e115]
+        - heading "Home" [level=3] [ref=e116]
+        - paragraph [ref=e117]: 0%
+        - paragraph [ref=e118]: (≤ 9.5%) · rugs, a few steps, pets and kids
+      - generic [ref=e119]:
+        - heading "Teleop link" [level=3] [ref=e120]
+        - paragraph [ref=e121]: 0%
+        - paragraph [ref=e122]: "(≤ 9.5%) · 40–100 ms of control lag. Before the latency gate: 10%."
+      - generic [ref=e123]:
+        - img "The robot walking down an icy 6° slope" [ref=e124]
+        - heading "Sidewalk" [level=3] [ref=e125]
+        - paragraph [ref=e126]: 6.7%
+        - paragraph [ref=e127]: (≤ 18.3%) · curbs, ramps, rain, crowds
+      - generic [ref=e128]:
+        - img "The robot crossing rubble with 5 cm bumps" [ref=e129]
+        - heading "Construction" [level=3] [ref=e130]
+        - paragraph [ref=e131]: 13.3%
+        - paragraph [ref=e132]: (≤ 26.6%) · gravel, mud, rubble, tool loads. Its weakest place.
+      - generic [ref=e133]:
+        - heading "How it’s counted" [level=3] [ref=e134]
+        - paragraph [ref=e135]: A fall is tilt past 65° or the body within 11 cm of the ground. A stall is under 35% of the commanded distance. Both count as failures.
+    - region [ref=e136]:
+      - heading "What it caught" [level=2] [ref=e137]
+      - generic [ref=e138]:
+        - list [ref=e139]:
+          - listitem [ref=e140]:
+            - button "Training couldn’t fix lag Every learned policy fell under 40–100 ms of lag; the bare gait never did. A latency gate, not more PPO, took teleop failures to 0 of 60." [ref=e141] [cursor=pointer]:
+              - generic [ref=e142]: Training couldn’t fix lag
+              - generic [ref=e143]: Every learned policy fell under 40–100 ms of lag; the bare gait never did. A latency gate, not more PPO, took teleop failures to 0 of 60.
+          - listitem [ref=e144]:
+            - button "The trained policy stood still v1 walked during noisy training and stalled when run for real. It scored 50.9, below the gait it was built on. Now every checkpoint is judged without noise." [ref=e145] [cursor=pointer]:
+              - generic [ref=e146]: The trained policy stood still
+              - generic [ref=e147]: v1 walked during noisy training and stalled when run for real. It scored 50.9, below the gait it was built on. Now every checkpoint is judged without noise.
+          - listitem [ref=e148]:
+            - button "Two safe stresses, one fall Stairs and a payload, each at 75% of its own limit, fail together on every seed. A single-axis report never shows this." [ref=e149] [cursor=pointer]:
+              - generic [ref=e150]: Two safe stresses, one fall
+              - generic [ref=e151]: Stairs and a payload, each at 75% of its own limit, fail together on every seed. A single-axis report never shows this.
+          - listitem [ref=e152]:
+            - button "More training made it worse A second hardening round fixed 2 of 11 failures, and red-team losses rose from 2 to 5. The fresh audit caught what its own report missed." [ref=e153] [cursor=pointer]:
+              - generic [ref=e154]: More training made it worse
+              - generic [ref=e155]: A second hardening round fixed 2 of 11 failures, and red-team losses rose from 2 to 5. The fresh audit caught what its own report missed.
+          - listitem [ref=e156]:
+            - 'button "Ice can save it On friction 0.05 it survives a side shove that topples it on concrete: it slides instead of tripping. It also can’t walk forward there at all." [ref=e157] [cursor=pointer]':
+              - generic [ref=e158]: Ice can save it
+              - generic [ref=e159]: "On friction 0.05 it survives a side shove that topples it on concrete: it slides instead of tripping. It also can’t walk forward there at all."
+        - figure [ref=e160]:
+          - 'img "Deployment-risk table: failure rate by place for five policies" [ref=e161]'
+    - region [ref=e162]:
+      - generic [ref=e163]:
+        - heading "Readiness certificate" [level=2] [ref=e164]
+        - paragraph [ref=e165]: gated-policy_v2field · score 84.1 · supervised trials with a spotter and kill switch
+        - generic [ref=e166]:
+          - heading "Shoves, worst point in the stride" [level=3] [ref=e167]
+          - generic [ref=e168]:
+            - generic [ref=e169]:
+              - term [ref=e170]: From the front
+              - definition [ref=e171]: 13.8 N·s
+            - generic [ref=e172]:
+              - term [ref=e173]: From the front-left
+              - definition [ref=e174]: 8.8 N·s
+            - generic [ref=e175]:
+              - term [ref=e176]: From the front-right
+              - definition [ref=e177]: 8.1 N·s
+            - generic [ref=e178]:
+              - term [ref=e179]: From the rear
+              - definition [ref=e180]: 8.1 N·s
+            - generic [ref=e181]:
+              - term [ref=e182]: From the right
+              - definition [ref=e183]: 6.9 N·s
+            - generic [ref=e184]:
+              - term [ref=e185]: From the rear-right
+              - definition [ref=e186]: 6.3 N·s
+            - generic [ref=e187]:
+              - term [ref=e188]: From the left
+              - definition [ref=e189]: 5.6 N·s
+            - generic [ref=e190]:
+              - term [ref=e191]: From the rear-left
+              - definition [ref=e192]: 5.6 N·s
+        - generic [ref=e193]:
+          - heading "Ground" [level=3] [ref=e194]
+          - generic [ref=e195]:
+            - generic [ref=e196]:
+              - term [ref=e197]: Uphill
+              - definition [ref=e198]: 20° · top of range
+            - generic [ref=e199]:
+              - term [ref=e200]: Downhill
+              - definition [ref=e201]: 12.2°
+            - generic [ref=e202]:
+              - term [ref=e203]: Stairs
+              - definition [ref=e204]: 9.4 cm
+            - generic [ref=e205]:
+              - term [ref=e206]: Rough ground
+              - definition [ref=e207]: ±8 cm · top of range
+            - generic [ref=e208]:
+              - term [ref=e209]: Low friction
+              - definition [ref=e210]: μ 0.05 · top of range
+        - generic [ref=e211]:
+          - heading "Body and signals" [level=3] [ref=e212]
+          - generic [ref=e213]:
+            - generic [ref=e214]:
+              - term [ref=e215]: Payload
+              - definition [ref=e216]: 8 kg · top of range
+            - generic [ref=e217]:
+              - term [ref=e218]: Weak motors
+              - definition [ref=e219]: 21% of torque
+            - generic [ref=e220]:
+              - term [ref=e221]: Control lag
+              - definition [ref=e222]: 120 ms · top of range
+            - generic [ref=e223]:
+              - term [ref=e224]: Sensor noise
+              - definition [ref=e225]: σ 0.5 · top of range
+        - paragraph [ref=e226]: Policy SHA-256 e33d605ea86e6fb1…MuJoCo 4.0.0 · numpy 2.5.3 · 24 nominal runs, 0 failures
+      - generic [ref=e227]:
+        - 'figure "Recorded in the simulator: a 7 N·s shove from the right, on rough ground. It kept walking." [ref=e228]':
+          - generic "Recorded shove clip. Press Enter to play or pause." [ref=e229]
+        - paragraph [ref=e231]: Every number on this sheet came from bisection in simulation, with the search budget stated. Not finding a failure is not proof it can’t fail; the certificate says how hard it looked.
+        - link "Read the full report" [ref=e232] [cursor=pointer]:
+          - /url: /reports/final
+    - region [ref=e233]:
+      - heading "Runs on a laptop" [level=2] [ref=e235]
+      - generic [ref=e236]:
+        - generic [aria-hidden] [ref=e237]: 4 min
+        - paragraph [ref=e238]:
+          - generic [ref=e239]: Trains on one CPU core
+          - text: PPO in numpy with hand-written backprop. No GPU, no PyTorch.
+      - generic [ref=e240]:
+        - generic [aria-hidden] [ref=e241]: Supervised
+        - paragraph [ref=e242]:
+          - generic [ref=e243]: A grade with its evidence
+          - text: 0–100 score, margins, odds and budget.
+      - generic [ref=e244]:
+        - generic [aria-hidden] [ref=e245]:
+          - generic [ref=e246]: ←
+          - generic [ref=e247]: →
+        - paragraph [ref=e248]:
+          - generic [ref=e249]: Shove it yourself
+          - text: Arrow keys push the robot live in the lab.
+      - paragraph [ref=e253]:
+        - generic [ref=e254]: Latency gate
+        - text: Falls back to the gait as lag climbs past 40 ms.
+      - generic [ref=e255]:
+        - code [ref=e256]: gated:policy.npz
+        - paragraph [ref=e257]:
+          - generic [ref=e258]: Bring your own policy
+          - text: Any obs → action callable, Gymnasium env included.
+      - generic [ref=e259]:
+        - generic [aria-hidden] [ref=e260]: exit 1
+        - paragraph [ref=e261]:
+          - generic [ref=e262]: Gates your release
+          - text: certify fails CI below the score you set.
+      - paragraph [ref=e266]:
+        - generic [ref=e267]: Offline by default
+        - text: Plain English to physics without an LLM; one is optional.
+      - generic [ref=e268]:
+        - paragraph [ref=e269]:
+          - generic [ref=e270]: Install
+          - text: Python 3.10+ and MuJoCo.
+        - code [ref=e272]: pip install -e '.[dev]' python -m breakpoint certify \ --policy gated:runs/v2field/policy_v2field.npz
+    - region [ref=e273]:
+      - heading "Fair questions" [level=2] [ref=e274]
+      - generic [ref=e275]:
+        - group [ref=e276]:
+          - generic "Is this a real robot?" [ref=e277] [cursor=pointer]
+          - paragraph [ref=e278]: No. It’s a generic 6 kg, 12-joint quadruped built procedurally in MuJoCo. Its numbers show relative robustness between policies, not certified limits of any product.
+        - group [ref=e279]:
+          - generic "What does “breaking point” mean exactly?" [ref=e280] [cursor=pointer]
+        - group [ref=e281]:
+          - generic "Why should I trust a 0% failure rate?" [ref=e282] [cursor=pointer]
+        - group [ref=e283]:
+          - generic "Can I test my own policy?" [ref=e284] [cursor=pointer]
+        - group [ref=e285]:
+          - generic "Do I need an LLM or an API key?" [ref=e286] [cursor=pointer]
+        - group [ref=e287]:
+          - generic "What does the latency gate actually do?" [ref=e288] [cursor=pointer]
+        - group [ref=e289]:
+          - generic "How long does a full audit take?" [ref=e290] [cursor=pointer]
+    - link "Open the lab and push the robot until it falls. Shove" [ref=e291] [cursor=pointer]:
+      - /url: /app
+      - generic [ref=e292]: Open the lab and push the robot until it falls.
+      - generic [ref=e295]: Shove
+  - contentinfo [ref=e296]:
+    - img "Breakpoint" [ref=e297]:
+      - generic [aria-hidden] [ref=e298]: B
+      - generic [aria-hidden] [ref=e299]: r
+      - generic [aria-hidden] [ref=e300]: e
+      - generic [aria-hidden] [ref=e301]: a
+      - generic [aria-hidden] [ref=e302]: k
+      - generic [aria-hidden] [ref=e303]: p
+      - generic [aria-hidden] [ref=e304]: o
+      - generic [aria-hidden] [ref=e305]: i
+      - generic [aria-hidden] [ref=e306]: "n"
+      - generic [aria-hidden] [ref=e307]: t
+    - generic [ref=e308]:
+      - list [ref=e309]:
+        - listitem [ref=e310]:
+          - link "Lab" [ref=e311] [cursor=pointer]:
+            - /url: /app
+        - listitem [ref=e312]:
+          - link "Docs" [ref=e313] [cursor=pointer]:
+            - /url: /docs
+        - listitem [ref=e314]:
+          - link "Readiness report" [ref=e315] [cursor=pointer]:
+            - /url: /reports/final
+      - list [ref=e316]:
+        - listitem [ref=e317]:
+          - link "Web API" [ref=e318] [cursor=pointer]:
+            - /url: /docs#api
+        - listitem [ref=e319]:
+          - link "Command line" [ref=e320] [cursor=pointer]:
+            - /url: /docs#cli
+        - listitem [ref=e321]:
+          - link "API reference" [ref=e322] [cursor=pointer]:
+            - /url: /api/docs
+      - list [ref=e323]:
+        - listitem [ref=e324]:
+          - link "Source on GitHub" [ref=e325] [cursor=pointer]:
+            - /url: https://github.com/AyanBhardwaj1/RL-Robot
+        - listitem [ref=e326]:
+          - link "First leaderboard" [ref=e327] [cursor=pointer]:
+            - /url: /reports/leaderboard-v1
+      - paragraph [ref=e328]: Built with MuJoCo, numpy and FastAPI. The 3D view uses three.js (MIT).
+    - generic [ref=e329]:
+      - paragraph [ref=e330]: © 2026 Breakpoint
+      - link "Open the lab" [ref=e331] [cursor=pointer]:
+        - /url: /app

@@ -37,14 +37,11 @@ FRAME_STRIDE = 2  # 25 Hz playback
 TERRAIN_ROWS, TERRAIN_COLS = 60, 160
 
 POLICIES: dict[str, dict] = {
-    "gated-v2field": {"spec": f"gated:{POLICY_DIR / 'policy_v2field.npz'}", "label": "Best: v2field + latency gate",
-                      "score": 84.1},
-    "v2field": {"spec": str(POLICY_DIR / "policy_v2field.npz"), "label": "v2field (deployment-hardened PPO)",
-                "score": 82.6},
-    "v2": {"spec": str(POLICY_DIR / "policy_v2.npz"), "label": "v2 (PPO, not hardened)", "score": 73.5},
-    "v1-hardened": {"spec": str(POLICY_DIR / "policy_hardened.npz"), "label": "v1 + one hardening round",
-                    "score": 77.2},
-    "cpg": {"spec": "cpg", "label": "Bare trotting gait (no learning)", "score": 66.8},
+    "gated-v2field": {"spec": f"gated:{POLICY_DIR / 'policy_v2field.npz'}", "label": "Best · gated v2field", "score": 84.1},
+    "v2field": {"spec": str(POLICY_DIR / "policy_v2field.npz"), "label": "v2field · hardened PPO", "score": 82.6},
+    "v2": {"spec": str(POLICY_DIR / "policy_v2.npz"), "label": "v2 · plain PPO", "score": 73.5},
+    "v1-hardened": {"spec": str(POLICY_DIR / "policy_hardened.npz"), "label": "v1 · one hardening round", "score": 77.2},
+    "cpg": {"spec": "cpg", "label": "Bare gait · no learning", "score": 66.8},
 }
 
 app = FastAPI(title="Breakpoint API", docs_url="/api/docs", openapi_url="/api/openapi.json")

@@ -47,8 +47,8 @@
     <div class="front-inner">
       <div class="shove-panel">
         <h2 class="shove-title">Push it until it falls</h2>
-        <p class="shove-copy">This is the best policy Breakpoint produced, running in MuJoCo. Pick a side and a strength, then shove it 1.2 seconds into its stride.</p>
         <form class="shove-form" id="shove-form" novalidate>
+          <button class="btn btn-dark" type="submit" id="shove-btn">Shove the robot</button>
           <fieldset class="dir-pick">
             <legend>Shove from</legend>
             <label><input type="radio" name="dir" value="left" checked> Left</label>
@@ -58,9 +58,9 @@
           </fieldset>
           <label class="impulse" for="impulse">Strength <output id="impulse-out" for="impulse">8 N·s</output></label>
           <input id="impulse" name="impulse" type="range" min="2" max="16" step="1" value="8" autocomplete="off">
-          <button class="btn btn-dark" type="submit" id="shove-btn">Shove the robot</button>
         </form>
-        <p class="shove-result" id="shove-result" aria-live="polite">It walks at 0.4 m/s. Its measured limit from the left is 5.6 N·s.</p>
+        <p class="shove-result" id="shove-result" aria-live="polite">Its measured limit from the left is 5.6 N·s.</p>
+        <p class="shove-copy">This is the best policy Breakpoint produced, running live in MuJoCo. Pick a side and a strength; the shove lands 1.2 seconds into its stride.</p>
       </div>
       <figure class="robot-stage" data-ui>
         <div class="robot-canvas" id="hero-robot">

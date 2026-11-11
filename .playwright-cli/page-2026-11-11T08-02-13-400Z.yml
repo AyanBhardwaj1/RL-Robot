@@ -1,0 +1,128 @@
+- generic [active] [ref=e1]:
+  - link "Skip to the lab" [ref=e2] [cursor=pointer]:
+    - /url: "#lab-main"
+  - banner [ref=e3]:
+    - link "Breakpoint" [ref=e4] [cursor=pointer]:
+      - /url: /
+    - navigation "Main" [ref=e5]:
+      - link "Docs" [ref=e6] [cursor=pointer]:
+        - /url: /docs
+      - link "Report" [ref=e7] [cursor=pointer]:
+        - /url: /reports/final
+      - link "Source" [ref=e8] [cursor=pointer]:
+        - /url: https://github.com/AyanBhardwaj1/RL-Robot
+  - main [ref=e9]:
+    - region "Controls" [ref=e10]:
+      - generic [ref=e11]:
+        - heading "Describe a world" [level=1] [ref=e12]
+        - generic [ref=e13]: Conditions, in plain English
+        - textbox "Conditions, in plain English" [ref=e14]:
+          - /placeholder: e.g. icy loading dock, carrying a 3 kg box, shoved hard from the left at 3s…
+          - text: icy loading dock, carrying a 3 kg box, shoved hard from the left at 3s
+        - list "Examples" [ref=e15]:
+          - listitem [ref=e16] [cursor=pointer]: muddy forest trail in the rain
+          - listitem [ref=e17] [cursor=pointer]: walk up a 12 degree hill with worn motors at 55% and 80ms wifi lag
+          - listitem [ref=e18] [cursor=pointer]: stairs with 7 cm steps
+          - listitem [ref=e19] [cursor=pointer]: carrying 10 lbs front-heavy, kicked from the right at 2s with 150 N
+        - generic [ref=e20]:
+          - button "Build the world" [ref=e21] [cursor=pointer]
+          - generic [ref=e22] [cursor=pointer]:
+            - text: From a photo
+            - button "From a photo" [ref=e23]
+        - paragraph [ref=e24]: "Built by the offline parser: low friction, payload, pushes."
+      - group [ref=e25]:
+        - generic "World settings · flat · μ 0.12 · 3 kg +" [ref=e26] [cursor=pointer]
+      - generic [ref=e27]:
+        - heading "Shoves" [level=2] [ref=e28]
+        - list [ref=e29]:
+          - listitem [ref=e30]:
+            - generic [ref=e31]: 15 N·s from the left at 3 s
+            - button "Remove the shove at 3 seconds" [ref=e32] [cursor=pointer]: Remove
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: From
+            - combobox "From" [ref=e36]:
+              - option "Left" [selected]
+              - option "Right"
+              - option "Front"
+              - option "Rear"
+              - option "Rear-left"
+              - option "Rear-right"
+              - option "Front-left"
+              - option "Front-right"
+          - generic [ref=e37]:
+            - generic [ref=e38]: Strength, N·s
+            - spinbutton "Strength, N·s" [ref=e39]: "8"
+          - generic [ref=e40]:
+            - generic [ref=e41]: At, seconds
+            - spinbutton "At, seconds" [ref=e42]: "2"
+          - button "Add shove" [ref=e43] [cursor=pointer]
+      - generic [ref=e44]:
+        - heading "Policy" [level=2] [ref=e45]
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e48]: Run
+            - combobox "Run" [ref=e49]:
+              - 'option "Best: v2field + latency gate · 84.1" [selected]'
+              - option "v2field (deployment-hardened PPO) · 82.6"
+              - option "v2 (PPO, not hardened) · 73.5"
+              - option "v1 + one hardening round · 77.2"
+              - option "Bare trotting gait (no learning) · 66.8"
+          - generic [ref=e50]:
+            - generic [ref=e51]: Compare with (ghost)
+            - combobox "Compare with (ghost)" [ref=e52]:
+              - option "None" [selected]
+              - 'option "Best: v2field + latency gate"'
+              - option "v2field (deployment-hardened PPO)"
+              - option "v2 (PPO, not hardened)"
+              - option "v1 + one hardening round"
+              - option "Bare trotting gait (no learning)"
+        - button "Run the simulation" [ref=e53] [cursor=pointer]
+    - region "Simulation" [ref=e54]:
+      - generic [ref=e55]:
+        - paragraph [ref=e56]: Build a world, then run it. The robot appears here.
+        - generic [ref=e57]:
+          - button "Replay" [disabled] [ref=e58]
+          - generic [ref=e59]: Playback position
+          - slider "Playback position" [disabled] [ref=e60] [cursor=pointer]: "0"
+      - generic [ref=e61]:
+        - paragraph [ref=e62]: Waiting
+        - paragraph [ref=e63]: The explanation of what happened will appear here, computed from the run, not guessed.
+      - generic [ref=e64]:
+        - region [ref=e65]:
+          - heading "Find a breaking point" [level=2] [ref=e66]
+          - paragraph [ref=e67]: Bisects one stress until the selected policy stops passing. Takes about 2 seconds.
+          - generic [ref=e68]:
+            - generic [ref=e69]: Stress
+            - combobox "Stress" [ref=e70]:
+              - option "Push from rear" [selected]
+              - option "Push from left"
+              - option "Push from front"
+              - option "Push from right"
+              - option "Push from rear-left"
+              - option "Push from front-left"
+              - option "Push from front-right"
+              - option "Push from rear-right"
+              - option "Low friction"
+              - option "Payload"
+              - option "Motor weakness"
+              - option "Action latency"
+              - option "Sensor noise"
+              - option "Uphill slope"
+              - option "Downhill slope"
+              - option "Stairs"
+              - option "Rough ground"
+            - button "Find it" [ref=e71] [cursor=pointer]
+          - paragraph [ref=e72]
+        - region [ref=e73]:
+          - heading "Failure odds by place" [level=2] [ref=e74]
+          - paragraph [ref=e75]: Samples 12 independent worlds from a deployment profile. Takes about 5 seconds.
+          - generic [ref=e76]:
+            - generic [ref=e77]: Place
+            - combobox "Place" [ref=e78]:
+              - option "Warehouse" [selected]
+              - option "Sidewalk"
+              - option "Home"
+              - option "Construction"
+              - option "Teleop"
+            - button "Check odds" [ref=e79] [cursor=pointer]
