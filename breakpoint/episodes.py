@@ -25,6 +25,7 @@ Log format, JSON Lines, one episode per line:
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -44,21 +45,66 @@ class Verdict:
     reasons: list[str] = field(default_factory=list)
 
 
-def _latency_at(trace: list[float], t_s: float) -> float:
-    if not trace:
-        return 0.0
-    return float(trace[min(len(trace) - 1, max(0, int(t_s)))])
+def _num(v, what: str, lo: float | None = None, allow_none: bool = False) -> float:
+    """A finite number (not a bool), optionally bounded below; anything else is a clear ValueError."""
+    if v is None and allow_none:
+        return math.nan
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
+        raise ValueError(f"{what} must be a finite number, got {v!r}")
+    if lo is not None and v < lo:
+        raise ValueError(f"{what} must be ≥ {lo:g}, got {v!r}")
+    return float(v)
+
+
+def _trace(ep: dict) -> list[float]:
+    """Latency samples, one per second. Gaps (null) stay in place as NaN so later samples keep their time."""
+    raw = ep.get("latency_ms")
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise ValueError(f"latency_ms must be a list of numbers (one per second), got {type(raw).__name__}")
+    return [_num(x, f"latency_ms[{k}]", lo=0.0, allow_none=True) for k, x in enumerate(raw)]
+
+
+def _latency_at(trace: list[float], t_s: float) -> tuple[float, str | None]:
+    """The sample for the second containing t_s; a gap or a missing trace falls back with a stated reason."""
+    finite = [x for x in trace if math.isfinite(x)]
+    if not finite:
+        return 0.0, "no latency samples: replayed at 0 ms, an optimistic assumption"
+    x = trace[min(len(trace) - 1, max(0, int(t_s)))]
+    if math.isfinite(x):
+        return x, None
+    return float(np.median(finite)), f"no latency sample at {t_s:.1f} s: used the episode median"
 
 
 def tag_episode(ep: dict, robot: Humanoid = Humanoid()) -> Verdict:
     name = str(ep.get("episode", "?"))
-    trace = [float(x) for x in ep.get("latency_ms") or [] if isinstance(x, (int, float)) and np.isfinite(x)]
+    try:
+        return _tag(ep, name, robot)
+    except ValueError as e:
+        raise ValueError(f"episode {name!r}: {e}") from None
+
+
+def _tag(ep: dict, name: str, robot: Humanoid) -> Verdict:
+    trace = _trace(ep)
+    payload = _num(ep.get("payload_kg", 0.0), "payload_kg", lo=0.0)
+    friction = _num(ep.get("friction", 0.8), "friction", lo=0.01)
+    slope = _num(ep.get("slope_deg", 0.0), "slope_deg")
+    contacts = ep.get("contacts") or []
+    if not isinstance(contacts, list):
+        raise ValueError(f"contacts must be a list, got {type(contacts).__name__}")
     reasons: list[str] = []
     fell = near = False
-    for c in ep.get("contacts") or []:
-        imp, ang, t = float(c.get("impulse_ns", 0.0)), float(c.get("direction_deg", 0.0)), float(c.get("t_s", 0.0))
-        cond = Conditions(payload_kg=float(ep.get("payload_kg", 0.0)), friction=float(ep.get("friction", 0.8)),
-                          floor_slope_deg=float(ep.get("slope_deg", 0.0)), latency_s=_latency_at(trace, t) / 1000.0)
+    for k, c in enumerate(contacts):
+        if not isinstance(c, dict):
+            raise ValueError(f"contacts[{k}] must be an object with t_s, impulse_ns and direction_deg")
+        imp = _num(c.get("impulse_ns", 0.0), f"contacts[{k}].impulse_ns", lo=0.0)
+        ang = _num(c.get("direction_deg", 0.0), f"contacts[{k}].direction_deg")
+        t = _num(c.get("t_s", 0.0), f"contacts[{k}].t_s", lo=0.0)
+        lat, note = _latency_at(trace, t)
+        if note:
+            reasons.append(note)
+        cond = Conditions(payload_kg=payload, friction=friction, floor_slope_deg=slope, latency_s=lat / 1000.0)
         r = recover(imp, ang, robot, cond)
         if not r.recovered:
             fell = True
@@ -68,8 +114,9 @@ def tag_episode(ep: dict, robot: Humanoid = Humanoid()) -> Verdict:
             reasons.append(f"near-fall at {t:.1f} s: {imp:.0f} N·s shove recovered in {r.steps} step(s), "
                            f"{NEAR_FALL_MARGIN - 1:.0%} harder would fall")
     lag = False
-    if trace:
-        peak, med = max(trace), float(np.median(trace))
+    finite = [x for x in trace if math.isfinite(x)]
+    if finite:
+        peak, med = max(finite), float(np.median(finite))
         if peak - med > STALL_MS or med > SLOW_MS:
             lag = True
             reasons.append(f"lag: median {med:.0f} ms, peak {peak:.0f} ms")
@@ -78,7 +125,14 @@ def tag_episode(ep: dict, robot: Humanoid = Humanoid()) -> Verdict:
 
 
 def filter_episodes(episodes: list[dict], robot: Humanoid = Humanoid()) -> dict:
-    verdicts = [tag_episode(ep, robot) for ep in episodes]
+    verdicts = []
+    for i, ep in enumerate(episodes, 1):
+        if not isinstance(ep, dict):
+            raise ValueError(f"record {i}: each episode must be a JSON object")
+        try:
+            verdicts.append(tag_episode(ep, robot))
+        except ValueError as e:
+            raise ValueError(f"record {i}, {e}") from None
     counts = {k: sum(v.tag == k for v in verdicts) for k in ("clean", "lag", "near-fall", "fall")}
     n = max(len(verdicts), 1)
     return {"episodes": len(verdicts), "counts": counts,

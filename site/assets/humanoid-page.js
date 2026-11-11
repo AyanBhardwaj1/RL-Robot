@@ -58,9 +58,10 @@
       ctx.fillRect(cx - H.WHEELED.half_width * SCALE, cy - H.WHEELED.half_length * SCALE, 2 * H.WHEELED.half_width * SCALE, 2 * H.WHEELED.half_length * SCALE);
     } else {
       // starting stance: two feet
-      const fl = H.BIPED.foot_half_length * SCALE, fw = H.BIPED.foot_half_width * SCALE;
+      const bp = biped(); // drawn with the design levers applied, so a longer foot shows
+      const fl = bp.foot_half_length * SCALE, fw = bp.foot_half_width * SCALE;
       for (const side of [1, -1]) {
-        const [fx, fy] = toScreen(0, side * H.BIPED.stance_half_width, origin);
+        const [fx, fy] = toScreen(0, side * bp.stance_half_width, origin);
         ctx.fillStyle = COLORS.foot; ctx.fillRect(fx - fw, fy - fl, 2 * fw, 2 * fl);
       }
       res.footsteps.filter((f) => f[0] <= t + 1e-9).forEach((f, i) => {
@@ -135,7 +136,7 @@
   function describe(r, dir, imp) {
     const gap = (d) => Math.abs(((dir - d + 540) % 360) - 180);
     const side = Object.entries(H.DIRECTIONS).reduce((best, e) => (gap(e[1]) < gap(best[1]) ? e : best))[0];
-    if (r.recovered) return [r.steps ? `Saved in ${r.steps} step${r.steps > 1 ? "s" : ""}` : "Held", `${n0.format(imp)} N·s from the ${side}: ${r.steps ? "it stepped where the capture point was heading" : "ankles alone kept the capture point inside the support"}${bodyKind() === "wheeled" ? " (the base drove under it)" : ""}.`];
+    if (r.recovered) return [r.steps ? `Saved in ${r.steps} step${r.steps > 1 ? "s" : ""}` : "Held", `${n0.format(imp)} N·s from the ${side}: ${bodyKind() === "wheeled" ? "the base drove under the capture point" : r.steps ? "it stepped where the capture point was heading" : "ankles alone kept the capture point inside the support"}.`];
     const reason = r.reason.charAt(0).toUpperCase() + r.reason.slice(1);
     return [r.reason.startsWith("blocked") ? "Blocked" : "Fell", `${n0.format(imp)} N·s from the ${side}. ${reason}.`];
   }
@@ -200,7 +201,9 @@
     c2.fillText("forward", cv.width / 2, 18); c2.fillText("backward", cv.width / 2, cv.height - 8);
     c2.textAlign = "left"; c2.fillText("left", 8, cv.height / 2 - 8); c2.textAlign = "right"; c2.fillText("right", cv.width - 8, cv.height / 2 - 8);
     const total = CAP_N * CAP_N, ok = total - counts["-1"];
-    $("#cap-stats").textContent = `${pct.format(ok / total)} of shoves up to 1.6 m/s are recoverable: ${counts[0]} with ankles only, ${counts[1]} with 1 step, ${counts[2]} with 2, ${counts[3]} with 3.`;
+    $("#cap-stats").textContent = bodyKind() === "wheeled"
+      ? `${pct.format(ok / total)} of shoves up to 1.6 m/s are recoverable by driving under the capture point (the base takes no steps).`
+      : `${pct.format(ok / total)} of shoves up to 1.6 m/s are recoverable: ${counts[0]} with ankles only, ${counts[1]} with 1 step, ${counts[2]} with 2, ${counts[3]} with 3.`;
   }
 
   function refreshEnvelope() {
@@ -256,9 +259,12 @@
     const ankle = d.levers.find((l) => l.key === "ankle_torque");
     const stance = d.levers.find((l) => l.key === "stance_width");
     let note = `Biggest single win: ${top.title.toLowerCase()} (${top.fixed} shifts saved, ${lost}).`;
-    if (combo && singles[1]) {
-      const sum = top.fixed + singles[1].fixed;
-      note += ` With ${singles[1].title.toLowerCase()} as well: ${combo.fixed} saved, ${combo.fixed < sum ? `not ${sum}; they overlap on the hardest side shoves` : "the gains add up"}.`;
+    const c = combo && combo.combination;
+    if (c) {
+      const [a, b] = c.components.map((k) => d.levers.find((l) => l.key === k));
+      const nested = c.saved_by_both_alone === Math.min(...c.saved_by_each);
+      note += ` ${combo.title}: ${combo.fixed} saved.` + (nested ? ` ${b.title} alone only saves shifts ${a.title.toLowerCase()} already saves,` : ` They share ${c.saved_by_both_alone} saved shifts,`)
+        + ` but together they save ${c.saved_only_together} that neither saves alone.`;
     }
     if (ankle && ankle.fixed + ankle.broken === 0) note += " Ankle torque is a control that can’t move: in every job the foot edge, not the ankle, limits the centre of pressure.";
     if (stance && stance.fixed && stance.broken) note += ` A wider stance cuts both ways (${stance.fixed} saved, ${stance.broken} lost): the loaded foot sits further out during the swing.`;
@@ -272,7 +278,8 @@
     const el = $("#" + id);
     el.addEventListener("input", () => { $(`#${id}-out`).textContent = outs[id](el.value); if (id !== "imp") refreshEnvelope(); });
   });
-  document.querySelectorAll('input[name="body"]').forEach((r) => r.addEventListener("change", () => { shove(last.dir); drawCapMap(); }));
+  const syncLevers = () => document.querySelectorAll('input[name="lever"]').forEach((c) => { c.disabled = bodyKind() === "wheeled"; });
+  document.querySelectorAll('input[name="body"]').forEach((r) => r.addEventListener("change", () => { syncLevers(); shove(last.dir); drawCapMap(); }));
   document.querySelectorAll('input[name="lever"]').forEach((c) => c.addEventListener("change", () => { refreshEnvelope(); shove(last.dir); }));
   document.querySelectorAll(".dir-pad button").forEach((b) => b.addEventListener("click", () => shove(+b.dataset.d)));
   canvas.addEventListener("click", (e) => {

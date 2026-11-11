@@ -26,6 +26,7 @@ class Lever:
     owner: str  # the team that would own the change
     robot: Callable[[Humanoid], Humanoid] = lambda r: r
     cond: Callable[[Conditions], Conditions] = lambda c: c
+    components: tuple[str, ...] = ()  # for a combined lever: the single levers it combines
 
 
 LEVERS = (
@@ -51,7 +52,8 @@ LEVERS = (
           cond=lambda c: replace(c, friction=c.friction * 1.15)),
     # Do the two largest single wins add up, or do they fix the same shifts?
     Lever("swing_and_lateral", "Faster swing + side-step reach", "Actuators, mechanical and controls",
-          robot=lambda r: replace(r, min_swing=r.min_swing * 0.85, max_lateral_step=r.max_lateral_step + 0.10)),
+          robot=lambda r: replace(r, min_swing=r.min_swing * 0.85, max_lateral_step=r.max_lateral_step + 0.10),
+          components=("swing_time", "lateral_reach")),
 )
 
 
@@ -84,11 +86,14 @@ def lever_table(trials: int = 150, seed: int = 0, robot: Humanoid = Humanoid(),
     base = {j: _outcomes(j, robot, None, trials, seed) for j in jobs}
     base_env = {d: breaking_point(DIRECTIONS[d], robot) for d in ("front", "left", "front-left")}
     rows = []
+    saved: dict[str, set[tuple[str, int]]] = {}  # lever -> the (job, shift) pairs it turns from fall to finish
     for lv in levers:
         per_job = {}
         tot_fixed = tot_broken = 0
+        saved[lv.key] = set()
         for j in jobs:
             new = _outcomes(j, robot, lv, trials, seed)
+            saved[lv.key] |= {(j, int(i)) for i in np.flatnonzero(~base[j] & new)}
             fixed = int(np.sum(~base[j] & new))
             broken = int(np.sum(base[j] & ~new))
             tot_fixed += fixed
@@ -98,6 +103,13 @@ def lever_table(trials: int = 150, seed: int = 0, robot: Humanoid = Humanoid(),
         rows.append({"key": lv.key, "title": lv.title, "owner": lv.owner, "jobs": per_job,
                      "fixed": tot_fixed, "broken": tot_broken, "net": tot_fixed - tot_broken,
                      "p_value": round(sign_test_p(tot_fixed, tot_broken), 4), "envelope": env})
+    for row, lv in zip(rows, levers):
+        if len(lv.components) == 2 and all(k in saved for k in lv.components):
+            a, b = (saved[k] for k in lv.components)
+            both = saved[lv.key]
+            row["combination"] = {"components": list(lv.components), "saved_by_each": [len(a), len(b)],
+                                  "saved_by_both_alone": len(a & b), "saved_only_together": len(both - (a | b)),
+                                  "beyond_best_single": len(both) - max(len(a), len(b))}
     rows.sort(key=lambda r: (-r["net"], r["key"]))
     return {"trials_per_job": trials, "seed": seed, "jobs": list(jobs),
             "baseline": {"jobs": {j: {"failure_rate": round(float(np.mean(~base[j])), 4),

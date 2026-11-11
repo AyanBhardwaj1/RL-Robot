@@ -70,3 +70,4 @@
 .levers { border: 0; padding: 0; margin: 4px 0 0; display: grid; gap: 8px; }
 .levers label { display: flex; align-items: center; gap: 10px; font-size: var(--step-small); font-weight: 600; cursor: pointer; min-height: 32px; }
 .levers input { accent-color: var(--orange); width: 18px; height: 18px; }
+.levers label:has(input:disabled) { opacity: .45; cursor: not-allowed; }

@@ -275,3 +275,23 @@ def test_attributed_slip_keeps_this_runs_event():
     from dataclasses import replace
 
     assert recover(64.1, 38.3, cond=replace(cond, friction=10.0)).reason == cause  # the counterfactual's cause
+
+
+def test_episode_filter_keeps_latency_timing_across_gaps_and_rejects_bad_records(tmp_path):
+    from breakpoint.cli import main
+    from breakpoint.episodes import _latency_at, _trace, filter_episodes, tag_episode
+
+    # a null sample must not shift later samples one second earlier (review finding)
+    tr = _trace({"latency_ms": [20, None, 400, 20, 20]})
+    assert _latency_at(tr, 2.5)[0] == 400 and _latency_at(tr, 1.0) == (20.0, _latency_at(tr, 1.0)[1])
+    assert _latency_at(tr, 1.0)[1] and "median" in _latency_at(tr, 1.0)[1]
+    assert "optimistic" in tag_episode({"contacts": [{"t_s": 1, "impulse_ns": 10, "direction_deg": 0}]}).reasons[0]
+    for bad in ({"latency_ms": "20,30"}, {"latency_ms": [True]}, {"friction": -1}, {"contacts": [35.0]},
+                {"contacts": [{"t_s": float("nan")}]}, {"contacts": [{"impulse_ns": -500}]}, {"payload_kg": None}):
+        with pytest.raises(ValueError):
+            tag_episode(bad)
+    with pytest.raises(ValueError, match="record 2"):
+        filter_episodes([{"contacts": []}, {"contacts": [{"impulse_ns": "big"}]}])
+    log = tmp_path / "bad.jsonl"
+    log.write_text('{"episode": "a", "contacts": [{"t_s": 1, "impulse_ns": null}]}\n')
+    assert main(["episodes", "--log", str(log)]) == 2

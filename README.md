@@ -95,8 +95,11 @@ and the browser lab at `/humanoid`):
   | Sole grip +15% | 0 / 0 | 1 |
   | Ankle torque +25% | 0 / 0 | 1 |
 
-  The two largest wins overlap: together they save 33 shifts, not 25 + 14, because both fix the hardest
-  side shoves. Ankle torque is a control that cannot move: in every job, even at the weakest sampled strength, the
+  The two largest wins interact. Side-step reach alone saves only shifts the faster swing already saves
+  (all 14 of them), yet together they save 33: 8 more than the faster swing alone, shifts that neither
+  change saves by itself.
+
+  Ankle torque is a control that cannot move: in every job, even at the weakest sampled strength, the
   foot edge limits the centre of pressure before the ankle does. Grip buys nothing because none of the
   failures were really slips. A wider stance cuts both ways, because the loaded foot sits further out
   during the swing.

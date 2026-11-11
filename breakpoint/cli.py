@@ -399,11 +399,15 @@ def cmd_design(a: argparse.Namespace) -> int:
 def cmd_episodes(a: argparse.Namespace) -> int:
     from .episodes import filter_episodes, read_episodes, synthetic_episodes, to_text
 
-    eps = read_episodes(a.log) if a.log else synthetic_episodes(a.demo, seed=a.seed)
+    try:
+        eps = read_episodes(a.log) if a.log else synthetic_episodes(a.demo, seed=a.seed)
+        report = filter_episodes(eps)
+    except (OSError, ValueError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
     if a.write_demo and not a.log:
         Path(a.write_demo).parent.mkdir(parents=True, exist_ok=True)
         Path(a.write_demo).write_text("".join(json.dumps(e) + "\n" for e in eps))
-    report = filter_episodes(eps)
     print(to_text(report))
     if a.out:
         Path(a.out).parent.mkdir(parents=True, exist_ok=True)

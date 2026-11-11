@@ -77,6 +77,19 @@
     "front": 109.23,
     "left": 73.29,
     "front-left": 95.85
+   },
+   "combination": {
+    "components": [
+     "swing_time",
+     "lateral_reach"
+    ],
+    "saved_by_each": [
+     25,
+     14
+    ],
+    "saved_by_both_alone": 14,
+    "saved_only_together": 8,
+    "beyond_best_single": 8
    }
   },
   {
