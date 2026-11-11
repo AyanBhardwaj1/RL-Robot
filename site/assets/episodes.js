@@ -13,6 +13,16 @@
   }
   // Like Python's dict.get: the default applies only when the key is absent (an explicit null is an error).
   const get = (o, k, d) => (Object.prototype.hasOwnProperty.call(o, k) ? o[k] : d);
+  // Python's format() rounds an exact half to even (2.25 -> "2.2", 200.5 -> "200"); toFixed rounds it up.
+  function fmt(x, d) {
+    const k = 10 ** d, scaled = Math.abs(x) * k, fl = Math.floor(scaled);
+    if (scaled - fl !== 0.5) return x.toFixed(d);
+    const even = fl % 2 === 0 ? fl : fl + 1;
+    return ((x < 0 ? -even : even) / k).toFixed(d);
+  }
+  // Python treats None, [], {}, "", 0 and False as "no contacts" (`ep.get("contacts") or []`).
+  const pyFalsy = (v) => v === undefined || v === null || v === false || v === 0 || v === "" ||
+    (Array.isArray(v) && !v.length) || (typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length);
   const median = (xs) => { const s = [...xs].sort((a, b) => a - b), n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
 
   function trace(ep) {
@@ -27,7 +37,7 @@
     if (!finite.length) return [0, "no latency samples: replayed at 0 ms, an optimistic assumption"];
     const x = tr[Math.min(tr.length - 1, Math.max(0, Math.floor(t)))];
     if (Number.isFinite(x)) return [x, null];
-    return [median(finite), `no latency sample at ${t.toFixed(1)} s: used the episode median`];
+    return [median(finite), `no latency sample at ${fmt(t, 1)} s: used the episode median`];
   }
 
   function tagEpisode(ep) {
@@ -39,7 +49,7 @@
     const tr = trace(ep);
     const payload = num(get(ep, "payload_kg", 0), "payload_kg", 0), friction = num(get(ep, "friction", 0.8), "friction", 0.01);
     const slope = num(get(ep, "slope_deg", 0), "slope_deg");
-    const contacts = ep.contacts || [];
+    const contacts = pyFalsy(ep.contacts) ? [] : ep.contacts;
     if (!Array.isArray(contacts)) throw new Error("contacts must be a list");
     const reasons = [];
     let fell = false, near = false;
@@ -51,17 +61,17 @@
       if (note) reasons.push(note);
       const cond = { payload_kg: payload, friction, floor_slope_deg: slope, latency_s: lat / 1000 };
       const r = H.recover("biped", imp, ang, cond, false);
-      if (!r.recovered) { fell = true; reasons.push(`fall at ${t.toFixed(1)} s: ${Math.round(imp)} N·s shove, ${r.reason}`); }
+      if (!r.recovered) { fell = true; reasons.push(`fall at ${fmt(t, 1)} s: ${fmt(imp, 0)} N·s shove, ${r.reason}`); }
       else if (!H.recover("biped", imp * NEAR_FALL_MARGIN, ang, cond, false).recovered) {
         near = true;
-        reasons.push(`near-fall at ${t.toFixed(1)} s: ${Math.round(imp)} N·s shove recovered in ${r.steps} step(s), 25% harder would fall`);
+        reasons.push(`near-fall at ${fmt(t, 1)} s: ${fmt(imp, 0)} N·s shove recovered in ${r.steps} step(s), 25% harder would fall`);
       }
     });
     let lag = false;
     const finite = tr.filter(Number.isFinite);
     if (finite.length) {
-      const peak = Math.max(...finite), med = median(finite);
-      if (peak - med > STALL_MS || med > SLOW_MS) { lag = true; reasons.push(`lag: median ${Math.round(med)} ms, peak ${Math.round(peak)} ms`); }
+      const peak = finite.reduce((a, b) => (b > a ? b : a), -Infinity), med = median(finite); // no spread: long traces
+      if (peak - med > STALL_MS || med > SLOW_MS) { lag = true; reasons.push(`lag: median ${fmt(med, 0)} ms, peak ${fmt(peak, 0)} ms`); }
     }
     return { episode: name, tag: fell ? "fall" : near ? "near-fall" : lag ? "lag" : "clean", reasons };
   }

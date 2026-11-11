@@ -49,8 +49,12 @@ def _num(v, what: str, lo: float | None = None, allow_none: bool = False) -> flo
     """A finite number (not a bool), optionally bounded below; anything else is a clear ValueError."""
     if v is None and allow_none:
         return math.nan
-    if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
-        raise ValueError(f"{what} must be a finite number, got {v!r}")
+    try:
+        finite = not isinstance(v, bool) and isinstance(v, (int, float)) and math.isfinite(v)
+    except OverflowError:  # an integer too large for a float, e.g. 10**400 in the JSON
+        finite = False
+    if not finite:
+        raise ValueError(f"{what} must be a finite number, got {str(v)[:40]}")
     if lo is not None and v < lo:
         raise ValueError(f"{what} must be ≥ {lo:g}, got {v!r}")
     return float(v)

@@ -81,14 +81,19 @@ def test_js_episode_filter_matches_python():
 
     eps = synthetic_episodes(60, seed=3)
     eps.append({"episode": "gap", "latency_ms": [20, None, 400, 20], "contacts": [{"t_s": 1, "impulse_ns": 40, "direction_deg": -90}]})
+    # exact halves round to even in Python's format(); the JS port must say the same thing
+    eps += [{"episode": "h1", "latency_ms": [300, 301]}, {"episode": "h2", "latency_ms": [10, 11, 130.5, 10]},
+            {"episode": "h3", "latency_ms": [20], "contacts": [{"t_s": 2.25, "impulse_ns": 200.5, "direction_deg": 0}]},
+            {"episode": "h4", "latency_ms": [20, None], "contacts": [{"t_s": 1.25, "impulse_ns": 5, "direction_deg": 0}]},
+            {"episode": "h5", "contacts": {}}]
     ep_js = Path(__file__).resolve().parent.parent / "site" / "assets" / "episodes.js"
     node = shutil.which("node")
     if node is None:
         pytest.fail("node is required to check the browser port")
     script = (f"const E = require({json.dumps(str(ep_js))}); const eps = {json.dumps(eps)};"
-              " console.log(JSON.stringify(E.filterEpisodes(eps).verdicts.map((v) => v.tag)));"
+              " console.log(JSON.stringify(E.filterEpisodes(eps).verdicts.map((v) => [v.tag, v.reasons])));"
               " let err = ''; try { E.filterEpisodes([{contacts: [{impulse_ns: null}]}]); } catch (e) { err = e.message; }"
               " console.log(JSON.stringify(err));")
     out = subprocess.run([node, "-e", script], capture_output=True, text=True, timeout=60, check=True).stdout.splitlines()
-    assert json.loads(out[0]) == [v["tag"] for v in filter_episodes(eps)["verdicts"]]
+    assert json.loads(out[0]) == [[v["tag"], v["reasons"]] for v in filter_episodes(eps)["verdicts"]]
     assert "record 1" in json.loads(out[1]) and "impulse_ns" in json.loads(out[1])

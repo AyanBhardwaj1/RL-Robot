@@ -7,3 +7,6 @@ runs/*.log
 build-cpp/
 .claude/settings.local.json
 .playwright-cli/
+
+# stray screenshots from local checks
+/*.png

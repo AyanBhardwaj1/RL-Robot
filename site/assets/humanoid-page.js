@@ -302,8 +302,8 @@
   function readUrl() {
     const q = new URLSearchParams(location.search);
     SLIDERS.forEach((id) => {
-      const el = $("#" + id), v = Number(q.get(id));
-      if (q.has(id) && Number.isFinite(v)) {
+      const raw = (q.get(id) || "").trim(), el = $("#" + id), v = Number(raw);
+      if (/^-?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(raw) && Number.isFinite(v)) { // a plain decimal; "" and hex are ignored
         el.value = String(Math.min(+el.max, Math.max(+el.min, v)));
         $(`#${id}-out`).textContent = outs[id](el.value);
       }
@@ -325,7 +325,7 @@
     if (on.length) q.set("levers", on.join(","));
     if (last.dir !== -90) q.set("dir", String(last.dir));
     const qs = q.toString();
-    try { history.replaceState(null, "", qs ? `?${qs}` : location.pathname); } catch (e) { /* sandboxed frames */ }
+    try { history.replaceState(null, "", `${location.pathname}${qs ? `?${qs}` : ""}${location.hash}`); } catch (e) { /* sandboxed frames */ }
   }
   document.querySelector(".hum-controls").addEventListener("input", writeUrl);
   document.querySelector(".hum-controls").addEventListener("change", writeUrl);
@@ -337,9 +337,9 @@
   });
 
   const startDir = readUrl();
-  urlReady = true;
   syncLevers();
   drawFrame({ com: [], capture: [], footsteps: [] }, 0, { sx: 0, sy: 0 });
   refreshEnvelope();
-  shove(startDir);
+  shove(startDir); // the address already describes this state: do not rewrite it on load
+  urlReady = true;
 })();

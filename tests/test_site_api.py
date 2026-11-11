@@ -89,6 +89,9 @@ def test_committed_web_build_is_in_sync_with_sources():
     for src, dst in (("runs/humanoid/baseline.json", "assets/data/humanoid.json"),
                      ("runs/humanoid/levers.json", "assets/data/levers.json"),
                      ("runs/episodes/teleop-demo.jsonl", "assets/data/teleop-episodes.jsonl")):
-        if (ROOT / src).is_file() and (web / dst).read_bytes() != (ROOT / src).read_bytes():
+        if (ROOT / src).is_file() and (not (web / dst).is_file() or (web / dst).read_bytes() != (ROOT / src).read_bytes()):
             stale.append(dst)
+    generated = {"sitemap.xml", "robots.txt"}  # written by the build itself
+    stale += [f"{p.relative_to(web)} (no longer in site/)" for p in web.glob("*.html")
+              if not (ROOT / "site" / p.name).is_file() and p.name not in generated]
     assert not stale, f"run python3 scripts/build_site.py; stale in web/: {stale[:10]}"
