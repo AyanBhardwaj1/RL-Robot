@@ -183,9 +183,36 @@ def _compound_section(extras: dict | None, who: str = "") -> str:
     return "".join(parts)
 
 
+def _deploy_section(deploy: dict[str, dict] | None) -> str:
+    """Profile x policy failure-rate table (lowest rate per profile in bold)."""
+    if not deploy:
+        return ""
+    policies = list(deploy)
+    profiles = list(dict.fromkeys(p for d in deploy.values() for p in d))
+    head = "".join(f"<th>{html.escape(n)}</th>" for n in policies)
+    rows = []
+    for prof in profiles:
+        best = min(deploy[n][prof]["failure_rate"] for n in policies if prof in deploy[n])
+        cells = []
+        for n in policies:
+            r = deploy[n].get(prof)
+            if not r:
+                cells.append("<td>–</td>")
+                continue
+            causes = ", ".join(f"{k} ×{v}" for k, v in r["failures_by_dominant_stressor"].items()) or "none"
+            txt = f"{r['failure_rate']:.0%} <span class='muted'>(≤ {r['failure_rate_upper_95']:.0%})</span>"
+            cells.append(f"<td title='{html.escape(causes)}'>{'<b>' + txt + '</b>' if r['failure_rate'] == best else txt}</td>")
+        rows.append(f"<tr><td>{html.escape(prof)}</td>{''.join(cells)}</tr>")
+    n_trials = next(iter(next(iter(deploy.values())).values()))["trials"]
+    return (f'<h2>Deployment risk</h2><p class="muted">Failure rate over {n_trials} independently seeded worlds '
+            'sampled from each deployment profile (95% upper bound in brackets; hover for causes). '
+            'Lowest per profile in bold.</p>'
+            f'<div class="card tablewrap"><table><tr><th>Profile</th>{head}</tr>{"".join(rows)}</table></div>')
+
+
 def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]],
                 atlas: dict[str, dict] | None, hunt_meta: dict | None, notes: list[str] | None = None,
-                extras: dict | None = None) -> str:
+                extras: dict | None = None, deploy: dict[str, dict] | None = None) -> str:
     names = list(probes)
     best = max(names, key=lambda n: cards[n]["score"])
     final = cards[best]
@@ -236,6 +263,7 @@ def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]
 <h2>Breaking points</h2><p class="muted">Bar = fraction of the tested range survived on every seed. {legend}</p><div class="card">{_bars(probes)}</div>
 <h2>Failure atlas</h2>{budget}<div class="card tablewrap"><table><tr><th>Mode</th><th>Severity</th><th>Outcome</th><th>Mildest world that breaks it</th></tr>{''.join(atlas_rows) or '<tr><td colspan=4>No failures found.</td></tr>'}</table></div>
 {_atlas_grid(atlas)}
+{_deploy_section(deploy)}
 {_compound_section(extras, names[-1])}
 <h2>Method</h2><div class="card"><ul>
 <li>Score = 45% margin index (push envelope 40%, other stressors 60%) + 40% nominal pass rate under domain-randomised conditions + 15% adversarial (penalises failure modes found at severity ≤ 0.5).</li>

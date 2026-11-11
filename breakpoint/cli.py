@@ -42,7 +42,11 @@ def nominal_trials(spec: str | None, n: int = NOMINAL_TRIALS, seed: int = 123) -
     return [r[0] for r in evaluate_many(spec, scns, seeds=[seed])]
 
 
-def audit(spec: str | None, label: str, hunt_gens: int = 5, workers: int = 3) -> dict:
+DEPLOY_TRIALS = 30
+
+
+def audit(spec: str | None, label: str, hunt_gens: int = 5, workers: int = 3,
+          deploy_trials: int = DEPLOY_TRIALS) -> dict:
     print(f"[audit] {label}: probing breaking points", flush=True)
     pr = probe(spec, workers=workers)
     print(f"[audit] {label}: nominal trials", flush=True)
@@ -58,8 +62,15 @@ def audit(spec: str | None, label: str, hunt_gens: int = 5, workers: int = 3) ->
     }
     card["compound_failures"] = compound_pairs(extras["interactions"])
     card["redteam_failures"] = sum(a["pass_rate"] < 1 for a in extras["redteam"]["attacks"])
+    deploy = {}
+    if deploy_trials > 0:
+        print(f"[audit] {label}: deployment profiles", flush=True)
+        for name in PROFILES:
+            r = deployment_check(spec, name, trials=deploy_trials, workers=workers)
+            deploy[name] = {k: r[k] for k in ("trials", "failures", "failure_rate", "failure_rate_upper_95",
+                                              "failures_by_dominant_stressor")}
     return {"label": label, "policy": spec or "cpg", "probe": pr, "nominal": nom, "hunt": h.to_dict(),
-            "card": card, "extras": extras}
+            "card": card, "extras": extras, "deploy": deploy}
 
 
 def _weakest_push(pr: list[dict]) -> str:
@@ -70,7 +81,8 @@ def _weakest_push(pr: list[dict]) -> str:
 def _write_report(out: Path, title: str, audits: list[dict], notes: list[str]) -> Path:
     last = audits[-1]
     page = render_html(title, {a["label"]: a["card"] for a in audits}, {a["label"]: a["probe"] for a in audits},
-                       last["hunt"]["atlas"], last["hunt"], notes, last.get("extras"))
+                       last["hunt"]["atlas"], last["hunt"], notes, last.get("extras"),
+                       deploy={a["label"]: a["deploy"] for a in audits if a.get("deploy")})
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.html").write_text(page)
     (out / "audit.json").write_text(json.dumps(audits, indent=1))

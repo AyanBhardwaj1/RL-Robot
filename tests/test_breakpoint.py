@@ -622,3 +622,15 @@ def test_policy_labels():
     assert policy_label(None) == "cpg-baseline"
     assert policy_label("gated:runs/v2/policy_v2.npz") == "gated-policy_v2"
     assert policy_label("py:examples.my_controller:make_policy") == "make_policy"
+
+
+def test_report_deploy_section_bolds_best_and_escapes():
+    from breakpoint.report import _deploy_section
+
+    d = {"a": {"home": {"trials": 10, "failure_rate": 0.1, "failure_rate_upper_95": 0.3,
+                        "failures_by_dominant_stressor": {"<x>": 1}}},
+         "b": {"home": {"trials": 10, "failure_rate": 0.0, "failure_rate_upper_95": 0.26,
+                        "failures_by_dominant_stressor": {}}}}
+    out = _deploy_section(d)
+    assert "Deployment risk" in out and out.count("<b>") == 1 and "&lt;x&gt;" in out
+    assert _deploy_section({}) == ""
