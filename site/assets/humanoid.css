@@ -28,7 +28,7 @@
 .k-wheel { background: #8fb7e8; }
 #h-polar { width: 100%; height: auto; }
 #h-polar .ring { fill: none; stroke: var(--char-3); }
-#h-polar .lbl { fill: var(--ink-on-dark); font: 600 9px "Schibsted Grotesk", sans-serif; }
+#h-polar .lbl { fill: var(--ink-on-dark); font: 600 9px "Schibsted Grotesk", sans-serif; paint-order: stroke; stroke: var(--char); stroke-width: 3px; stroke-linejoin: round; }
 #h-polar .biped { fill: rgba(244, 123, 37, .35); stroke: var(--orange); stroke-width: 2; }
 #h-polar .wheel { fill: rgba(143, 183, 232, .18); stroke: #8fb7e8; stroke-width: 2; }
 .hum-cap { background: var(--char-2); padding: clamp(20px, 3vw, 40px) var(--margin); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: clamp(20px, 4vw, 56px); align-items: center; }
