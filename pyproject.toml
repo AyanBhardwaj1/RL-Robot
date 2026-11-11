@@ -11,7 +11,7 @@ dependencies = ["numpy>=1.26", "mujoco>=3.1", "fastapi>=0.110", "uvicorn>=0.29",
 
 [project.optional-dependencies]
 gym = ["gymnasium>=1.0"]
-dev = ["pytest", "httpx", "ruff", "gymnasium>=1.0"]
+dev = ["pytest", "pytest-cov", "httpx", "ruff", "gymnasium>=1.0"]
 
 [project.scripts]
 breakpoint = "breakpoint.cli:main"

@@ -469,3 +469,47 @@ def test_rules_understand_imperial_units():
     s = compile_rules("hauling 10 lbs down a stairway with 2 inch steps").scenario
     assert s.payload_kg == pytest.approx(4.54, abs=0.01)
     assert s.step_height == pytest.approx(0.0508, abs=1e-3)
+
+
+# ------------------------------------------------------------------- cli
+def test_cli_compile_run_and_regress(tmp_path, capsys, monkeypatch):
+    from breakpoint.cli import main
+
+    monkeypatch.delenv("BREAKPOINT_LLM_BASE_URL", raising=False)
+    scn_path = tmp_path / "scn.json"
+    assert main(["compile", "stairs with 5 cm steps", "--offline", "--out", str(scn_path)]) == 0
+    assert json.loads(capsys.readouterr().out)["scenario"]["terrain"] == "stairs"
+    short = Scenario.from_json(scn_path.read_text()).with_(duration_s=2.0)
+    scn_path.write_text(short.to_json())
+    assert main(["run", "--scenario", str(scn_path)]) in (0, 1)
+    assert "passed" in capsys.readouterr().out
+
+    suite = tmp_path / "suite"
+    suite.mkdir()
+    (suite / "case_00.json").write_text(json.dumps({"scenario": Scenario(duration_s=2.0).to_dict(), "seed": 0}))
+    assert main(["regress", "--suite", str(suite)]) == 0
+    assert "1/1 regression cases pass" in capsys.readouterr().out
+    assert main(["regress", "--suite", str(tmp_path / "empty")]) == 2
+
+
+def test_cli_deploy_gates_on_failure_budget(capsys):
+    from breakpoint.cli import main
+
+    rc = main(["deploy", "--profile", "home", "--trials", "4", "--workers", "1", "--max-fail", "1.0"])
+    assert rc == 0 and "home:" in capsys.readouterr().out
+    assert main(["deploy", "--profile", "home", "--trials", "4", "--workers", "1", "--max-fail", "0.0"]) == 1
+
+
+def test_hunt_small_budget_builds_atlas_and_suite(tmp_path):
+    from breakpoint.cli import save_suite
+    from breakpoint.hunt import hunt
+
+    res = hunt(None, generations=2, population=8, workers=1, seed=3)
+    assert res.evaluations == 16 and len(res.history) == 2
+    for cell in res.atlas.values():
+        assert not cell["outcome"]["passed"] and "|" in cell["cell"]
+    paths = save_suite(dict(list(res.atlas.items())[:1]), None, tmp_path / "suite", shrink_iters=2)
+    assert len(paths) == min(1, len(res.atlas))
+    for p in paths:
+        case = json.loads(p.read_text())
+        assert 0 < case["alpha"] <= 1.0 and "scenario" in case
