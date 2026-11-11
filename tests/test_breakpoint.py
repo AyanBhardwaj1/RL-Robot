@@ -362,3 +362,11 @@ def test_push_probe_sweeps_gait_phases():
     assert 0.0 <= push_phase_at_impact(0.0) < 360.0
     r = probe_axis((None, Scenario().to_dict(), "push_rear", [0], 2))
     assert r["rollouts"] % len(PUSH_PHASES) == 0
+
+
+def test_atlas_grid_marks_found_cells():
+    from breakpoint.report import _atlas_grid
+
+    svg = _atlas_grid({"payload|1": {"scenario": {"name": "heavy <box>"}}})
+    assert svg.count("var(--bad)") == 1 and "heavy &lt;box&gt;" in svg
+    assert _atlas_grid({}) == ""

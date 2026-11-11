@@ -93,8 +93,9 @@ What the lab found:
   search did not. **Ship round 1.**
 - **Compound fragility is real.** For the hardened policy, *stairs + payload*, each at 75% of its
   own breaking point, fails on every seed, while each passes alone.
-- **The failure-boundary map shows a counter-intuitive pocket.** On near-zero friction the robot
-  survives a 16 N·s side shove it can't survive on concrete, because it slides instead of tripping.
+- **The failure-boundary map shows a counter-intuitive pocket.** At friction 0.05 the robot survives
+  a 16 N·s side shove that topples it on concrete, because it slides instead of tripping. On that ice
+  it also can't make forward progress at all, so it still fails the cell with no push.
 
 ![compound stress](docs/report_compound.png)
 

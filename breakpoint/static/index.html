@@ -169,7 +169,13 @@ $("play").onclick = async () => {
     const m = JSON.parse(ev.data);
     if (m.type === "init") buildWorld(m.specs, m.terrain);
     else if (m.type === "frame") { applyPose(m.poses); $("hud").textContent = `t = ${m.t.toFixed(1)} s · x = ${m.x.toFixed(2)} m · shoves ${m.shoves} · absorbed ${m.impulse} N·s`; }
-    else if (m.type === "over") { banner(m.fell ? `Down after ${m.shoves} shoves · absorbed ${m.impulse} N·s` : `Survived 30 s · absorbed ${m.impulse} N·s`, !m.fell); $("out").textContent = JSON.stringify(m, null, 1); }
+    else if (m.type === "over") {
+      const key = "bp-best-" + $("policy").value; let best = 0;
+      try { best = +localStorage.getItem(key) || 0; if (m.impulse > best) localStorage.setItem(key, m.impulse); } catch (e) { /* storage unavailable */ }
+      const record = m.impulse > best ? " · new record!" : ` · record ${best} N·s`;
+      banner((m.fell ? `Down after ${m.shoves} shoves · absorbed ${m.impulse} N·s` : `Survived 30 s · absorbed ${m.impulse} N·s`) + record, !m.fell);
+      $("out").textContent = JSON.stringify(m, null, 1);
+    }
     else if (m.type === "error") $("out").textContent = "error: " + m.message;
   };
 };

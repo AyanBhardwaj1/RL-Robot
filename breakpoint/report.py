@@ -126,6 +126,33 @@ def _heatmap(bm: dict) -> str:
     return "".join(out)
 
 
+ATLAS_ROWS = ("push", "low friction", "payload", "weak motors", "latency", "sensor noise", "terrain")
+ATLAS_COLS = ("≤0.25", "≤0.5", "≤0.75", "≤1.0", ">1.0")
+
+
+def _atlas_grid(atlas: dict[str, dict] | None) -> str:
+    """MAP-Elites view: which (stressor, severity band) cells contain a known failure."""
+    if not atlas:
+        return ""
+    cw, ch, ml = 64, 26, 110
+    w, h = ml + cw * len(ATLAS_COLS) + 10, ch * (len(ATLAS_ROWS) + 1) + 10
+    out = [f'<svg viewBox="0 0 {w} {h}" class="chart" style="max-width:560px" role="img" aria-label="Failure atlas grid">']
+    for i, col in enumerate(ATLAS_COLS):
+        out.append(f'<text x="{ml + i * cw + cw / 2}" y="16" class="lbl" text-anchor="middle">{col}</text>')
+    for j, row in enumerate(ATLAS_ROWS):
+        y = 24 + j * ch
+        out.append(f'<text x="{ml - 8}" y="{y + ch / 2 + 2}" class="lbl" text-anchor="end">{row}</text>')
+        for i in range(len(ATLAS_COLS)):
+            cell = atlas.get(f"{row}|{i}")
+            style = "fill:var(--bad);fill-opacity:.7" if cell else "fill:var(--line);fill-opacity:.6"
+            tip = f"{row}, severity {ATLAS_COLS[i]}: " + (f"fails ({cell['scenario']['name']})" if cell else "no failure found")
+            out.append(f'<rect x="{ml + i * cw}" y="{y}" width="{cw - 3}" height="{ch - 3}" rx="3" style="{style}">'
+                       f'<title>{html.escape(tip)}</title></rect>')
+    out.append("</svg>")
+    return ('<p class="muted">MAP-Elites view: red = a failure was found in that (dominant stressor × severity) '
+            f'cell; grey = none within the search budget.</p><div class="card">{"".join(out)}</div>')
+
+
 def _compound_section(extras: dict | None, who: str = "") -> str:
     if not extras:
         return ""
@@ -204,6 +231,7 @@ def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]
 <div class="grid2"><div class="card">{polar}</div><div class="card"><p class="muted">How to read: the robot faces up. A dent in the shape is a direction where a shove topples it. Side pushes are usually the weakest because a trotting quadruped has a narrow support polygon laterally.</p></div></div>
 <h2>Breaking points</h2><p class="muted">Bar = fraction of the tested range survived on every seed. {legend}</p><div class="card">{_bars(probes)}</div>
 <h2>Failure atlas</h2>{budget}<div class="card tablewrap"><table><tr><th>Mode</th><th>Severity</th><th>Outcome</th><th>Mildest world that breaks it</th></tr>{''.join(atlas_rows) or '<tr><td colspan=4>No failures found.</td></tr>'}</table></div>
+{_atlas_grid(atlas)}
 {_compound_section(extras, names[-1])}
 <h2>Method</h2><div class="card"><ul>
 <li>Score = 45% margin index (push envelope 40%, other stressors 60%) + 40% nominal pass rate under domain-randomised conditions + 15% adversarial (penalises failure modes found at severity ≤ 0.5).</li>
