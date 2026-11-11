@@ -103,8 +103,56 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;p
 """
 
 
+def _heatmap(bm: dict) -> str:
+    xs, ys, grid = bm["x"]["values"], bm["y"]["values"], bm["pass_rate"]
+    cw, ch, ml, mb = 56, 34, 70, 40
+    w, h = ml + cw * len(xs) + 10, ch * len(ys) + mb + 10
+    out = [f'<svg viewBox="0 0 {w} {h}" class="chart" role="img" aria-label="Failure boundary">']
+    for j, yv in enumerate(ys):
+        y = 5 + (len(ys) - 1 - j) * ch
+        out.append(f'<text x="{ml - 6}" y="{y + ch / 2 + 4}" class="lbl" text-anchor="end">{yv:g}</text>')
+        for i, xv in enumerate(xs):
+            r = grid[j][i]
+            out.append(f'<rect x="{ml + i * cw}" y="{y}" width="{cw - 2}" height="{ch - 2}" rx="3" '
+                       f'style="fill:{"var(--ok)" if r >= 1 else ("var(--warn)" if r > 0 else "var(--bad)")};fill-opacity:{0.35 + 0.5 * (1 - r) if r < 1 else 0.55}">'
+                       f'<title>{html.escape(bm["x"]["label"])} {xv:g}, {html.escape(bm["y"]["label"])} {yv:g}: {r:.0%} pass</title></rect>')
+    for i, xv in enumerate(xs):
+        out.append(f'<text x="{ml + i * cw + cw / 2}" y="{h - mb + 18}" class="lbl" text-anchor="middle">{xv:g}</text>')
+    out.append(f'<text x="{ml + cw * len(xs) / 2}" y="{h - 6}" class="lbl" text-anchor="middle">{html.escape(bm["x"]["label"])} ({html.escape(bm["x"]["unit"])})</text>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+def _compound_section(extras: dict | None) -> str:
+    if not extras:
+        return ""
+    parts = ['<h2>Compound stress</h2><p class="muted">Pairs of the weakest axes, each set to a fraction of its '
+             'own breaking point. Single-axis margins cannot see these failures.</p><div class="card tablewrap"><table>'
+             '<tr><th>Stressor A</th><th>Stressor B</th><th>Each at</th><th>Pass rate</th></tr>']
+    for c in extras.get("interactions", []):
+        flag = ' style="color:var(--bad);font-weight:600"' if c["compound_failure"] else ""
+        parts.append(f"<tr><td>{html.escape(c['a'])}</td><td>{html.escape(c['b'])}</td><td>{c['fraction']:.0%}</td>"
+                     f"<td{flag}>{c['pass_rate']:.0%}</td></tr>")
+    parts.append("</table></div>")
+    bm = extras.get("boundary")
+    if bm:
+        parts.append(f'<h2>Failure boundary</h2><p class="muted">{html.escape(bm["y"]["label"])} ({html.escape(bm["y"]["unit"])}, rows) '
+                     f'× {html.escape(bm["x"]["label"])} (columns). Green passes, red falls.</p><div class="card">{_heatmap(bm)}</div>')
+    rt = extras.get("redteam")
+    if rt:
+        parts.append(f'<h2>Red team</h2><p class="muted">Realistic multi-stressor situations proposed by the '
+                     f'{"LLM red-teamer" if rt["source"] == "llm" else "offline red-team templates"} from the measured weak spots.</p>'
+                     '<div class="card tablewrap"><table><tr><th>Situation</th><th>Pass rate (3 seeds)</th></tr>')
+        for a in rt["attacks"]:
+            flag = ' style="color:var(--bad);font-weight:600"' if a["pass_rate"] < 1 else ""
+            parts.append(f"<tr><td>{html.escape(a['scenario']['name'])}</td><td{flag}>{a['pass_rate']:.0%}</td></tr>")
+        parts.append("</table></div>")
+    return "".join(parts)
+
+
 def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]],
-                atlas: dict[str, dict] | None, hunt_meta: dict | None, notes: list[str] | None = None) -> str:
+                atlas: dict[str, dict] | None, hunt_meta: dict | None, notes: list[str] | None = None,
+                extras: dict | None = None) -> str:
     names = list(probes)
     final = cards[names[-1]]
     color = {"FIELD-READY": "var(--ok)", "SUPERVISED": "var(--ok)", "LAB-ONLY": "var(--warn)"}.get(final["grade"], "var(--bad)")
@@ -152,6 +200,7 @@ def render_html(title: str, cards: dict[str, dict], probes: dict[str, list[dict]
 <div class="grid2"><div class="card">{polar}</div><div class="card"><p class="muted">How to read: the robot faces up. A dent in the shape is a direction where a shove topples it. Side pushes are usually the weakest because a trotting quadruped has a narrow support polygon laterally.</p></div></div>
 <h2>Breaking points</h2><p class="muted">Bar = fraction of the tested range survived on every seed. {legend}</p><div class="card">{_bars(probes)}</div>
 <h2>Failure atlas</h2>{budget}<div class="card tablewrap"><table><tr><th>Mode</th><th>Severity</th><th>Outcome</th><th>Mildest world that breaks it</th></tr>{''.join(atlas_rows) or '<tr><td colspan=4>No failures found.</td></tr>'}</table></div>
+{_compound_section(extras)}
 <h2>Method</h2><div class="card"><ul>
 <li>Score = 45% margin index (push envelope 40%, other stressors 60%) + 40% nominal pass rate under domain-randomised conditions + 15% adversarial (penalises failure modes found at severity ≤ 0.5).</li>
 <li>Pass = no fall (tilt &gt; 65° or body clearance &lt; 11 cm) and ≥ 35% of commanded distance covered.</li>

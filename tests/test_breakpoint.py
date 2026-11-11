@@ -233,3 +233,59 @@ def test_websocket_shove_game():
             if msg["type"] == "over":
                 break
         assert msg["type"] == "over" and msg["fell"] and msg["shoves"] >= 1
+
+
+# ---------------------------------------------------------------- red team
+PROBE_FIXTURE = [
+    {"key": "push_left", "label": "Push from left", "unit": "N·s", "breaking_point": 5.0, "fraction": 0.125},
+    {"key": "friction", "label": "Low friction", "unit": "μ", "breaking_point": 0.3, "fraction": 0.7},
+    {"key": "payload_kg", "label": "Payload", "unit": "kg", "breaking_point": 3.0, "fraction": 0.4},
+]
+
+
+def test_interactions_scale_each_axis_by_its_own_breaking_point():
+    from breakpoint.redteam import interactions
+
+    cases = interactions(None, PROBE_FIXTURE, top_k=3, workers=1, seeds=[0])
+    assert len(cases) == 3 * 2  # 3 pairs x 2 fractions
+    half = next(c for c in cases if c["fraction"] == 0.5 and "payload_kg" in c["settings"] and "friction" in c["settings"])
+    assert half["settings"]["payload_kg"] == pytest.approx(1.5)
+    assert half["settings"]["friction"] == pytest.approx(0.65)
+    assert all(0.0 <= c["pass_rate"] <= 1.0 for c in cases)
+
+
+def test_boundary_map_grid_shape_and_benign_corner_passes():
+    from breakpoint.redteam import boundary_map
+
+    bm = boundary_map(None, "friction", "push_left", n=3, workers=1)
+    assert len(bm["pass_rate"]) == 3 and len(bm["pass_rate"][0]) == 3
+    assert bm["pass_rate"][0][0] == 1.0  # full friction, no push
+
+
+def test_propose_offline_templates_are_valid_and_target_weak_spots(monkeypatch):
+    from breakpoint.redteam import propose
+
+    monkeypatch.delenv("BREAKPOINT_LLM_BASE_URL", raising=False)
+    scns, src = propose(PROBE_FIXTURE, n=3)
+    assert src == "templates" and len(scns) == 3
+    assert any(s.friction < 1.0 and s.pushes for s in scns)
+
+
+def test_propose_uses_llm_and_validates(monkeypatch):
+    from breakpoint import redteam
+
+    monkeypatch.setattr(redteam, "_llm_config", lambda: ("https://x", "k", "m"))
+    monkeypatch.setattr(redteam, "_chat", lambda msgs: json.dumps({"scenarios": [{"name": "x", "friction": -3}, "junk"]}))
+    scns, src = redteam.propose(PROBE_FIXTURE, n=3)
+    assert src == "llm" and len(scns) == 1 and scns[0].friction == 0.05
+
+
+def test_report_renders_compound_sections():
+    from breakpoint.redteam import boundary_map
+
+    bm = boundary_map(None, "friction", "push_left", n=2, workers=1)
+    extras = {"interactions": [{"a": "A", "b": "B", "fraction": 0.5, "pass_rate": 0.0, "compound_failure": True}],
+              "boundary": bm, "redteam": {"source": "templates", "attacks": [{"scenario": {"name": "<b>x</b>"}, "pass_rate": 0.5}]}}
+    card = scorecard(PROBE_FIXTURE, [{"passed": True}], {})
+    page = render_html("t", {"a": card}, {"a": PROBE_FIXTURE}, {}, None, extras=extras)
+    assert "Compound stress" in page and "Failure boundary" in page and "&lt;b&gt;x" in page

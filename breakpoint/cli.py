@@ -22,6 +22,7 @@ from .hunt import hunt, shrink
 from .policy import ResidualPolicy, load_policy
 from .ppo import PPOConfig, ScenarioSampler, train
 from .probe import probe
+from .redteam import boundary_map, interactions, red_team
 from .report import render_html, scorecard
 from .scenario import Scenario
 
@@ -46,13 +47,27 @@ def audit(spec: str | None, label: str, hunt_gens: int = 5, workers: int = 3) ->
     print(f"[audit] {label}: adversarial hunt", flush=True)
     h = hunt(spec, generations=hunt_gens, workers=workers, log=_log)
     card = scorecard(pr, nom, h.atlas)
-    return {"label": label, "policy": spec or "cpg", "probe": pr, "nominal": nom, "hunt": h.to_dict(), "card": card}
+    print(f"[audit] {label}: compound stress + red team", flush=True)
+    extras = {
+        "interactions": interactions(spec, pr, workers=workers),
+        "boundary": boundary_map(spec, "friction", _weakest_push(pr), n=6, workers=workers),
+        "redteam": red_team(spec, pr, workers=workers),
+    }
+    card["compound_failures"] = sum(c["compound_failure"] for c in extras["interactions"])
+    card["redteam_failures"] = sum(a["pass_rate"] < 1 for a in extras["redteam"]["attacks"])
+    return {"label": label, "policy": spec or "cpg", "probe": pr, "nominal": nom, "hunt": h.to_dict(),
+            "card": card, "extras": extras}
+
+
+def _weakest_push(pr: list[dict]) -> str:
+    pushes = [r for r in pr if r["key"].startswith("push_")]
+    return min(pushes, key=lambda r: r["fraction"])["key"] if pushes else "push_left"
 
 
 def _write_report(out: Path, title: str, audits: list[dict], notes: list[str]) -> Path:
     last = audits[-1]
     page = render_html(title, {a["label"]: a["card"] for a in audits}, {a["label"]: a["probe"] for a in audits},
-                       last["hunt"]["atlas"], last["hunt"], notes)
+                       last["hunt"]["atlas"], last["hunt"], notes, last.get("extras"))
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.html").write_text(page)
     (out / "audit.json").write_text(json.dumps(audits, indent=1))
@@ -152,6 +167,17 @@ def cmd_regress(a: argparse.Namespace) -> int:
     return 1 if failed else 0
 
 
+def cmd_redteam(a: argparse.Namespace) -> int:
+    pr = probe(a.policy, workers=a.workers)
+    res = red_team(a.policy, pr, n=a.n, workers=a.workers, use_llm=not a.offline)
+    ix = interactions(a.policy, pr, workers=a.workers)
+    print(json.dumps({"source": res["source"],
+                      "attacks": [{"name": x["scenario"]["name"], "pass_rate": x["pass_rate"]} for x in res["attacks"]],
+                      "compound_failures": [f"{c['a']} + {c['b']} @ {c['fraction']:.0%}" for c in ix if c["compound_failure"]]},
+                     indent=2))
+    return 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     import uvicorn
 
@@ -203,6 +229,13 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--policy")
     g.add_argument("--suite", required=True)
     g.set_defaults(fn=cmd_regress)
+
+    rt = sub.add_parser("redteam", help="compound-stress + red-team attacks on a policy")
+    rt.add_argument("--policy")
+    rt.add_argument("--n", type=int, default=5)
+    rt.add_argument("--workers", type=int, default=3)
+    rt.add_argument("--offline", action="store_true")
+    rt.set_defaults(fn=cmd_redteam)
 
     v = sub.add_parser("serve", help="web playground")
     v.add_argument("--host", default="127.0.0.1")

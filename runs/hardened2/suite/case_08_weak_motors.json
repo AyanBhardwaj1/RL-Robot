@@ -1,0 +1,30 @@
+{
+ "scenario": {
+  "name": "minimal weak motors failure",
+  "terrain": "rough",
+  "roughness": 0.010357805529522751,
+  "slope_deg": 1.943125341554008,
+  "step_height": 0.0,
+  "friction": 0.9548020727288237,
+  "payload_kg": 2.0882848245994357,
+  "payload_offset_x": -0.023031090453403485,
+  "motor_strength": 0.7828554691602804,
+  "latency_steps": 0.0,
+  "obs_noise": 0.018392665811024826,
+  "target_speed": 0.5,
+  "duration_s": 6.0,
+  "pushes": [
+   {
+    "t": 1.0,
+    "force": 48.54316264865479,
+    "direction_deg": -117.23711300532037,
+    "duration": 0.1
+   }
+  ],
+  "notes": ""
+ },
+ "seed": 533883,
+ "alpha": 0.40625,
+ "stressor": "weak motors",
+ "found_against": "runs/hardened/policy_hardened.npz"
+}

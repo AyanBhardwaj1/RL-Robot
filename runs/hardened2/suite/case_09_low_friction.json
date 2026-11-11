@@ -1,0 +1,30 @@
+{
+ "scenario": {
+  "name": "minimal low friction failure",
+  "terrain": "rough",
+  "roughness": 0.021826815142237558,
+  "slope_deg": -4.626041195366168,
+  "step_height": 0.0,
+  "friction": 0.6824980258625445,
+  "payload_kg": 0.7314199042999199,
+  "payload_offset_x": -0.0462723961552621,
+  "motor_strength": 0.8690640722015682,
+  "latency_steps": 1.0,
+  "obs_noise": 0.0078332064421577,
+  "target_speed": 0.5,
+  "duration_s": 6.0,
+  "pushes": [
+   {
+    "t": 2.2888531133812835,
+    "force": 114.98182439929813,
+    "direction_deg": -39.47779680318965,
+    "duration": 0.1
+   }
+  ],
+  "notes": ""
+ },
+ "seed": 566053,
+ "alpha": 0.53125,
+ "stressor": "low friction",
+ "found_against": "runs/hardened/policy_hardened.npz"
+}
