@@ -463,3 +463,9 @@ def test_bring_your_own_policy_spec():
         load_policy("py:nocolon")
     out, _ = rollout(pol, Scenario(duration_s=2.0), seed=0)
     assert out.survived
+
+
+def test_rules_understand_imperial_units():
+    s = compile_rules("hauling 10 lbs down a stairway with 2 inch steps").scenario
+    assert s.payload_kg == pytest.approx(4.54, abs=0.01)
+    assert s.step_height == pytest.approx(0.0508, abs=1e-3)

@@ -31,6 +31,8 @@ from .scenario import Scenario, json_schema
 LLM_TIMEOUT_S = 20
 MAX_IMAGE_PIXELS = 4096 * 4096
 NUM = r"(\d+(?:\.\d+)?)"
+LB_TO_KG = 0.4536
+IN_TO_CM = 2.54
 
 
 @dataclass(frozen=True)
@@ -68,7 +70,8 @@ def compile_rules(text: str) -> Compiled:
     # terrain
     if re.search(r"\b(stairs?|steps?|staircase|curb)\b", t):
         d["terrain"] = "stairs"
-        cm = _num_near(t, NUM + r"\s*cm", 6.0)
+        inches = _num_near(t, NUM + r"\s*(?:in\b|inch|inches|\")", 0.0)
+        cm = inches * IN_TO_CM if inches else _num_near(t, NUM + r"\s*cm", 6.0)
         d["step_height"] = cm / 100.0
         hit("stairs")
     elif re.search(r"\b(hill|slope|ramp|incline|uphill|downhill|decline)\b", t):
@@ -84,6 +87,9 @@ def compile_rules(text: str) -> Compiled:
     # payload
     if m := re.search(NUM + r"\s*(?:kg|kilo)", t):
         d["payload_kg"] = float(m.group(1))
+        hit("payload")
+    elif m := re.search(NUM + r"\s*(?:lbs?|pounds?)\b", t):
+        d["payload_kg"] = round(float(m.group(1)) * LB_TO_KG, 2)
         hit("payload")
     elif re.search(r"\b(carry|carrying|backpack|payload|box|package|load)\b", t):
         d["payload_kg"] = 2.5
