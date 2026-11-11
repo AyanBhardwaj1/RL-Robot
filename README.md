@@ -23,7 +23,7 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
   from the side but fails 45% of home-care routes.
 - Paired design levers with a sign test: a 15% faster swing saves 25 of 750 sampled shifts and loses
   none; 25% more ankle torque saves none.
-- Four independent code reviews, 31 findings fixed with regression tests, several of which made the
+- Five independent code reviews, 37 findings fixed with regression tests, several of which made the
   results less flattering. They are written up below.
 
 ![playground](docs/playground.png)
