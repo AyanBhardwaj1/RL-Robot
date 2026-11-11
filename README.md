@@ -14,6 +14,18 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
    construction, teleop),
 6. and writes a **readiness report** comparing policies before and after retraining.
 
+**Highlights**
+
+- A latency gate, not more training, took the best quadruped policy from 10% to 0 of 60 falls under
+  teleoperation lag (readiness 84.1, up from 66.8 for its bare gait).
+- A full-size humanoid lab in Python, the browser and allocation-free C++17, held equal by tests: side
+  shoves are the biped's weak spot (44 vs 92 N·s from the front), and a wheeled base survives 2.7× more
+  from the side but fails 45% of home-care routes.
+- Paired design levers with a sign test: a 15% faster swing saves 25 of 750 sampled shifts and loses
+  none; 25% more ankle torque saves none.
+- Four independent code reviews, 31 findings fixed with regression tests, several of which made the
+  results less flattering. They are written up below.
+
 ![playground](docs/playground.png)
 
 ## Humanoid push lab
