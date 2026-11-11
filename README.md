@@ -70,7 +70,40 @@ export BREAKPOINT_LLM_API_KEY=...
 export BREAKPOINT_LLM_MODEL=<model id>
 ```
 
-## Results: leaderboard (CPU, committed in `runs/leaderboard/`)
+## Headline: best policy so far
+
+**`runs/v2field/policy_v2field.npz` scores 82.6 (SUPERVISED).** The CPG gait alone scores 66.8 in
+the same audit (`runs/leaderboard2/`). The best policy has zero compound failures and these
+margins: uphill 20° (the top of the tested range), payload 8 kg (also the top), stairs 9.4 cm,
+latency 60 ms, and side shoves of 6.9 / 5.6 N·s at the worst gait phase.
+
+How it was built: v2 was PPO-trained from scratch with the corrected learner (bootstrapping on
+time-limit truncation, 16 terrain variants, deterministic best-checkpoint selection) for 420k
+steps, about 4 minutes on one CPU core. It then had one **deployment-aware** hardening round
+toward the sidewalk and construction profiles.
+
+| Policy (leaderboard v2) | Readiness | Margin | Uphill | Payload | Stairs | Latency | Side push L/R | Compound | Red team |
+|---|---|---|---|---|---|---|---|---|---|
+| CPG gait alone | 66.8 | 0.50 | 9.1° | 3.3 kg | 5.6 cm | 120 ms | 4.4 / 4.4 | 2 | 3/5 |
+| v1 + hardening round 1 | 77.2 | 0.56 | 16.3° | 6.3 kg | 7.0 cm | 40 ms | 6.3 / 8.8 | 1 | 2/5 |
+| v2 (fixed PPO, no hardening) | 73.5 | 0.54 | 9.7° | 8.0 kg | 7.5 cm | 40 ms | 5.0 / 4.4 | 1 | 5/5 |
+| **v2 + deployment-aware hardening** | **82.6** | **0.61** | **20°** | **8.0 kg** | **9.4 cm** | **60 ms** | **6.9 / 5.6** | **0** | **2/5** |
+
+Deployment check (60 sampled worlds per profile, same worlds for each policy):
+
+| Profile | v2 | v2 + deployment-aware hardening |
+|---|---|---|
+| warehouse | 0.0% (UB 4.9%) | 0.0% (UB 4.9%) |
+| home | 0.0% (UB 4.9%) | 0.0% (UB 4.9%) |
+| sidewalk | 10.0% (UB 18.2%) | **5.0% (UB 11.9%)** |
+| construction | **10.0% (UB 18.2%)** | 16.7% (UB 26.0%) |
+
+The hardening round halved sidewalk failures, the profile whose dominant cause was latency, but
+construction got worse, mainly from low friction. At 60 trials neither change is statistically
+significant (the bounds overlap), and the tool reports bounds so nobody over-reads them. Next
+round: more trials and a construction-focused profile mix.
+
+## Results: first leaderboard (v1 lineage, committed in `runs/leaderboard/`)
 
 All four policies were audited in one run with the same code, seeds and search budget
 (`python -m breakpoint leaderboard cpg runs/policy_v1.npz runs/hardened/policy_hardened.npz runs/hardened2/policy_hardened2.npz`).

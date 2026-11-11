@@ -1,0 +1,400 @@
+[
+ {
+  "profile": "construction",
+  "description": "Gravel, mud, slopes, rubble, heavy tool payloads, weak comms.",
+  "trials": 60,
+  "failures": 6,
+  "failure_rate": 0.1,
+  "failure_rate_upper_95": 0.1819,
+  "failures_by_dominant_stressor": {
+   "low friction": 2,
+   "terrain": 2,
+   "latency": 2
+  },
+  "worst": [
+   {
+    "scenario": {
+     "name": "construction sample",
+     "terrain": "slope",
+     "roughness": 0.0,
+     "slope_deg": -11.603336747315302,
+     "step_height": 0.0,
+     "friction": 0.3245841143617168,
+     "payload_kg": 4.066351196001362,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.9323741402459996,
+     "latency_steps": 4.0,
+     "obs_noise": 0.04853086206137439,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": false,
+     "fell": true,
+     "time_s": 3.44,
+     "distance": 1.455,
+     "min_clearance": 0.1818,
+     "min_upright": 0.3805,
+     "mean_speed": 0.423,
+     "progress_ok": true,
+     "passed": false,
+     "margin": -0.828
+    }
+   },
+   {
+    "scenario": {
+     "name": "construction sample",
+     "terrain": "slope",
+     "roughness": 0.0,
+     "slope_deg": -11.761090540624993,
+     "step_height": 0.0,
+     "friction": 0.7978823911668618,
+     "payload_kg": 1.8252307887913533,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.8184622746498893,
+     "latency_steps": 0.0,
+     "obs_noise": 0.052209166106931076,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": false,
+     "fell": true,
+     "time_s": 4.06,
+     "distance": 1.366,
+     "min_clearance": 0.1887,
+     "min_upright": 0.4129,
+     "mean_speed": 0.336,
+     "progress_ok": true,
+     "passed": false,
+     "margin": -0.797
+    }
+   },
+   {
+    "scenario": {
+     "name": "construction sample",
+     "terrain": "slope",
+     "roughness": 0.0,
+     "slope_deg": 11.540048130629522,
+     "step_height": 0.0,
+     "friction": 0.8983259614735266,
+     "payload_kg": 3.4277099224034737,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.8472303559947759,
+     "latency_steps": 3.0,
+     "obs_noise": 0.055075738445675204,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": false,
+     "fell": true,
+     "time_s": 4.62,
+     "distance": 0.567,
+     "min_clearance": 0.1843,
+     "min_upright": 0.4131,
+     "mean_speed": 0.123,
+     "progress_ok": false,
+     "passed": false,
+     "margin": -0.769
+    }
+   },
+   {
+    "scenario": {
+     "name": "construction sample",
+     "terrain": "rough",
+     "roughness": 0.02351644902028533,
+     "slope_deg": 0.0,
+     "step_height": 0.0,
+     "friction": 0.6565800181198181,
+     "payload_kg": 1.9580950026408062,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.9057967861715106,
+     "latency_steps": 4.0,
+     "obs_noise": 0.01817260748267038,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": true,
+     "fell": false,
+     "time_s": 6.0,
+     "distance": 0.911,
+     "min_clearance": 0.1856,
+     "min_upright": 0.9028,
+     "mean_speed": 0.152,
+     "progress_ok": false,
+     "passed": false,
+     "margin": -0.1
+    }
+   },
+   {
+    "scenario": {
+     "name": "construction sample",
+     "terrain": "rough",
+     "roughness": 0.03310751570071437,
+     "slope_deg": 0.0,
+     "step_height": 0.0,
+     "friction": 0.417064439074083,
+     "payload_kg": 3.0111958818981286,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.8749932059146546,
+     "latency_steps": 4.0,
+     "obs_noise": 0.005781221242390142,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": true,
+     "fell": false,
+     "time_s": 6.0,
+     "distance": 0.797,
+     "min_clearance": 0.1651,
+     "min_upright": 0.9391,
+     "mean_speed": 0.133,
+     "progress_ok": false,
+     "passed": false,
+     "margin": -0.1
+    }
+   }
+  ]
+ },
+ {
+  "profile": "home",
+  "description": "Hardwood, rugs, a few steps, pets and kids.",
+  "trials": 60,
+  "failures": 0,
+  "failure_rate": 0.0,
+  "failure_rate_upper_95": 0.0487,
+  "failures_by_dominant_stressor": {},
+  "worst": []
+ },
+ {
+  "profile": "sidewalk",
+  "description": "Urban pavement, curbs, ramps, crowds, wet after rain.",
+  "trials": 60,
+  "failures": 6,
+  "failure_rate": 0.1,
+  "failure_rate_upper_95": 0.1819,
+  "failures_by_dominant_stressor": {
+   "latency": 3,
+   "low friction": 2,
+   "terrain": 1
+  },
+  "worst": [
+   {
+    "scenario": {
+     "name": "sidewalk sample",
+     "terrain": "stairs",
+     "roughness": 0.0,
+     "slope_deg": 0.0,
+     "step_height": 0.04590920270736727,
+     "friction": 0.4088237829792216,
+     "payload_kg": 1.9623900801326886,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.9972628813822955,
+     "latency_steps": 3.0,
+     "obs_noise": 0.002975280244649958,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [
+      {
+       "t": 3.187045351228928,
+       "force": 57.0969571449824,
+       "direction_deg": 168.45342837287268,
+       "duration": 0.1
+      }
+     ],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": false,
+     "fell": true,
+     "time_s": 3.44,
+     "distance": 0.68,
+     "min_clearance": 0.1999,
+     "min_upright": 0.4171,
+     "mean_speed": 0.198,
+     "progress_ok": false,
+     "passed": false,
+     "margin": -0.828
+    }
+   },
+   {
+    "scenario": {
+     "name": "sidewalk sample",
+     "terrain": "slope",
+     "roughness": 0.0,
+     "slope_deg": -7.0485735743945845,
+     "step_height": 0.0,
+     "friction": 0.9188669772404645,
+     "payload_kg": 0.7615410166217789,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.9976462321936045,
+     "latency_steps": 1.0,
+     "obs_noise": 0.009776990936669285,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [
+      {
+       "t": 3.107956211979359,
+       "force": 57.752057077683624,
+       "direction_deg": -134.3458431859508,
+       "duration": 0.1
+      }
+     ],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": false,
+     "fell": true,
+     "time_s": 3.66,
+     "distance": 1.262,
+     "min_clearance": 0.1917,
+     "min_upright": 0.4122,
+     "mean_speed": 0.345,
+     "progress_ok": true,
+     "passed": false,
+     "margin": -0.817
+    }
+   },
+   {
+    "scenario": {
+     "name": "sidewalk sample",
+     "terrain": "rough",
+     "roughness": 0.013570934006836614,
+     "slope_deg": 0.0,
+     "step_height": 0.0,
+     "friction": 0.9891656158760237,
+     "payload_kg": 0.012817765328620334,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.958987002832095,
+     "latency_steps": 2.0,
+     "obs_noise": 0.019565314276802914,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [
+      {
+       "t": 2.5780667458536257,
+       "force": 40.93738909579679,
+       "direction_deg": -147.98316951134208,
+       "duration": 0.1
+      }
+     ],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": true,
+     "fell": false,
+     "time_s": 6.0,
+     "distance": 0.882,
+     "min_clearance": 0.1971,
+     "min_upright": 0.9429,
+     "mean_speed": 0.147,
+     "progress_ok": false,
+     "passed": false,
+     "margin": -0.1
+    }
+   },
+   {
+    "scenario": {
+     "name": "sidewalk sample",
+     "terrain": "slope",
+     "roughness": 0.0,
+     "slope_deg": 7.819125333885115,
+     "step_height": 0.0,
+     "friction": 0.693307621677556,
+     "payload_kg": 0.36588664935143744,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.9481260496575269,
+     "latency_steps": 3.0,
+     "obs_noise": 0.01601834073217218,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [
+      {
+       "t": 2.7362755099705076,
+       "force": 27.88939789183474,
+       "direction_deg": 110.92923065288454,
+       "duration": 0.1
+      }
+     ],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": true,
+     "fell": false,
+     "time_s": 6.0,
+     "distance": -0.329,
+     "min_clearance": 0.1971,
+     "min_upright": 0.8795,
+     "mean_speed": -0.055,
+     "progress_ok": false,
+     "passed": false,
+     "margin": -0.1
+    }
+   },
+   {
+    "scenario": {
+     "name": "sidewalk sample",
+     "terrain": "slope",
+     "roughness": 0.0,
+     "slope_deg": 6.619052203318223,
+     "step_height": 0.0,
+     "friction": 0.7930726383948281,
+     "payload_kg": 0.13054083282258278,
+     "payload_offset_x": 0.0,
+     "motor_strength": 0.9325545616100704,
+     "latency_steps": 3.0,
+     "obs_noise": 0.007636295599324776,
+     "target_speed": 0.5,
+     "duration_s": 6.0,
+     "phase0_deg": -1.0,
+     "pushes": [],
+     "notes": ""
+    },
+    "outcome": {
+     "survived": true,
+     "fell": false,
+     "time_s": 6.0,
+     "distance": -0.693,
+     "min_clearance": 0.2042,
+     "min_upright": 0.9397,
+     "mean_speed": -0.115,
+     "progress_ok": false,
+     "passed": false,
+     "margin": -0.1
+    }
+   }
+  ]
+ },
+ {
+  "profile": "warehouse",
+  "description": "Sealed concrete, occasional spills, carries totes, bumped by carts and people.",
+  "trials": 60,
+  "failures": 0,
+  "failure_rate": 0.0,
+  "failure_rate_upper_95": 0.0487,
+  "failures_by_dominant_stressor": {},
+  "worst": []
+ }
+]
