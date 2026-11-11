@@ -83,8 +83,36 @@ def _logp(mu: np.ndarray, log_std: np.ndarray, a: np.ndarray) -> np.ndarray:
     return -0.5 * np.sum(z * z, axis=1) - np.sum(log_std) - 0.5 * ACT_DIM * LOG2PI
 
 
+EVAL_WORLDS = (
+    Scenario(duration_s=6.0),
+    Scenario(duration_s=6.0, terrain="rough", roughness=0.02, friction=0.6, payload_kg=1.0),
+    Scenario(duration_s=6.0, pushes=(Push(t=2.0, force=50.0, direction_deg=90.0, duration=0.1),)),
+    Scenario(duration_s=6.0, terrain="slope", slope_deg=5.0, latency_steps=1.0),
+)
+
+
+def deterministic_score(policy: ResidualPolicy, seeds: tuple[int, ...] = (0, 1)) -> float:
+    """Model-selection score with the *deterministic* policy (what actually ships).
+
+    Training curves use stochastic actions, which can hide a mean policy that stalls;
+    this score is pass rate plus a small progress bonus over fixed evaluation worlds.
+    """
+    from .evaluate import rollout  # local import: evaluate imports env, keep ppo light
+
+    total = 0.0
+    n = 0
+    for scn in EVAL_WORLDS:
+        for sd in seeds:
+            out, _ = rollout(policy, scn, seed=sd)
+            expected = scn.target_speed * scn.duration_s
+            total += float(out.passed) + 0.25 * float(np.clip(out.distance / expected, 0.0, 1.0))
+            n += 1
+    return total / n
+
+
 def train(policy: ResidualPolicy, sampler: ScenarioSampler, cfg: PPOConfig = PPOConfig(),
-          seed: int = 0, log: Callable[[dict], None] | None = None) -> list[dict]:
+          seed: int = 0, log: Callable[[dict], None] | None = None,
+          checkpoint: Callable[[ResidualPolicy, dict], None] | None = None, eval_every: int = 10) -> list[dict]:
     rng = np.random.default_rng(seed)
     env = QuadrupedEnv(sampler.sample(cfg.episode_s), seed=seed)
     obs = env.reset(sampler.sample(cfg.episode_s), seed=int(rng.integers(1 << 30)))
@@ -176,6 +204,9 @@ def train(policy: ResidualPolicy, sampler: ScenarioSampler, cfg: PPOConfig = PPO
             "std": float(np.exp(policy.log_std).mean()),
             "sps": steps / max(1e-6, time.time() - t0),
         }
+        if checkpoint and (len(history) % eval_every == eval_every - 1 or steps >= cfg.total_steps):
+            row["det_score"] = deterministic_score(policy)
+            checkpoint(policy, row)
         history.append(row)
         if log:
             log(row)

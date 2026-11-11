@@ -370,3 +370,15 @@ def test_atlas_grid_marks_found_cells():
     svg = _atlas_grid({"payload|1": {"scenario": {"name": "heavy <box>"}}})
     assert svg.count("var(--bad)") == 1 and "heavy &lt;box&gt;" in svg
     assert _atlas_grid({}) == ""
+
+
+def test_deterministic_score_and_checkpoint_callback():
+    from breakpoint.ppo import PPOConfig, ScenarioSampler, deterministic_score, train
+
+    pol = ResidualPolicy(seed=0)
+    s = deterministic_score(pol, seeds=(0,))
+    assert 0.0 <= s <= 1.25
+    seen = []
+    train(pol, ScenarioSampler(seed=0), PPOConfig(total_steps=256, rollout_steps=128, minibatch=64, epochs=1),
+          checkpoint=lambda p, row: seen.append(row["det_score"]), eval_every=1)
+    assert len(seen) == 2 and all(0.0 <= v <= 1.25 for v in seen)

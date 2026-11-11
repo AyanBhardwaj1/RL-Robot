@@ -20,7 +20,7 @@ from .compiler import compile_image, compile_text
 from .evaluate import evaluate_many, rollout
 from .hunt import hunt, shrink
 from .policy import ResidualPolicy, load_policy
-from .ppo import PPOConfig, ScenarioSampler, train
+from .ppo import PPOConfig, ScenarioSampler, deterministic_score, train
 from .probe import probe
 from .redteam import boundary_map, interactions, red_team
 from .report import render_html, scorecard
@@ -110,10 +110,18 @@ def cmd_run(a: argparse.Namespace) -> int:
 def cmd_train(a: argparse.Namespace) -> int:
     pol = ResidualPolicy.load(a.init) if a.init else ResidualPolicy(seed=a.seed, name=Path(a.out).stem)
     failures = [Scenario.from_dict(json.loads(p.read_text())["scenario"]) for p in sorted(Path(a.suite).glob("*.json"))] if a.suite else []
-    train(pol, ScenarioSampler(failures=failures, seed=a.seed), PPOConfig(total_steps=a.steps), seed=a.seed, log=_log)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-    pol.save(a.out)
-    print(f"saved {a.out}")
+    best = {"score": -1.0, "steps": 0}
+
+    def keep_best(policy: ResidualPolicy, row: dict) -> None:
+        # model selection on the deterministic policy: the stochastic training curve can lie
+        if row["det_score"] > best["score"]:
+            best.update(score=row["det_score"], steps=row["steps"])
+            policy.save(a.out)
+
+    train(pol, ScenarioSampler(failures=failures, seed=a.seed), PPOConfig(total_steps=a.steps), seed=a.seed,
+          log=_log, checkpoint=keep_best)
+    print(f"saved {a.out} (best deterministic score {best['score']:.3f} at {best['steps']} steps)")
     return 0
 
 
@@ -153,10 +161,19 @@ def cmd_harden(a: argparse.Namespace) -> int:
     failures = [Scenario.from_dict(json.loads(p.read_text())["scenario"]) for p in suite]
     pol = ResidualPolicy.load(a.policy) if a.policy else ResidualPolicy(seed=a.seed)
     pol.name = "hardened"
-    train(pol, ScenarioSampler(failures=failures, seed=a.seed + 1), PPOConfig(total_steps=a.steps, lr=2e-4),
-          seed=a.seed + 1, log=_log)
     hardened = out / f"policy_{out.name}.npz"
-    pol.save(hardened)
+    start = deterministic_score(pol)
+    best = {"score": start}
+    pol.save(hardened)  # the starting point is a valid candidate: never ship something worse
+
+    def keep_best(policy: ResidualPolicy, row: dict) -> None:
+        if row["det_score"] > best["score"]:
+            best["score"] = row["det_score"]
+            policy.save(hardened)
+
+    train(pol, ScenarioSampler(failures=failures, seed=a.seed + 1), PPOConfig(total_steps=a.steps, lr=2e-4),
+          seed=a.seed + 1, log=_log, checkpoint=keep_best)
+    print(f"[harden] deterministic score {start:.3f} -> best {best['score']:.3f}", flush=True)
     after = audit(str(hardened), "after", a.hunt_gens, a.workers)
     reg = evaluate_many(str(hardened), failures, seeds=[0, 1])
     fixed = sum(all(r["passed"] for r in rs) for rs in reg)
