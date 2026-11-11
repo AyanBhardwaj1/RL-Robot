@@ -144,6 +144,7 @@
   function shove(dir) {
     const imp = +$("#imp").value;
     last.dir = dir;
+    writeUrl();
     const r = H.recover(body(), imp, dir, cond(), true);
     last.result = r;
     const [word, why] = describe(r, dir, imp);
@@ -295,7 +296,50 @@
     const map = { ArrowLeft: 90, ArrowRight: -90, ArrowUp: 0, ArrowDown: 180 }; // arrow = way the robot is pushed
     if (e.key in map) { e.preventDefault(); shove(map[e.key]); }
   });
+  // ---------- shareable scenario links: the controls live in the query string ----------
+  const SLIDERS = ["imp", "payload", "friction", "latency", "strength", "step"];
+  let urlReady = false; // do not rewrite the address until the link's own state has been applied
+  function readUrl() {
+    const q = new URLSearchParams(location.search);
+    SLIDERS.forEach((id) => {
+      const el = $("#" + id), v = Number(q.get(id));
+      if (q.has(id) && Number.isFinite(v)) {
+        el.value = String(Math.min(+el.max, Math.max(+el.min, v)));
+        $(`#${id}-out`).textContent = outs[id](el.value);
+      }
+    });
+    if (q.get("body") === "wheeled") document.querySelector('input[name="body"][value="wheeled"]').checked = true;
+    const on = (q.get("levers") || "").split(",");
+    document.querySelectorAll('input[name="lever"]').forEach((c) => { c.checked = on.includes(c.value); });
+    const d = Number(q.get("dir"));
+    if (!q.has("dir") || !Number.isFinite(d)) return -90;
+    const n = ((Math.round(d) % 360) + 360) % 360; // 0..359, then (-180, 180] so 180 stays "from the front"
+    return n > 180 ? n - 360 : n;
+  }
+  function writeUrl() {
+    if (!urlReady) return;
+    const q = new URLSearchParams();
+    SLIDERS.forEach((id) => { const el = $("#" + id); if (el.value !== el.defaultValue) q.set(id, el.value); });
+    if (bodyKind() === "wheeled") q.set("body", "wheeled");
+    const on = [...document.querySelectorAll('input[name="lever"]:checked')].map((i) => i.value);
+    if (on.length) q.set("levers", on.join(","));
+    if (last.dir !== -90) q.set("dir", String(last.dir));
+    const qs = q.toString();
+    try { history.replaceState(null, "", qs ? `?${qs}` : location.pathname); } catch (e) { /* sandboxed frames */ }
+  }
+  document.querySelector(".hum-controls").addEventListener("input", writeUrl);
+  document.querySelector(".hum-controls").addEventListener("change", writeUrl);
+  const copyBtn = $("#copy-link");
+  if (copyBtn) copyBtn.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(location.href); copyBtn.textContent = "Link copied"; }
+    catch (e) { copyBtn.textContent = "Copy the address bar"; }
+    setTimeout(() => { copyBtn.textContent = "Copy a link to this scenario"; }, 2000);
+  });
+
+  const startDir = readUrl();
+  urlReady = true;
+  syncLevers();
   drawFrame({ com: [], capture: [], footsteps: [] }, 0, { sx: 0, sy: 0 });
   refreshEnvelope();
-  shove(-90);
+  shove(startDir);
 })();

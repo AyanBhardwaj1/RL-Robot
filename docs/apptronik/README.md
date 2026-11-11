@@ -117,6 +117,8 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
 4. **Ship it (60 s).** Run `python -m breakpoint quantize --policy runs/v2field/policy_v2field.npz --gated`: INT8 is 3.6× smaller with the same readiness score. Then run `certify`: a certificate with hash and versions that fails CI below a bar.
 5. **Real time (optional, 30 s).** Run `./build-cpp/breakpoint_cp bench 2`. The step takes under 1 µs; the
    scheduler's worst wake-up ranged from 2 to 15 ms over five runs. Say: “The math is free; the kernel is the risk.”
+   Tip: every lab state is a link. Set up the shot you want (say, 150 ms of lag and a shove from the
+   side), press “Copy a link to this scenario”, and paste it into an email or a slide.
 6. **Close (30 s).** Open `/roles`: each Apptronik team, the file that touches it, and what I’d build next with them.
 
 ## 5. Talking points and honest limits

@@ -71,3 +71,6 @@
 .levers label { display: flex; align-items: center; gap: 10px; font-size: var(--step-small); font-weight: 600; cursor: pointer; min-height: 32px; }
 .levers input { accent-color: var(--orange); width: 18px; height: 18px; }
 .levers label:has(input:disabled) { opacity: .45; cursor: not-allowed; }
+.copy-link { margin-top: 6px; padding: 10px 12px; background: var(--char-3); color: var(--ink-on-dark); border: 0; font: 600 var(--step-small) "Schibsted Grotesk", sans-serif; cursor: pointer; text-align: left; }
+.copy-link:hover { background: var(--char); }
+.copy-link:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
