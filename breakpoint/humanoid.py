@@ -26,6 +26,7 @@ site/assets/humanoid.js so the browser demo and this module agree (see tests).
 from __future__ import annotations
 
 import math
+import zlib
 from dataclasses import asdict, dataclass, field, replace
 
 import numpy as np
@@ -175,7 +176,8 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
 
     # Latency compensation (a Smith predictor): the controller measures the capture point `latency` late,
     # but knows the CoP it has commanded since, so it rolls the measurement forward with the exact
-    # discrete LIP map xi' = p + (xi - p) e^(w dt). With S the running sum of the CoP terms over the last
+    # discrete LIP map xi' = p + (xi - p) e^(w dt) (the plant integrates with semi-implicit Euler; the two
+    # differ by under 2 mm of capture point at 250 ms). With S the running sum of the CoP terms over the last
     # `latency` ticks, the estimate of now is E^n * seen - S, updated in O(1) per tick. What latency costs
     # is then exactly what it should: the shove goes unseen for `latency` seconds.
     e_dt = math.exp(w * DT)
@@ -210,8 +212,8 @@ def recover(impulse: float, direction_deg: float, robot: Humanoid = Humanoid(), 
             # slip if the same shove would have been recovered on a floor with ample grip.
             if cond.friction < GRIPPY:
                 grippy = recover(impulse, direction_deg, robot, replace(cond, friction=GRIPPY), horizon_s=horizon_s)
-                if not grippy.recovered:
-                    rec.reason = grippy.reason
+                if not grippy.recovered:  # the cause comes first; the event (steps, time) is this run's slip
+                    rec.reason = f"{grippy.reason}: the foot slipped first, at {t:.2f} s; ample grip would not have saved it"
             break
         if latency_steps:
             j = tick % latency_steps
@@ -472,12 +474,18 @@ JOBS = {j.name: j for j in (
 )}
 
 
+def job_rng(job: str, seed: int = 0) -> np.random.Generator:
+    """An independent random stream per job (keyed by a stable hash of its name), so two jobs that draw
+    their conditions in the same order do not get the same shoves."""
+    return np.random.default_rng([seed, zlib.crc32(job.encode())])
+
+
 def job_risk(job: str, robot: Humanoid | WheeledBase = Humanoid(), trials: int = 200, seed: int = 0) -> dict:
     from .evaluate import failure_upper_bound
 
     if job not in JOBS:
         raise ValueError(f"unknown job {job!r}; choose from {sorted(JOBS)}")
-    rng = np.random.default_rng(seed)
+    rng = job_rng(job, seed)
     fails, causes = 0, {}
     for _ in range(trials):
         cond, imp, ang = JOBS[job].sample(rng)

@@ -17,7 +17,7 @@ body.docs .app-bar { position: sticky; top: 0; z-index: 5; }
 .docs-main td:first-child { white-space: nowrap; padding-right: 20px; }
 .docs-main ul { padding-left: 20px; }
 @media (max-width: 820px) {
-  .docs-wrap { grid-template-columns: 1fr; }
+  .docs-wrap { grid-template-columns: minmax(0, 1fr); }
   .toc { position: static; grid-template-columns: repeat(2, 1fr); }
   .docs-main td:first-child { white-space: normal; }
   .docs-main table { display: block; overflow-x: auto; }

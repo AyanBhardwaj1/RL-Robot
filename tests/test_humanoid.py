@@ -251,3 +251,27 @@ def test_episode_filter_tags_falls_near_falls_and_lag(tmp_path):
     a, b = filter_episodes(eps), filter_episodes(read_episodes(log))
     assert a["counts"] == b["counts"] and sum(a["counts"].values()) == 30
     assert set(a["drop"]) == {v["episode"] for v in a["verdicts"] if v["tag"] == "fall"}
+
+
+def test_jobs_draw_independent_shoves():
+    """Regression: two jobs that sample in the same order must not get the same shoves (review finding)."""
+    from breakpoint.humanoid import job_rng
+
+    a, b = job_rng("line-side kitting"), job_rng("teleoperated data collection")
+    sa = [JOBS["line-side kitting"].sample(a)[2] for _ in range(20)]
+    sb = [JOBS["teleoperated data collection"].sample(b)[2] for _ in range(20)]
+    assert sa != sb
+    again = job_rng("line-side kitting")
+    assert [JOBS["line-side kitting"].sample(again)[2] for _ in range(20)] == sa  # reproducible per job
+
+
+def test_attributed_slip_keeps_this_runs_event():
+    """Regression: the cause is the counterfactual's, but the report still says when this run's foot slipped."""
+    cond = Conditions(friction=0.5, payload_kg=16.3, floor_slope_deg=2.5, latency_s=0.023, actuator_strength=0.83)
+    r = recover(64.1, 38.3, cond=cond)
+    assert not r.recovered and "slipped first" in r.reason
+    cause, event = r.reason.split(":", 1)
+    assert not cause.startswith("slipped") and f"{r.time_s:.2f} s" in event
+    from dataclasses import replace
+
+    assert recover(64.1, 38.3, cond=replace(cond, friction=10.0)).reason == cause  # the counterfactual's cause

@@ -237,7 +237,13 @@
       tb.appendChild(tr);
     });
     const top = d.levers[0];
-    $("#levers-note").textContent = `Biggest single win: ${top.title.toLowerCase()} (${top.fixed} shifts saved, none lost). Ankle torque buys nothing at full strength: the foot, not the ankle, limits the centre of pressure. A wider stance helps as many shifts as it hurts: the loaded foot sits further out during the swing.`;
+    const lost = top.broken ? `${top.broken} lost` : "none lost";
+    const ankle = d.levers.find((l) => l.key === "ankle_torque");
+    const stance = d.levers.find((l) => l.key === "stance_width");
+    let note = `Biggest single win: ${top.title.toLowerCase()} (${top.fixed} shifts saved, ${lost}).`;
+    if (ankle && ankle.fixed + ankle.broken === 0) note += " Ankle torque is a control that can’t move: in every job the foot edge, not the ankle, limits the centre of pressure.";
+    if (stance && stance.fixed && stance.broken) note += ` A wider stance cuts both ways (${stance.fixed} saved, ${stance.broken} lost): the loaded foot sits further out during the swing.`;
+    $("#levers-note").textContent = note;
   }).catch(() => { $("#levers-table tbody").innerHTML = "<tr><td colspan=5>Run python -m breakpoint design to produce this table.</td></tr>"; });
 
   // ---------- wire up ----------

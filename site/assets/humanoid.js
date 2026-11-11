@@ -78,7 +78,7 @@
         reason = `slipped: needed friction ${(need / z).toFixed(2)} > ${cond.friction.toFixed(2)}`;
         if (cond.friction < GRIPPY) { // a slip only if ample grip would have saved it (see humanoid.py)
           const g = recoverBiped(impulse, dirDeg, robot, Object.assign({}, cond, { friction: GRIPPY }), false, horizon);
-          if (!g.recovered) reason = g.reason;
+          if (!g.recovered) reason = `${g.reason}: the foot slipped first, at ${t.toFixed(2)} s; ample grip would not have saved it`;
         }
         finished = true; break;
       }

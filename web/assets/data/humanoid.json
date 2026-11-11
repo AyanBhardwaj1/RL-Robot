@@ -36,11 +36,11 @@
    "biped": {
     "job": "line-side kitting",
     "trials": 150,
-    "failures": 7,
-    "failure_rate": 0.04666666666666667,
-    "failure_rate_upper_95": 0.0839,
+    "failures": 3,
+    "failure_rate": 0.02,
+    "failure_rate_upper_95": 0.049,
     "causes": {
-     "capture point ran away beyond leg reach": 5,
+     "capture point ran away beyond leg reach": 1,
      "needed more than 3 steps": 2
     }
    },
@@ -57,12 +57,12 @@
    "biped": {
     "job": "tote handling",
     "trials": 150,
-    "failures": 8,
-    "failure_rate": 0.05333333333333334,
-    "failure_rate_upper_95": 0.0922,
+    "failures": 9,
+    "failure_rate": 0.06,
+    "failure_rate_upper_95": 0.1004,
     "causes": {
-     "needed more than 3 steps": 1,
-     "capture point ran away beyond leg reach": 7
+     "capture point ran away beyond leg reach": 6,
+     "needed more than 3 steps": 3
     }
    },
    "wheeled": {
@@ -78,23 +78,22 @@
    "biped": {
     "job": "trailer unloading",
     "trials": 150,
-    "failures": 20,
-    "failure_rate": 0.13333333333333333,
-    "failure_rate_upper_95": 0.1855,
+    "failures": 26,
+    "failure_rate": 0.17333333333333334,
+    "failure_rate_upper_95": 0.2298,
     "causes": {
-     "capture point ran away beyond leg reach": 13,
-     "needed more than 3 steps": 6,
-     "slipped": 1
+     "capture point ran away beyond leg reach": 20,
+     "needed more than 3 steps": 6
     }
    },
    "wheeled": {
     "job": "trailer unloading",
     "trials": 150,
-    "failures": 24,
-    "failure_rate": 0.16,
-    "failure_rate_upper_95": 0.2152,
+    "failures": 37,
+    "failure_rate": 0.24666666666666667,
+    "failure_rate_upper_95": 0.3087,
     "causes": {
-     "blocked": 24
+     "blocked": 37
     }
    }
   },
@@ -110,11 +109,11 @@
    "wheeled": {
     "job": "home care",
     "trials": 150,
-    "failures": 70,
-    "failure_rate": 0.4666666666666667,
-    "failure_rate_upper_95": 0.5337,
+    "failures": 68,
+    "failure_rate": 0.4533333333333333,
+    "failure_rate_upper_95": 0.5204,
     "causes": {
-     "blocked": 70
+     "blocked": 68
     }
    }
   },
@@ -122,12 +121,12 @@
    "biped": {
     "job": "teleoperated data collection",
     "trials": 150,
-    "failures": 16,
-    "failure_rate": 0.10666666666666667,
-    "failure_rate_upper_95": 0.1553,
+    "failures": 11,
+    "failure_rate": 0.07333333333333333,
+    "failure_rate_upper_95": 0.1164,
     "causes": {
-     "capture point ran away beyond leg reach": 10,
-     "needed more than 3 steps": 6
+     "capture point ran away beyond leg reach": 6,
+     "needed more than 3 steps": 5
     }
    },
    "wheeled": {

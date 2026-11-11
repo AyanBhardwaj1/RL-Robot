@@ -37,12 +37,12 @@
   "biped": {
    "job": "__fleet__tote-handling",
    "trials": 150,
-   "failures": 7,
-   "failure_rate": 0.04666666666666667,
-   "failure_rate_upper_95": 0.0839,
+   "failures": 10,
+   "failure_rate": 0.06666666666666667,
+   "failure_rate_upper_95": 0.1084,
    "causes": {
-    "needed more than 3 steps": 3,
-    "capture point ran away beyond leg reach": 4
+    "needed more than 3 steps": 5,
+    "capture point ran away beyond leg reach": 5
    }
   },
   "wheeled": {

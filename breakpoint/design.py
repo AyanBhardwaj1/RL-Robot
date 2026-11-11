@@ -16,7 +16,7 @@ from dataclasses import dataclass, replace
 
 import numpy as np
 
-from .humanoid import DIRECTIONS, JOBS, Conditions, Humanoid, breaking_point, recover
+from .humanoid import DIRECTIONS, JOBS, Conditions, Humanoid, breaking_point, job_rng, recover
 
 
 @dataclass(frozen=True)
@@ -29,6 +29,8 @@ class Lever:
 
 
 LEVERS = (
+    # A structural null in every job: even at the weakest sampled strength (0.8) and heaviest load the
+    # ankle can hold the CoP past the foot edge, so the foot, not the ankle, limits it. Kept as a control.
     Lever("ankle_torque", "Ankle torque +25%", "Actuators",
           robot=lambda r: replace(r, ankle_torque=r.ankle_torque * 1.25)),
     Lever("swing_time", "Swing 15% faster", "Actuators and controls",
@@ -61,7 +63,7 @@ def sign_test_p(fixed: int, broken: int) -> float:
 
 
 def _outcomes(job: str, robot: Humanoid, lever: Lever | None, trials: int, seed: int) -> np.ndarray:
-    rng = np.random.default_rng(seed)
+    rng = job_rng(job, seed)  # same stream with and without the lever: paired
     ok = np.zeros(trials, dtype=bool)
     r = lever.robot(robot) if lever else robot
     for i in range(trials):

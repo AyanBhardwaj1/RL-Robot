@@ -62,7 +62,7 @@ originals before quoting it**. Items marked *(unverified)* came from a single ag
 | Fleet Connect / integration | gRPC, protobuf, REST, MQTT, Kafka, WMS/ERP integration | stateless HTTP API, deployment profiles |
 | Test / TestOps | HIL and simulation testing, regression, coverage | `regress`, `certify`, shrunk counterexamples |
 | Safety | IEC 61508, ISO 13849, ISO 10218, R15.06/R15.08, HARA, FMEA | failure bounds, evidence-based explanations, biped vs wheeled odds |
-| Hardware / systems engineering | Actuator and mechanical trade-offs, system requirements, design reviews | `design.py`: paired design levers with a sign test (a 15% faster swing saves 24 of 750 shifts and loses none; +25% ankle torque saves none) |
+| Hardware / systems engineering | Actuator and mechanical trade-offs, system requirements, design reviews | `design.py`: paired design levers with a sign test (a 15% faster swing saves 25 of 750 shifts and loses none; +25% ankle torque saves none) |
 | Data / teleoperation (Robot Park) | Collecting teleoperation and autonomy data at scale for robot foundation models | `episodes.py`: tags each demonstration clean, lag, near-fall or fall by replaying its contacts at the latency measured then (52% of 200 sample episodes clean, 11% falls) |
 
 Role sources: [Staff SWE – Humanoid Controls](https://job-boards.greenhouse.io/apptronik/jobs/6142283004),
@@ -99,10 +99,10 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
    - Shove from the side: the biped holds only 44 N·s, half its front limit, because the stepping leg
      cannot cross the loaded one. Switch to the wheeled base: 120 N·s from the side, 137 from the front.
    - Raise the curb slider to 10 cm and it is blocked.
-   - Scroll to “Legs or wheels, by job”. Home care: wheeled fails 47%, biped 0%. Trailer
-     unloading: wheeled fails 16% (blocked), biped 13% (heavy cases on ramps).
+   - Scroll to “Legs or wheels, by job”. Home care: wheeled fails 45%, biped 0%. Trailer
+     unloading: wheeled fails 25% (blocked), biped 17% (heavy cases on ramps).
    - Scroll to “Which spec change helps most”. Say: “If you had one spec to improve, the data says swing
-     speed: 24 shifts saved, none lost, p < 0.001. Ankle torque buys nothing; the foot is the limit.”
+     speed: 25 shifts saved, none lost, p < 0.001. Ankle torque buys nothing; the foot is the limit.”
    - Show the capturability map, then drag latency to 150 ms. Say: “This map caught a bug in my own
      latency model that bisection missed, and an independent review caught two more. Each fix made the
      biped look worse and the numbers more honest.”
@@ -146,6 +146,6 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
 > an open-source robustness lab for legged-robot policies. It finds the exact shove, slope, load and lag
 > where a policy fails, hardens the policy, and gives deployment odds with confidence bounds. For Apollo’s world I
 > added a humanoid push-recovery lab using capture-point stepping, which compares a walking biped with a
-> wheeled base by job: legs win home-care routes 0% to 47%, wheels survive 2.7× bigger side shoves.
+> wheeled base by job: legs win home-care routes 0% to 45%, wheels survive 2.7× bigger side shoves.
 > I also measured that an INT8 policy is 3.6× smaller with no robustness loss. Demo: [link]. Code:
 > https://github.com/AyanBhardwaj1/RL-Robot. I’d love to bring this to [team]; happy to walk through it in five minutes.

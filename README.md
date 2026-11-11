@@ -43,11 +43,14 @@ and the browser lab at `/humanoid`):
 
   | Job | Biped | Wheeled |
   |---|---|---|
-  | Line-side kitting | 4.7% (hard side shoves) | 0% |
-  | Tote handling | 5.3% (hard side shoves) | 0% |
-  | Trailer unloading | 13.3% (heavy cases, ramps) | 16.0% (blocked) |
-  | Home care | 0% | 47% |
-  | Teleoperated data collection | 10.7% (shoves under lag) | 0% |
+  | Line-side kitting | 2.0% (hard side shoves) | 0% |
+  | Tote handling | 6.0% (hard side shoves) | 0% |
+  | Trailer unloading | 17.3% (heavy cases, ramps) | 24.7% (blocked) |
+  | Home care | 0% | 45.3% |
+  | Teleoperated data collection | 7.3% (shoves under lag) | 0% |
+
+  Each job draws from its own random stream; with 150 shifts a rate is good to a few points, so the
+  95% upper bounds in `runs/humanoid/baseline.json` are the numbers to plan with.
 
 - **Browser parity.** The browser version is a line-for-line JavaScript port, and `tests/test_humanoid_js.py`
   runs it under Node to check it against Python.
@@ -65,21 +68,23 @@ and the browser lab at `/humanoid`):
 - **Blaming the right cause.** A falling robot's foot always slips in the end, so "slipped" used to be the
   most common failure. The controller now respects the friction cone (it pulls the centre of pressure
   toward the centre of mass, as a balance QP would), and a failure counts as a slip only if the same shove
-  is recovered on a floor with ample grip. In trailer unloading that moved 15 of 16 "slips" to falls.
+  is recovered on a floor with ample grip. In trailer unloading all 18 "slips" turned out to be falls that ample grip would not have saved.
 - **Design levers** (`python -m breakpoint design`). Each spec change is re-run on the same 750 sampled shifts
   as the baseline, so every shift either flips or not:
 
   | Change | Shifts fixed / broken | Sign test p |
   |---|---|---|
-  | Swing 15% faster | 24 / 0 | < 0.001 |
+  | Swing 15% faster | 25 / 0 | < 0.001 |
   | Side-step reach +10 cm | 14 / 0 | < 0.001 |
-  | 20 ms less control latency | 9 / 0 | 0.004 |
-  | Foot 4 cm longer | 3 / 0 | 0.25 |
+  | 20 ms less control latency | 11 / 0 | 0.001 |
+  | Foot 4 cm longer | 7 / 0 | 0.016 |
+  | Stance 3 cm wider | 7 / 4 | 0.55 |
+  | Sole grip +15% | 0 / 0 | 1 |
   | Ankle torque +25% | 0 / 0 | 1 |
-  | Stance 3 cm wider | 7 / 7 | 1 |
 
-  Ankle torque buys nothing at full strength because the foot, not the ankle, limits the centre of
-  pressure; a wider stance helps as many shifts as it hurts, because the loaded foot sits further out
+  Ankle torque is a control that cannot move: in every job, even at the weakest sampled strength, the
+  foot edge limits the centre of pressure before the ankle does. Grip buys nothing because none of the
+  failures were really slips. A wider stance cuts both ways, because the loaded foot sits further out
   during the swing.
 
 ![capturability map](docs/capturability.png)
