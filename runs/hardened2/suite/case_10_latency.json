@@ -1,0 +1,30 @@
+{
+ "scenario": {
+  "name": "minimal latency failure",
+  "terrain": "rough",
+  "roughness": 0.029280948386818034,
+  "slope_deg": -9.973636145781338,
+  "step_height": 0.0,
+  "friction": 0.6651688879882558,
+  "payload_kg": 3.1291714789219656,
+  "payload_offset_x": -0.10851016651296667,
+  "motor_strength": 0.8915859407021608,
+  "latency_steps": 4.0,
+  "obs_noise": 0.09589622805673391,
+  "target_speed": 0.5,
+  "duration_s": 6.0,
+  "pushes": [
+   {
+    "t": 2.9219633385764334,
+    "force": 106.68367639741531,
+    "direction_deg": -16.565921278737704,
+    "duration": 0.1
+   }
+  ],
+  "notes": ""
+ },
+ "seed": 446525,
+ "alpha": 0.96875,
+ "stressor": "latency",
+ "found_against": "runs/hardened/policy_hardened.npz"
+}

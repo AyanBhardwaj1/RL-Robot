@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breakpoint: one-page brief</title>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: Letter; margin: 0.5in 0.55in; }
+  :root { --ink: #17161b; --orange: #f47b25; --soft: #f6efe8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 9.6pt/1.33 "Schibsted Grotesk", system-ui, sans-serif; color: var(--ink); background: #fff; }
+  main { max-width: 7.6in; margin: 0 auto; padding: 0; }
+  header { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; border-bottom: 4px solid var(--orange); padding-bottom: 8px; }
+  h1 { margin: 0; font-size: 26pt; line-height: .95; letter-spacing: -0.04em; font-weight: 800; }
+  .tag { margin: 4px 0 0; font-size: 12pt; font-weight: 600; }
+  .links { text-align: right; font-size: 9pt; font-weight: 600; }
+  .links a { color: var(--ink); }
+  h2 { font-size: 11pt; margin: 10px 0 4px; letter-spacing: -0.01em; font-weight: 800; }
+  p { margin: 0 0 6px; }
+  ul { margin: 0; padding-left: 16px; }
+  li { margin: 0 0 2px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .figs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 2px; }
+  .fig { background: var(--soft); padding: 8px 10px; }
+  .fig b { display: block; font-size: 15pt; line-height: 1; letter-spacing: -0.03em; }
+  .fig span { font-size: 8.5pt; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  th, td { text-align: left; padding: 3px 6px 3px 0; border-bottom: 1px solid #e6dfd8; vertical-align: top; }
+  th { font-weight: 800; }
+  code { font-size: 8.5pt; }
+  footer { margin-top: 10px; font-size: 8.5pt; }
+  @media print { a { text-decoration: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Breakpoint</h1>
+      <p class="tag">Find where a walking robot’s policy breaks, harden it, and know the odds before you ship.</p>
+    </div>
+    <p class="links"><a href="https://github.com/AyanBhardwaj1/RL-Robot">github.com/AyanBhardwaj1/RL-Robot</a><br>Python · C++17 · JavaScript · MuJoCo</p>
+  </header>
+
+  <div class="figs">
+    <div class="fig"><b>84.1</b><span>readiness of the best quadruped policy, up from 66.8 for its bare gait</span></div>
+    <div class="fig"><b>0 / 60</b><span>teleop worlds it fell in after a latency gate (10% before)</span></div>
+    <div class="fig"><b>44 vs 120</b><span>N·s side shove survived: walking biped vs wheeled base</span></div>
+    <div class="fig"><b>3.6×</b><span>smaller INT8 policy with no measured robustness loss</span></div>
+  </div>
+
+  <div class="cols">
+    <section>
+      <h2>What it does</h2>
+      <ul>
+        <li><b>Breaking points.</b> Bisects 17 stresses (shoves at 4 gait phases, slope, stairs, friction, payload, weak motors, latency, noise) to the exact edge the policy survives.</li>
+        <li><b>Failure hunting.</b> Cross-entropy search for the mildest failing worlds, a MAP-Elites atlas of failure types, and shrinking to minimal JSON regression tests.</li>
+        <li><b>Hardening.</b> PPO, written from scratch in numpy, replays failures and target deployment worlds; a checkpoint ships only if it beats the start.</li>
+        <li><b>Deployment odds.</b> Failure rate per site profile with a 95% upper bound and causes; a hazard log turns them into risk ratings with verify commands.</li>
+        <li><b>Humanoid lab.</b> Capture-point push recovery for a 72 kg biped, a wheeled-base comparison, and odds by job, in Python, a browser port and a C++17 port held equal by tests.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>What it found</h2>
+      <ul>
+        <li>A policy that walked in noisy training stood still when run for real, and scored below the gait it was built on.</li>
+        <li>A second hardening round overfit; a fresh audit caught it.</li>
+        <li>Training could not remove latency failures; gating the learned residual on measured link latency did.</li>
+        <li>Legs vs wheels: the wheeled base survives 1.5× bigger shoves from the front and 2.7× from the side, but fails 45% of home-care routes (stairs); the biped fails 0% there, but 17% of trailer shifts.</li>
+        <li>Design levers, paired on 750 shifts: a 15% faster swing saves 25 and loses none (p &lt; 0.001); +25% ankle torque saves none.</li>
+        <li>A capturability map and an independent review exposed three modelling errors (a non-causal latency model, a swing foot that still held weight, ankles that ignored lag); each fix made the biped’s odds worse and more honest.</li>
+        <li>The C++ controller step costs under 1 µs; the worst stock-kernel wake-up ranged from 2 to 15 ms over five runs, which is the case for PREEMPT_RT.</li>
+      </ul>
+    </section>
+  </div>
+
+  <h2>Where it meets each team</h2>
+  <table>
+    <thead><tr><th>Team</th><th>Evidence in the repo</th></tr></thead>
+    <tbody>
+      <tr><td>Controls</td><td>LIP + capture-point stepping with ankle, friction, reach, swing and stance-leg limits, Smith-predictor latency compensation (<code>humanoid.py</code>, <code>cpp/capture_point.hpp</code>)</td></tr>
+      <tr><td>Simulation</td><td>Procedural MJCF quadruped and terrain, validated scenario schema, physical convention tests</td></tr>
+      <tr><td>Robot learning</td><td>numpy PPO with finite-difference-checked backprop, failure replay, deterministic checkpoint selection</td></tr>
+      <tr><td>ML systems</td><td>FP16 and per-channel INT8 compression judged by breaking points, not only action error</td></tr>
+      <tr><td>Real-time / embedded</td><td>Allocation-free 2 ms C++ step, 500 Hz loop benchmark, latency and actuator-strength budgets</td></tr>
+      <tr><td>Platform / test</td><td>Over 90 tests, CI with <code>-Werror</code> C++ build, regression suites, a certify gate with hash and versions</td></tr>
+      <tr><td>Fleet / safety</td><td>Stateless HTTP API, site profiles with confidence bounds, measured hazard log with mitigations</td></tr>
+    </tbody>
+  </table>
+
+  <footer>Built with an AI coding agent and checked by six independent code reviews (48 findings fixed with regression tests). The robots are generic, not models of any product; numbers compare designs, not certify hardware.</footer>
+</main>
+</body>
+</html>

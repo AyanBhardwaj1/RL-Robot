@@ -1,0 +1,30 @@
+{
+ "scenario": {
+  "name": "minimal payload failure",
+  "terrain": "rough",
+  "roughness": 0.00304766437980112,
+  "slope_deg": -1.1151738785592833,
+  "step_height": 0.0,
+  "friction": 0.9769906863324564,
+  "payload_kg": 1.3514835972135328,
+  "payload_offset_x": -0.02540988752818655,
+  "motor_strength": 0.9553398190019513,
+  "latency_steps": 1.0,
+  "obs_noise": 0.06372545182875249,
+  "target_speed": 0.5,
+  "duration_s": 6.0,
+  "pushes": [
+   {
+    "t": 3.130438419031677,
+    "force": 75.55609867900355,
+    "direction_deg": -79.12078481534806,
+    "duration": 0.1
+   }
+  ],
+  "notes": ""
+ },
+ "seed": 985686,
+ "alpha": 0.5625,
+ "stressor": "payload",
+ "found_against": "runs/policy_v1.npz"
+}

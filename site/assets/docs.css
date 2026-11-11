@@ -1,0 +1,24 @@
+/* Breakpoint docs: long-form reading on the charcoal ground. */
+body.docs .app-bar { position: sticky; top: 0; z-index: 5; }
+.docs-wrap { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); padding: 40px var(--margin) 120px; max-width: 1200px; margin: 0 auto; }
+.toc { position: sticky; top: 80px; align-self: start; display: grid; gap: 10px; font-weight: 600; font-size: var(--step-small); }
+.toc a { text-decoration: none; transition: opacity .15s var(--ease); }
+.toc a:hover { opacity: .75; }
+.docs-main { max-width: 74ch; }
+.docs-main h1 { font-size: var(--step-head); }
+.docs-main h2 { font-size: var(--step-lead); letter-spacing: -0.02em; margin: 56px 0 16px; line-height: 1.1; }
+.docs-main p, .docs-main li { line-height: 1.6; }
+.docs-main .lead { font-size: var(--step-lead); line-height: 1.35; margin-top: 16px; }
+.docs-main p + p { margin-top: 12px; }
+.docs-main pre { background: var(--char-2); padding: 18px 20px; overflow-x: auto; margin: 16px 0; }
+.docs-main code { font-size: .9em; }
+.docs-main table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: var(--step-small); }
+.docs-main th, .docs-main td { text-align: left; vertical-align: top; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--char-3); }
+.docs-main td:first-child { white-space: nowrap; padding-right: 20px; }
+.docs-main ul { padding-left: 20px; }
+@media (max-width: 820px) {
+  .docs-wrap { grid-template-columns: minmax(0, 1fr); }
+  .toc { position: static; grid-template-columns: repeat(2, 1fr); }
+  .docs-main td:first-child { white-space: normal; }
+  .docs-main table { display: block; overflow-x: auto; }
+}

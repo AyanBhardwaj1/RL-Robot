@@ -1,0 +1,31 @@
+{
+ "scenario": {
+  "name": "minimal sensor noise failure",
+  "terrain": "rough",
+  "roughness": 0.005855123780457696,
+  "slope_deg": -2.493389468362984,
+  "step_height": 0.0,
+  "friction": 0.8635834460395206,
+  "payload_kg": 0.8442857698425604,
+  "payload_offset_x": -0.04875,
+  "motor_strength": 0.9598808390299557,
+  "latency_steps": 1.0,
+  "obs_noise": 0.08305877591327997,
+  "target_speed": 0.5,
+  "duration_s": 6.0,
+  "phase0_deg": -1.0,
+  "pushes": [
+   {
+    "t": 1.1580948377038838,
+    "force": 61.4382591264188,
+    "direction_deg": -47.92275658253672,
+    "duration": 0.1
+   }
+  ],
+  "notes": ""
+ },
+ "seed": 473313,
+ "alpha": 0.40625,
+ "stressor": "sensor noise",
+ "found_against": "runs/v2field/policy_v2field.npz"
+}

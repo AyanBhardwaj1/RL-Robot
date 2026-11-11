@@ -1,0 +1,30 @@
+{
+ "scenario": {
+  "name": "minimal terrain failure",
+  "terrain": "rough",
+  "roughness": 0.004913458365232178,
+  "slope_deg": -6.804150130101918,
+  "step_height": 0.0,
+  "friction": 0.8339169793737707,
+  "payload_kg": 1.0316910594641246,
+  "payload_offset_x": -0.015210151277021012,
+  "motor_strength": 0.8946012375166819,
+  "latency_steps": 1.0,
+  "obs_noise": 0.04603860877895733,
+  "target_speed": 0.5,
+  "duration_s": 6.0,
+  "pushes": [
+   {
+    "t": 2.307924019267629,
+    "force": 66.27337603912449,
+    "direction_deg": 79.28927458969002,
+    "duration": 0.1
+   }
+  ],
+  "notes": ""
+ },
+ "seed": 877017,
+ "alpha": 0.59375,
+ "stressor": "terrain",
+ "found_against": "runs/policy_v1.npz"
+}

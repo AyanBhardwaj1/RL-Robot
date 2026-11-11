@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Roles · Breakpoint</title>
+<meta name="description" content="Every specialization a humanoid robotics team hires for, mapped to working code, measured results and the next thing to build in Breakpoint.">
+<meta property="og:title" content="Breakpoint, team by team">
+<meta property="og:description" content="Every specialization a humanoid robotics team hires for, mapped to working code and measured results.">
+<meta property="og:image" content="/assets/og-humanoid.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17161b">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/roles.css">
+</head>
+<body class="app roles">
+<a class="skip" href="#roles-main">Skip to content</a>
+<header class="app-bar">
+  <a class="wordmark" href="/" translate="no">Breakpoint</a>
+  <nav aria-label="Main"><a href="/humanoid">Humanoid lab</a><a href="/app">Quadruped lab</a><a href="/docs">Docs</a><a href="https://github.com/AyanBhardwaj1/RL-Robot" rel="noopener">Source</a></nav>
+</header>
+<main id="roles-main">
+  <section class="roles-intro">
+    <h1>Built for a humanoid team</h1>
+    <p>A humanoid company hires across controls, simulation, learning, perception, embedded, platform, fleet, test, safety, data and systems engineering. Breakpoint touches each of them with working code and a measured result. Each card names the file, the number it produced, and the next thing I’d build for that team.</p>
+  </section>
+
+  <nav class="role-index" aria-label="Teams">
+    <a href="#controls">Controls</a><a href="#sim">Simulation</a><a href="#learning">Robot learning</a><a href="#mlsys">ML systems</a>
+    <a href="#perception">Perception</a><a href="#embedded">Real-time and embedded</a><a href="#platform">Platform and dev tools</a>
+    <a href="#fleet">Fleet and integration</a><a href="#test">Test and validation</a><a href="#safety">Safety</a><a href="#data">Data and teleoperation</a><a href="#systems">Hardware and systems</a>
+  </nav>
+
+  <div class="role-grid">
+    <article class="role" id="controls">
+      <h2>Controls and motion planning</h2>
+      <p class="does">Whole-body control, balance and stepping, MPC, state estimation; real-time C++ and Python.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li><code>breakpoint/humanoid.py</code>: linear-inverted-pendulum balance with capture-point stepping, bounded by ankle torque, friction, swing time, leg reach and lateral reach, with slope compensation by leaning.</li>
+        <li>Measured: the biped survives 92 N·s from the front but only 44 N·s from the side, because while one foot swings only the other carries weight. 150 ms of lag, compensated by a Smith predictor, still cuts the front limit to 57 N·s. A 20 kg tote held in front drops forward pushes from 92 to 77 N·s.</li>
+        <li>Wheeled-base model that drives under its capture point: 137 N·s from the front and 120 from the side, but blocked by any curb over 2.5 cm.</li>
+        <li>A live capturability map, built from 1,369 simulations per redraw, colours every shove by the steps it needs. It exposed a bug in my own latency model that bisection could not see; the fix is in all three implementations.</li>
+        <li>The controller respects the friction cone like a balance QP would, and a failure is blamed on the floor only if ample grip would have saved it; all 18 trailer “slips” were really falls.</li>
+        <li><code>breakpoint/design.py</code>: which spec change helps most, paired on 750 shifts. A 15% faster swing saves 25 and loses none (p &lt; 0.001); +25% ankle torque saves none, because the foot is the limit.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>A QP whole-body controller on a MuJoCo humanoid that tracks the same capture-point steps, so the reduced model can be checked against full dynamics.</p>
+    </article>
+
+    <article class="role" id="sim">
+      <h2>Simulation</h2>
+      <p class="does">MuJoCo and Isaac environments, contact models, domain randomization, sim-to-real, MJCF/URDF tooling.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li><code>world.py</code> builds a 12-joint quadruped and heightfield terrain (rough, slope, stairs) procedurally in MJCF; <code>env.py</code> adds PD actuation, latency, sensor noise, pushes at exact gait phases.</li>
+        <li>One validated scenario schema clamps every input, whether typed, photographed, generated by an LLM or proposed by search.</li>
+        <li>An independent review caught mirrored push directions; a physical regression test now pins the convention.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>System identification from logged hardware runs, fitting friction, actuator lag and torque limits so the scenario bounds come from the robot rather than defaults.</p>
+    </article>
+
+    <article class="role" id="learning">
+      <h2>Robot learning</h2>
+      <p class="does">RL and imitation learning for locomotion and manipulation, foundation and VLA models, sim-to-real.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li>PPO with hand-written backprop in numpy (checked against finite differences), trained on one CPU core in about 4 minutes.</li>
+        <li>Hardening loop: failures are found, shrunk to minimal tests, replayed in training; a checkpoint ships only if it beats the start.</li>
+        <li>Honest results: one round took readiness 76.5 → 82.6; a second round overfit; latency could not be trained away, so a latency gate took teleop failures from 10% to 0%.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>Use the same audit as an evaluation harness for a learned manipulation policy: grasp success versus tote mass, friction and sensor delay.</p>
+    </article>
+
+    <article class="role" id="mlsys">
+      <h2>ML systems and edge deployment</h2>
+      <p class="does">Profiling, quantizing and distilling policies to fit onboard compute; ONNX/TensorRT; latency budgets.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li><code>quantize.py</code>: FP16 and per-channel INT8 compression with a robustness check, not just an action-error check.</li>
+        <li>Measured: INT8 is 3.6× smaller (32.3 KB → 9.1 KB) with mean action error 0.002, and readiness unchanged at 84.1 with 0% teleop failures.</li>
+        <li>The FP16 run scored 84.8: a 10⁻⁴ action change moved bisection edges, so the score has about ±0.7 of noise worth reporting.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>ONNX export with a real INT8 runtime, and a CI gate that fails when a compressed policy’s breaking point on any axis drops below a set margin.</p>
+    </article>
+
+    <article class="role" id="perception">
+      <h2>Perception</h2>
+      <p class="does">Detection, segmentation, SLAM, sensor fusion on edge GPUs.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li>Photo-to-scenario: explainable surface cues (texture, glare, colour, banding) set roughness, friction and stairs, or a vision LLM fills the same bounded schema.</li>
+        <li>Sensor noise is a stress axis; every policy is probed for how much noise it tolerates.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>A floor-condition classifier from robot camera frames that predicts the friction band, and a test of how wrong it may be before the odds change.</p>
+    </article>
+
+    <article class="role" id="embedded">
+      <h2>Real-time and embedded</h2>
+      <p class="does">Real-time C++ control loops, EtherCAT and CAN, motor drives, firmware, latency.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li>Control latency is modelled at the step level: 20 ms per control tick in the quadruped, continuous in the humanoid.</li>
+        <li>Measured latency budgets: the gated policy tolerates 120 ms; ungated learned policies fail above 40–60 ms.</li>
+        <li>Actuator strength is an axis: the best quadruped policy keeps walking at 21% of nominal torque.</li>
+        <li><code>cpp/capture_point.hpp</code>: a header-only C++17 controller with an allocation-free 2 ms <code>step()</code>, matching Python to 0.01 N·s on all 16 breaking points (tested in CI with <code>-Werror</code>).</li>
+        <li>500 Hz benchmark over five runs: the step costs 0.7 µs (p50) and about 2 µs (p99), but the worst wake-up on a stock kernel ranged from 1.9 to 15 ms, up to seven missed periods. The case for PREEMPT_RT, measured.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>The same loop on a PREEMPT_RT kernel with an isolated core and SCHED_FIFO, with jitter fed back into the humanoid lab as a latency distribution.</p>
+    </article>
+
+    <article class="role" id="platform">
+      <h2>Platform and developer tools</h2>
+      <p class="does">Build systems, CI/CD, developer experience, internal tools, AI-assisted workflows.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li>Over 90 tests, lint-clean, CI on every push; the browser (JavaScript) and C++ ports are both tested against the Python model so none of the three can drift.</li>
+        <li>A CLI with 17 commands, a local and a serverless web lab, and one script that regenerates every committed result (the humanoid results come back byte-identical).</li>
+        <li>Built with an AI coding agent, then reviewed six times by independent reviewers; 48 findings fixed with regression tests, including a swing foot that still held weight and two jobs that shared one random stream.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>An editor extension that runs <code>breakpoint run</code> on the scenario under the cursor and shows the replay inline.</p>
+    </article>
+
+    <article class="role" id="fleet">
+      <h2>Fleet and integration</h2>
+      <p class="does">Fleet software, APIs to warehouse and plant systems, monitoring, uptime.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li>Deployment profiles turn a site into a distribution of conditions; failure odds come with a 95% upper bound and causes.</li>
+        <li>A stateless HTTP API (<code>/api/simulate</code>, <code>/api/deploy</code>, <code>/api/probe</code>) with validation, size caps and caching.</li>
+        <li>Humanoid job odds: biped 0% vs wheeled 45% on home-care routes (stairs), wheeled 25% on trailer unloading (lips and debris).</li>
+        <li><code>fleet.py</code>: fits a site profile from per-shift telemetry (JSON Lines) using robust quantiles. A deliberately glitched sensor doesn’t move it. It then re-runs the odds for both bodies; on 300 synthetic shifts it recovers the true payload, friction and contact rate.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>Drift alerts: compare tonight’s fitted profile with last week’s and flag when the odds move past their confidence bounds.</p>
+    </article>
+
+    <article class="role" id="test">
+      <h2>Test and validation</h2>
+      <p class="does">Hardware-in-the-loop and simulation tests, regression suites, coverage, release gates.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li>Shrunk counterexamples saved as JSON with seeds; <code>regress</code> replays them on 3 seeds and exits non-zero on failure.</li>
+        <li><code>certify</code> writes a certificate with the policy’s SHA-256, toolchain versions and git commit, and fails CI below a score.</li>
+        <li>Compound stress: two stresses that each pass alone at 75% of their limits can fail together.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>The same suite runner against a hardware-in-the-loop target, with the simulator and the bench sharing one scenario file.</p>
+    </article>
+
+    <article class="role" id="safety">
+      <h2>Safety</h2>
+      <p class="does">Hazard analysis, functional safety (IEC 61508, ISO 13849, ISO 10218), safety for learned systems.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li>Every failure rate carries a 95% upper bound, and every report states its search budget: no failure found is not proof of none.</li>
+        <li>Failures are explained from evidence, for example “fell 0.7 s after a 12 N·s shove from the right with slippery ground and a 3 kg payload”.</li>
+        <li>Biped versus wheeled odds by job make the stability trade-off explicit.</li>
+        <li><code>hazards.py</code>: every failure class becomes a hazard log entry with a measured frequency and 95% bound, severity, a 4×4 risk rating, mitigation and the command that re-verifies it. Top entry: wheeled base blocked on 45% of home-care routes.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>Trace each hazard to a requirement and a regression scenario, so a code change that raises a hazard’s measured rate fails CI.</p>
+    </article>
+
+    <article class="role" id="data">
+      <h2>Data and teleoperation</h2>
+      <p class="does">Collecting demonstrations at scale for foundation models; teleoperation over networks.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li>A teleoperated data-collection job profile with 50–250 ms of network lag.</li>
+        <li>Finding: learned policies are the latency-sensitive part; gating them on measured link latency removed every teleop failure.</li>
+        <li><code>breakpoint/episodes.py</code>: a demonstration filter. Each recorded contact is replayed through the humanoid model at the latency measured at that moment. Of 200 sample episodes, 52% come back clean; 11% are falls to drop, and the rest are flagged for stalls, a blind link or near-falls (fine for recovery training, not as nominal demos). It also runs in the browser on the humanoid page, on the sample log or your own, with nothing uploaded.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>Run the filter on real episode logs, then check whether a policy trained only on clean episodes beats one trained on everything, on the same breaking-point audit.</p>
+    </article>
+
+    <article class="role" id="systems">
+      <h2>Hardware and systems engineering</h2>
+      <p class="does">Actuators, mechanical design and system requirements: deciding which spec is worth the money, mass and schedule.</p>
+      <h3>In Breakpoint</h3>
+      <ul>
+        <li><code>breakpoint/design.py</code>: each spec change re-run on the same 750 sampled shifts, so every shift either flips or not, with an exact sign test on the flips.</li>
+        <li>Measured: a 15% faster swing saves 25 shifts and loses none; 10 cm more side-step reach saves 14; 20 ms less latency saves 11; a 4 cm longer foot saves 7. Side-step reach alone only saves shifts a faster swing already saves, yet together they save 33: 8 shifts neither saves alone. A 25% stronger ankle saves none, because in every job the foot, not the ankle, limits the centre of pressure.</li>
+        <li>A wider stance cuts both ways (7 saved, 4 lost, not significant): during a swing the loaded foot sits further from the body. A trade-off a single failure rate would hide.</li>
+      </ul>
+      <h3>Next I’d build</h3>
+      <p>Cost-weighted levers: attach mass, cost and schedule to each spec and rank changes by robustness bought per kilogram or per dollar, against the real robot’s model.</p>
+    </article>
+  </div>
+
+  <section class="roles-cta">
+    <h2>See it run</h2>
+    <p>Shove the humanoid, compare legs with wheels, then read the readiness report the quadruped earned.</p>
+    <p class="row"><a class="btn btn-light" href="/humanoid">Open the humanoid lab</a><a class="btn btn-ghost" href="/reports/final">Read the report</a></p>
+  </section>
+</main>
+</body>
+</html>

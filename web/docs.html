@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Breakpoint docs</title>
+<meta name="description" content="Install Breakpoint, run an audit from the command line, harden a policy, gate a release, and call the web API.">
+<meta property="og:title" content="Breakpoint docs">
+<meta property="og:description" content="Install, audit, harden, gate a release and call the web API.">
+<meta property="og:image" content="/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17161b">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body class="docs">
+<a class="skip" href="#docs-main">Skip to content</a>
+<header class="app-bar">
+  <a class="wordmark" href="/" translate="no">Breakpoint</a>
+  <nav aria-label="Main"><a href="/app">Lab</a><a href="/humanoid">Humanoid lab</a><a href="/roles">Roles</a><a href="/reports/final">Report</a><a href="https://github.com/AyanBhardwaj1/RL-Robot" rel="noopener">Source</a></nav>
+</header>
+<div class="docs-wrap">
+  <nav class="toc" aria-label="On this page">
+    <a href="#install">Install</a><a href="#cli">Command line</a><a href="#policies">Policy specs</a>
+    <a href="#humanoid">Humanoid model</a><a href="#scenarios">Scenarios</a><a href="#api">Web API</a><a href="#scores">How scores work</a><a href="#limits">Limits</a>
+  </nav>
+  <main id="docs-main" class="docs-main">
+    <h1>Docs</h1>
+    <p class="lead">Breakpoint runs on any machine with Python 3.10+ and MuJoCo. No GPU, no PyTorch, no API keys.</p>
+
+    <h2 id="install">Install</h2>
+<pre><code>git clone https://github.com/AyanBhardwaj1/RL-Robot.git
+cd RL-Robot
+pip install -e '.[dev]'
+pytest -q</code></pre>
+
+    <h2 id="cli">Command line</h2>
+    <p>Every command is <code>python -m breakpoint &lt;command&gt;</code>. Commands that judge a policy exit non-zero when it fails, so they can gate CI.</p>
+    <table>
+      <thead><tr><th scope="col">Command</th><th scope="col">What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>compile "…"</code></td><td>Plain English (or <code>--image photo.jpg</code>) to a validated scenario JSON.</td></tr>
+        <tr><td><code>run --text "…"</code></td><td>Roll out one scenario; exit 1 if the robot falls or stalls.</td></tr>
+        <tr><td><code>train --steps 420000</code></td><td>Train a residual PPO policy on one CPU core, keeping the best checkpoint judged without noise.</td></tr>
+        <tr><td><code>audit --policy p</code></td><td>Breaking points, nominal runs, adversarial hunt, compound stress, red team and deployment odds, as an HTML report.</td></tr>
+        <tr><td><code>harden --policy p --profile sidewalk,teleop</code></td><td>Hunt failures, shrink them to tests, fine-tune on them and the target places, re-audit.</td></tr>
+        <tr><td><code>regress --suite dir</code></td><td>Replay saved counterexamples on 3 seeds.</td></tr>
+        <tr><td><code>deploy --profile warehouse --max-fail 0.1</code></td><td>Failure rate and 95% upper bound for each place.</td></tr>
+        <tr><td><code>redteam --policy p</code></td><td>Compound-stress pairs and realistic multi-stressor attacks.</td></tr>
+        <tr><td><code>leaderboard cpg a.npz b.npz</code></td><td>Up to 4 policies audited side by side with identical seeds.</td></tr>
+        <tr><td><code>certify --policy p --min-score 80</code></td><td>Readiness certificate with policy hash and toolchain versions.</td></tr>
+        <tr><td><code>humanoid --latency-ms 150</code></td><td>Humanoid push envelopes for a walking biped and a wheeled base, plus failure odds by job.</td></tr>
+        <tr><td><code>fleet --log shifts.jsonl</code></td><td>Fit a site profile from per-shift telemetry (robust quantiles) and re-run humanoid odds for both bodies. <code>--demo "tote handling"</code> generates a synthetic log.</td></tr>
+        <tr><td><code>design</code></td><td>Which spec change buys the most robustness: every job re-run on the same sampled shifts with one change, shifts fixed vs broken, sign test.</td></tr>
+        <tr><td><code>episodes --log eps.jsonl</code></td><td>Tag teleoperated demonstrations before training: each recorded contact is replayed at the latency measured at that moment; episodes come back clean, lag, near-fall or fall. <code>--demo 200</code> generates a sample log.</td></tr>
+        <tr><td><code>hazards --fail-on-high</code></td><td>Hazard log from measured humanoid failures: rate, 95% bound, severity, risk, mitigation, verify command.</td></tr>
+        <tr><td><code>quantize --policy p --gated</code></td><td>FP16 and INT8 compression, profiled and re-audited for robustness.</td></tr>
+        <tr><td><code>serve</code></td><td>The local lab with live shove mode over a WebSocket.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="policies">Policy specs</h2>
+    <table>
+      <thead><tr><th scope="col">Spec</th><th scope="col">Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>cpg</code></td><td>The open-loop trotting gait with no learning. Immune to lag, weak against shoves.</td></tr>
+        <tr><td><code>runs/v2/policy_v2.npz</code></td><td>A residual PPO policy saved by <code>train</code> or <code>harden</code>.</td></tr>
+        <tr><td><code>gated:&lt;spec&gt;</code></td><td>That policy behind the latency gate: full strength to 40 ms, faded to the gait by 80 ms.</td></tr>
+        <tr><td><code>py:module:factory</code></td><td>Your own controller: <code>factory()</code> returns a callable from a 47-number observation to 12 joint corrections in [-1, 1].</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="humanoid">Humanoid model</h2>
+    <p>The humanoid lab (<a href="/humanoid">/humanoid</a>, <code>breakpoint/humanoid.py</code>) treats a 72 kg humanoid as a linear inverted pendulum, <code>x″ = ω²(x − p)</code> with <code>ω = √(g / z₀)</code>. Its capture point <code>ξ = x + ẋ/ω</code> decides recovery:</p>
+    <ul>
+      <li>ankles move the centre of pressure inside the foot, limited by ankle torque and friction;</li>
+      <li>if the latency-delayed capture point leaves the foot, the robot steps to where ξ will be at touchdown, limited by leg reach, lateral reach and a swing time that grows with payload;</li>
+      <li>more than 3 steps, a slip, or a step taller than it can climb counts as a failure.</li>
+    </ul>
+    <p>The wheeled base drives under the capture point instead, with bounded acceleration, speed and traction. The same model exists three times: Python (reference), JavaScript (the browser lab) and C++17 (<code>cpp/capture_point.hpp</code>, an allocation-free 2 ms step), and tests keep all three equal.</p>
+<pre><code>cmake -S cpp -B build-cpp && cmake --build build-cpp
+./build-cpp/breakpoint_cp envelope 0.2     # breaking points with 200 ms latency
+./build-cpp/breakpoint_cp bench 2          # 500 Hz loop: step cost and wake-up jitter</code></pre>
+
+    <h2 id="scenarios">Scenarios</h2>
+    <p>Every world, whether typed, photographed, proposed by an LLM or found by the search, passes through one schema that clamps each value to physical bounds.</p>
+<pre><code>{
+  "terrain": "rough",        // flat | rough | slope | stairs
+  "roughness": 0.03,         // m, 0–0.08
+  "slope_deg": 0,            // −20 to 20, uphill positive
+  "step_height": 0,          // m, 0–0.10
+  "friction": 0.6,           // 0.05–2
+  "payload_kg": 2.5,         // 0–8
+  "motor_strength": 1.0,     // × torque, 0.2–1.5
+  "latency_steps": 2,        // × 20 ms, 0–6
+  "obs_noise": 0.02,         // σ, 0–0.5
+  "pushes": [{ "t": 2.0, "force": 80, "direction_deg": -90, "duration": 0.1 }]
+}</code></pre>
+    <p>A push’s <code>direction_deg</code> is the force direction in the robot’s frame: 0 pushes it forward (a shove from the rear), +90 toward its left (a shove from its right), −90 toward its right (a shove from its left).</p>
+
+    <h2 id="api">Web API</h2>
+    <p>The hosted lab calls these endpoints. They are stateless, size-capped and documented interactively at <a href="/api/docs">/api/docs</a>.</p>
+    <table>
+      <thead><tr><th scope="col">Endpoint</th><th scope="col">Body</th><th scope="col">Returns</th></tr></thead>
+      <tbody>
+        <tr><td><code>POST /api/compile</code></td><td><code>{"text"}</code></td><td>Scenario and how it was parsed</td></tr>
+        <tr><td><code>POST /api/compile_image</code></td><td><code>{"image_b64", "caption"}</code></td><td>Scenario from a ground photo (3 MB max)</td></tr>
+        <tr><td><code>POST /api/simulate</code></td><td><code>{"scenario", "policy", "seed"}</code></td><td>Outcome, explanation, geom poses per frame (10 s max)</td></tr>
+        <tr><td><code>POST /api/probe</code></td><td><code>{"policy", "axis"}</code></td><td>Breaking point on one stress</td></tr>
+        <tr><td><code>POST /api/deploy</code></td><td><code>{"policy", "profile", "trials"}</code></td><td>Failure rate, bound and causes (12 worlds max)</td></tr>
+        <tr><td><code>GET /api/policies</code>, <code>/api/profiles</code>, <code>/api/axes</code></td><td>–</td><td>Available options</td></tr>
+      </tbody>
+    </table>
+<pre><code>curl -X POST https://&lt;this-site&gt;/api/simulate -H 'Content-Type: application/json' \
+  -d '{"policy": "gated-v2field", "scenario": {"terrain": "stairs", "step_height": 0.07}}'</code></pre>
+
+    <h2 id="scores">How scores work</h2>
+    <ul>
+      <li><strong>Pass</strong>: no fall (tilt past 65° or body within 11 cm of the ground) and at least 35% of the commanded distance.</li>
+      <li><strong>Breaking point</strong>: the largest stress passed on every seed, found by bisection; pushes are tested at 4 points in the stride and scored by the worst.</li>
+      <li><strong>Readiness score</strong>: 45% margin index (pushes 40%, other stresses 60%) + 40% nominal pass rate + 15% adversarial (penalises failures found at low severity).</li>
+      <li><strong>Grades</strong>: 85+ field-ready, 70+ supervised, 50+ lab-only, below that not ready.</li>
+      <li><strong>Bounds</strong>: exact binomial with zero failures (≈ 3 / n), Wilson score otherwise, at 95%.</li>
+    </ul>
+
+    <h2 id="limits">Limits</h2>
+    <ul>
+      <li>The robot is generic, not a calibrated model of a product, so numbers compare policies rather than certify hardware.</li>
+      <li>Search can’t prove a failure doesn’t exist; reports always state the budget.</li>
+      <li>The hosted lab runs on serverless functions: no live WebSocket shove mode (use arrow keys during playback instead), and odds use 12 worlds rather than 60.</li>
+    </ul>
+  </main>
+</div>
+</body>
+</html>

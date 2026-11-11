@@ -1,0 +1,142 @@
+{
+ "conditions": {
+  "payload_kg": 0.0,
+  "payload_reach": 0.35,
+  "payload_height": 1.05,
+  "friction": 0.8,
+  "latency_s": 0.0,
+  "actuator_strength": 1.0,
+  "floor_slope_deg": 0.0,
+  "floor_step_m": 0.0
+ },
+ "envelope": {
+  "biped": {
+   "front": 92.38,
+   "front-left": 62.7,
+   "left": 44.34,
+   "rear-left": 62.7,
+   "rear": 92.38,
+   "rear-right": 62.7,
+   "right": 44.34,
+   "front-right": 62.7
+  },
+  "wheeled": {
+   "front": 137.01,
+   "front-left": 156.98,
+   "left": 120.07,
+   "rear-left": 156.98,
+   "rear": 137.01,
+   "rear-right": 156.98,
+   "right": 120.07,
+   "front-right": 156.98
+  }
+ },
+ "jobs": {
+  "line-side kitting": {
+   "biped": {
+    "job": "line-side kitting",
+    "trials": 150,
+    "failures": 3,
+    "failure_rate": 0.02,
+    "failure_rate_upper_95": 0.049,
+    "causes": {
+     "capture point ran away beyond leg reach": 1,
+     "needed more than 3 steps": 2
+    }
+   },
+   "wheeled": {
+    "job": "line-side kitting",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   }
+  },
+  "tote handling": {
+   "biped": {
+    "job": "tote handling",
+    "trials": 150,
+    "failures": 9,
+    "failure_rate": 0.06,
+    "failure_rate_upper_95": 0.1004,
+    "causes": {
+     "capture point ran away beyond leg reach": 6,
+     "needed more than 3 steps": 3
+    }
+   },
+   "wheeled": {
+    "job": "tote handling",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   }
+  },
+  "trailer unloading": {
+   "biped": {
+    "job": "trailer unloading",
+    "trials": 150,
+    "failures": 26,
+    "failure_rate": 0.17333333333333334,
+    "failure_rate_upper_95": 0.2298,
+    "causes": {
+     "capture point ran away beyond leg reach": 20,
+     "needed more than 3 steps": 6
+    }
+   },
+   "wheeled": {
+    "job": "trailer unloading",
+    "trials": 150,
+    "failures": 37,
+    "failure_rate": 0.24666666666666667,
+    "failure_rate_upper_95": 0.3087,
+    "causes": {
+     "blocked": 37
+    }
+   }
+  },
+  "home care": {
+   "biped": {
+    "job": "home care",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   },
+   "wheeled": {
+    "job": "home care",
+    "trials": 150,
+    "failures": 68,
+    "failure_rate": 0.4533333333333333,
+    "failure_rate_upper_95": 0.5204,
+    "causes": {
+     "blocked": 68
+    }
+   }
+  },
+  "teleoperated data collection": {
+   "biped": {
+    "job": "teleoperated data collection",
+    "trials": 150,
+    "failures": 11,
+    "failure_rate": 0.07333333333333333,
+    "failure_rate_upper_95": 0.1164,
+    "causes": {
+     "capture point ran away beyond leg reach": 6,
+     "needed more than 3 steps": 5
+    }
+   },
+   "wheeled": {
+    "job": "teleoperated data collection",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   }
+  }
+ }
+}

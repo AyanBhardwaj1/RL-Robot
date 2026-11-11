@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+runs/*.log
+.ruff_cache/
+.vercel/
+build-cpp/
+.claude/settings.local.json
+.playwright-cli/
+
+# stray screenshots from local checks
+/*.png

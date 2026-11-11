@@ -1,0 +1,2333 @@
+[
+ {
+  "label": "before",
+  "policy": "runs/hardened/policy_hardened.npz",
+  "probe": [
+   {
+    "key": "push_rear",
+    "label": "Push from rear",
+    "unit": "N\u00b7s",
+    "breaking_point": 6.25,
+    "fraction": 0.1562,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_right",
+    "label": "Push from right",
+    "unit": "N\u00b7s",
+    "breaking_point": 6.875,
+    "fraction": 0.1719,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_front",
+    "label": "Push from front",
+    "unit": "N\u00b7s",
+    "breaking_point": 16.875,
+    "fraction": 0.4219,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_left",
+    "label": "Push from left",
+    "unit": "N\u00b7s",
+    "breaking_point": 8.125,
+    "fraction": 0.2031,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
+    "unit": "N\u00b7s",
+    "breaking_point": 4.375,
+    "fraction": 0.1094,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_front-right",
+    "label": "Push from front-right",
+    "unit": "N\u00b7s",
+    "breaking_point": 8.75,
+    "fraction": 0.2188,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_front-left",
+    "label": "Push from front-left",
+    "unit": "N\u00b7s",
+    "breaking_point": 18.75,
+    "fraction": 0.4688,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
+    "unit": "N\u00b7s",
+    "breaking_point": 6.875,
+    "fraction": 0.1719,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "friction",
+    "label": "Low friction",
+    "unit": "\u03bc",
+    "breaking_point": 0.2281,
+    "fraction": 0.8125,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "payload_kg",
+    "label": "Payload",
+    "unit": "kg",
+    "breaking_point": 6.25,
+    "fraction": 0.7812,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "motor_strength",
+    "label": "Motor weakness",
+    "unit": "\u00d7 torque",
+    "breaking_point": 0.3875,
+    "fraction": 0.7656,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "latency_steps",
+    "label": "Action latency",
+    "unit": "\u00d720 ms",
+    "breaking_point": 2.0,
+    "fraction": 0.3333,
+    "fails_nominal": false,
+    "rollouts": 8
+   },
+   {
+    "key": "obs_noise",
+    "label": "Sensor noise",
+    "unit": "\u03c3",
+    "breaking_point": 0.5,
+    "fraction": 1.0,
+    "fails_nominal": false,
+    "rollouts": 4
+   },
+   {
+    "key": "slope_up",
+    "label": "Uphill slope",
+    "unit": "deg",
+    "breaking_point": 16.25,
+    "fraction": 0.8125,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "slope_down",
+    "label": "Downhill slope",
+    "unit": "deg",
+    "breaking_point": 15.625,
+    "fraction": 0.7812,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "step_height",
+    "label": "Stairs",
+    "unit": "m",
+    "breaking_point": 0.0703,
+    "fraction": 0.7031,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "roughness",
+    "label": "Rough ground",
+    "unit": "m",
+    "breaking_point": 0.08,
+    "fraction": 1.0,
+    "fails_nominal": false,
+    "rollouts": 4
+   }
+  ],
+  "nominal": [
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.877,
+    "min_clearance": 0.1948,
+    "min_upright": 0.9459,
+    "mean_speed": 0.313,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5653
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.688,
+    "min_clearance": 0.1935,
+    "min_upright": 0.9523,
+    "mean_speed": 0.281,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5567
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 2.92,
+    "min_clearance": 0.1997,
+    "min_upright": 0.9593,
+    "mean_speed": 0.487,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.598
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.762,
+    "min_clearance": 0.1751,
+    "min_upright": 0.9496,
+    "mean_speed": 0.294,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.434
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 2.888,
+    "min_clearance": 0.2053,
+    "min_upright": 0.9787,
+    "mean_speed": 0.481,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.6353
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.904,
+    "min_clearance": 0.1891,
+    "min_upright": 0.9605,
+    "mean_speed": 0.317,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5273
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.646,
+    "min_clearance": 0.1885,
+    "min_upright": 0.9493,
+    "mean_speed": 0.274,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5233
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.209,
+    "min_clearance": 0.1951,
+    "min_upright": 0.7773,
+    "mean_speed": 0.202,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5673
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.664,
+    "min_clearance": 0.1872,
+    "min_upright": 0.9512,
+    "mean_speed": 0.277,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5147
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.517,
+    "min_clearance": 0.1919,
+    "min_upright": 0.9558,
+    "mean_speed": 0.253,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.546
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.976,
+    "min_clearance": 0.1966,
+    "min_upright": 0.9578,
+    "mean_speed": 0.329,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5773
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.578,
+    "min_clearance": 0.1925,
+    "min_upright": 0.958,
+    "mean_speed": 0.263,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.55
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.391,
+    "min_clearance": 0.1927,
+    "min_upright": 0.9607,
+    "mean_speed": 0.232,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5513
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.634,
+    "min_clearance": 0.1954,
+    "min_upright": 0.9585,
+    "mean_speed": 0.272,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5693
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.578,
+    "min_clearance": 0.1998,
+    "min_upright": 0.9536,
+    "mean_speed": 0.263,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5987
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.16,
+    "min_clearance": 0.1877,
+    "min_upright": 0.965,
+    "mean_speed": 0.193,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.518
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 2.623,
+    "min_clearance": 0.1983,
+    "min_upright": 0.9592,
+    "mean_speed": 0.437,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5887
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.758,
+    "min_clearance": 0.1968,
+    "min_upright": 0.9555,
+    "mean_speed": 0.293,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5787
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 2.085,
+    "min_clearance": 0.194,
+    "min_upright": 0.9292,
+    "mean_speed": 0.347,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.56
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.686,
+    "min_clearance": 0.1978,
+    "min_upright": 0.957,
+    "mean_speed": 0.281,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5853
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.952,
+    "min_clearance": 0.1968,
+    "min_upright": 0.9536,
+    "mean_speed": 0.325,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5787
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.114,
+    "min_clearance": 0.1907,
+    "min_upright": 0.9552,
+    "mean_speed": 0.186,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.538
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.513,
+    "min_clearance": 0.1913,
+    "min_upright": 0.9604,
+    "mean_speed": 0.252,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.542
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.574,
+    "min_clearance": 0.179,
+    "min_upright": 0.9595,
+    "mean_speed": 0.262,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.46
+   }
+  ],
+  "hunt": {
+   "evaluations": 120,
+   "failures_found": 59,
+   "atlas": {
+    "terrain|4": {
+     "x": [
+      0.5014031441555983,
+      0.2643757841077089,
+      0.0,
+      0.08713179620723138,
+      0.6953179622268227,
+      0.36160887748029125,
+      0.4633794117295601,
+      0.1646953126167502,
+      0.5527388312766746,
+      0.27710922881102273,
+      0.12827542829521804
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.027802764703773606,
+      "slope_deg": -10.059140621497495,
+      "step_height": 0.0,
+      "friction": 0.5487371702599615,
+      "payload_kg": 1.5862547046462534,
+      "payload_offset_x": -0.12,
+      "motor_strength": 0.9433643324652996,
+      "latency_steps": 3.0,
+      "obs_noise": 0.12656310711810193,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.384826284885654,
+        "force": 165.82164938300238,
+        "direction_deg": -80.24067762803182,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 1.62,
+      "distance": 0.748,
+      "min_clearance": 0.2099,
+      "min_upright": 0.3946,
+      "mean_speed": 0.462,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.919
+     },
+     "severity": 1.0169,
+     "score": -0.1054490204274452,
+     "cell": "terrain|4",
+     "stressor": "terrain",
+     "seed": 473313
+    },
+    "weak motors|4": {
+     "x": [
+      0.12361826262202066,
+      0.8567322357331019,
+      0.2637836876574001,
+      0.822322483653376,
+      0.22016424584522096,
+      0.12935501229731747,
+      0.42493561146760006,
+      0.6594359254608417,
+      0.3983028730146034,
+      0.174341352762999,
+      0.0
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.025496136688056004,
+      "slope_deg": 4.783077763825251,
+      "step_height": 0.0,
+      "friction": 0.8887435636401814,
+      "payload_kg": 5.140393414398611,
+      "payload_offset_x": -0.05669191496222396,
+      "motor_strength": 0.46549038562530554,
+      "latency_steps": 1.0,
+      "obs_noise": 0.04527425430406111,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.0,
+        "force": 119.49086190438102,
+        "direction_deg": -117.23711300532037,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 1.6,
+      "distance": 0.279,
+      "min_clearance": 0.1705,
+      "min_upright": 0.4042,
+      "mean_speed": 0.174,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.92
+     },
+     "severity": 1.0523,
+     "score": -0.07813722161455161,
+     "cell": "weak motors|4",
+     "stressor": "weak motors",
+     "seed": 533883
+    },
+    "terrain|3": {
+     "x": [
+      0.20652387620064883,
+      0.26704732970498146,
+      0.029622563135323687,
+      0.19214210478998667,
+      0.15556397744565736,
+      0.17684074477070982,
+      0.5513282352449458,
+      0.18125257440054401,
+      0.40388038843929375,
+      0.2535919409458565,
+      1.0
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.033079694114696745,
+      "slope_deg": -9.56242276798368,
+      "step_height": 0.0,
+      "friction": 0.8141285114194161,
+      "payload_kg": 1.6022839782298888,
+      "payload_offset_x": -0.1128905848475223,
+      "motor_strength": 0.8751076318865086,
+      "latency_steps": 1.0,
+      "obs_noise": 0.06189426066974844,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 4.0,
+        "force": 121.16411653178811,
+        "direction_deg": -88.70690125949166,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 4.4,
+      "distance": 1.435,
+      "min_clearance": 0.175,
+      "min_upright": 0.3615,
+      "mean_speed": 0.326,
+      "progress_ok": true,
+      "passed": false,
+      "margin": -0.78
+     },
+     "severity": 0.7657,
+     "score": -0.16747629651609086,
+     "cell": "terrain|3",
+     "stressor": "terrain",
+     "seed": 1022513
+    },
+    "low friction|4": {
+     "x": [
+      0.6640564164966389,
+      0.22946506801566113,
+      0.13707924584108155,
+      0.379180967380074,
+      0.3907967177371833,
+      0.04212816910068007,
+      0.6847628279917666,
+      0.2097385916632992,
+      0.7214545844661844,
+      0.3903394533244732,
+      0.42961770446042774
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.041085769679505994,
+      "slope_deg": -8.707842250101024,
+      "step_height": 0.0,
+      "friction": 0.40234922515302496,
+      "payload_kg": 1.3767904080939668,
+      "payload_offset_x": -0.08710098099814043,
+      "motor_strength": 0.7535323712029519,
+      "latency_steps": 2.0,
+      "obs_noise": 0.014744859185238024,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.2888531133812835,
+        "force": 216.43637533985532,
+        "direction_deg": -39.47779680318965,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 2.52,
+      "distance": 1.238,
+      "min_clearance": 0.1769,
+      "min_upright": 0.3528,
+      "mean_speed": 0.491,
+      "progress_ok": true,
+      "passed": false,
+      "margin": -0.874
+     },
+     "severity": 1.1026,
+     "score": 0.008083383288200574,
+     "cell": "low friction|4",
+     "stressor": "low friction",
+     "seed": 566053
+    },
+    "low friction|2": {
+     "x": [
+      0.41315930600561224,
+      0.031621177710506376,
+      0.33198012568228713,
+      0.0,
+      0.1285511661591004,
+      0.3495689511078234,
+      0.2223740761745524,
+      0.24647150344681515,
+      0.37846563523809573,
+      0.20278213096995984,
+      0.5047422094691506
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.013342444570473145,
+      "slope_deg": -7.605854896595545,
+      "step_height": 0.0,
+      "friction": 0.628156624594949,
+      "payload_kg": 0.18972706626303826,
+      "payload_offset_x": -0.04032476983625109,
+      "motor_strength": 1.0,
+      "latency_steps": 1.0,
+      "obs_noise": 0.12234913288773817,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.5142266284074517,
+        "force": 113.53969057142872,
+        "direction_deg": -106.99843285081445,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 3.26,
+      "distance": 1.713,
+      "min_clearance": 0.2257,
+      "min_upright": 0.4223,
+      "mean_speed": 0.525,
+      "progress_ok": true,
+      "passed": false,
+      "margin": -0.837
+     },
+     "severity": 0.6706,
+     "score": -0.30054059748798767,
+     "cell": "low friction|2",
+     "stressor": "low friction",
+     "seed": 361674
+    },
+    "latency|3": {
+     "x": [
+      0.0,
+      0.42577912777634624,
+      0.0990489438952809,
+      0.34588839964006807,
+      0.66165359881032,
+      0.15990611468050464,
+      0.4098873106029335,
+      0.5614569327159178,
+      0.46021240047736844,
+      0.5265641401962244,
+      0.3498628566165574
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.024593238636176008,
+      "slope_deg": 1.8437079814775323,
+      "step_height": 0.0,
+      "friction": 1.0,
+      "payload_kg": 2.5546747666580774,
+      "payload_offset_x": -0.09622825346513258,
+      "motor_strength": 0.7751725402339558,
+      "latency_steps": 3.0,
+      "obs_noise": 0.05596714013817662,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.0495885698496723,
+        "force": 138.0637201432105,
+        "direction_deg": 9.563090470640788,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 2.76,
+      "distance": 1.02,
+      "min_clearance": 0.1915,
+      "min_upright": 0.3981,
+      "mean_speed": 0.369,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.862
+     },
+     "severity": 0.7742,
+     "score": -0.24261434848140617,
+     "cell": "latency|3",
+     "stressor": "latency",
+     "seed": 576264
+    },
+    "latency|2": {
+     "x": [
+      0.0,
+      0.3526836015888411,
+      0.2603274210436814,
+      0.0,
+      0.3693166935815945,
+      0.30539148815071165,
+      0.1845044260496036,
+      0.3599458925675554,
+      0.4748615395689847,
+      0.23394598374477174,
+      0.4425070975092324
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.011070265562976215,
+      "slope_deg": -4.201623222973339,
+      "step_height": 0.0,
+      "friction": 1.0,
+      "payload_kg": 2.1161016095330467,
+      "payload_offset_x": -0.05752141894951646,
+      "motor_strength": 1.0,
+      "latency_steps": 2.0,
+      "obs_noise": 0.10688702085274908,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.327521292527697,
+        "force": 142.4584618706954,
+        "direction_deg": -95.77944585188217,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 2.6,
+      "distance": 0.767,
+      "min_clearance": 0.1866,
+      "min_upright": 0.3833,
+      "mean_speed": 0.295,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.87
+     },
+     "severity": 0.5886,
+     "score": -0.3991312232816436,
+     "cell": "latency|2",
+     "stressor": "latency",
+     "seed": 428901
+    },
+    "none|0": {
+     "x": [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.5,
+      0.8318927369995293
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "flat",
+      "roughness": 0.0,
+      "slope_deg": 0.0,
+      "step_height": 0.0,
+      "friction": 1.0,
+      "payload_kg": 0.0,
+      "payload_offset_x": 0.0,
+      "motor_strength": 1.0,
+      "latency_steps": 0.0,
+      "obs_noise": 0.0,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": true,
+      "fell": false,
+      "time_s": 6.0,
+      "distance": 0.848,
+      "min_clearance": 0.1997,
+      "min_upright": 0.9521,
+      "mean_speed": 0.141,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.1
+     },
+     "severity": 0.0,
+     "score": -0.1,
+     "cell": "none|0",
+     "stressor": "none",
+     "seed": 12734
+    },
+    "terrain|2": {
+     "x": [
+      0.2528404915056509,
+      0.37566727798345917,
+      0.3886830581142199,
+      0.239542323584442,
+      0.3652181971003099,
+      0.1325442913424743,
+      0.2529952586501785,
+      0.22269727250747948,
+      0.32172280753907767,
+      0.311102116082961,
+      0.3310817512513786
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.015179715519010711,
+      "slope_deg": -8.319081824775616,
+      "step_height": 0.0,
+      "friction": 0.7724435576449142,
+      "payload_kg": 2.254003667900755,
+      "payload_offset_x": -0.026716066052587223,
+      "motor_strength": 0.8442974896701128,
+      "latency_steps": 2.0,
+      "obs_noise": 0.04639050196986601,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.9932452537541359,
+        "force": 96.5168422617233,
+        "direction_deg": -68.00323821013404,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 2.48,
+      "distance": 0.962,
+      "min_clearance": 0.1735,
+      "min_upright": 0.411,
+      "mean_speed": 0.388,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.876
+     },
+     "severity": 0.7275,
+     "score": -0.2939996571068234,
+     "cell": "terrain|2",
+     "stressor": "terrain",
+     "seed": 203580
+    },
+    "latency|4": {
+     "x": [
+      0.38403568402780697,
+      0.5383520823951768,
+      0.03328960639584225,
+      0.17217121079557604,
+      0.7472942258313446,
+      0.28282758505211847,
+      0.5037582518162242,
+      0.15682112186558836,
+      0.3670836177115366,
+      0.4539835520035064,
+      0.6406544461921444
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.030225495108973453,
+      "slope_deg": -10.295366344032349,
+      "step_height": 0.0,
+      "friction": 0.6543678843749737,
+      "payload_kg": 3.230112494371061,
+      "payload_offset_x": -0.11201049446499786,
+      "motor_strength": 0.8880887129828756,
+      "latency_steps": 4.0,
+      "obs_noise": 0.09898965476824145,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.9219633385764334,
+        "force": 110.12508531346097,
+        "direction_deg": -16.565921278737704,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 3.34,
+      "distance": 1.146,
+      "min_clearance": 0.1596,
+      "min_upright": 0.3958,
+      "mean_speed": 0.343,
+      "progress_ok": true,
+      "passed": false,
+      "margin": -0.833
+     },
+     "severity": 1.1136,
+     "score": 0.05785055563018182,
+     "cell": "latency|4",
+     "stressor": "latency",
+     "seed": 446525
+    },
+    "low friction|3": {
+     "x": [
+      0.4389713569615713,
+      0.08144564228574508,
+      0.6239667842165899,
+      0.051732392492554194,
+      0.31690652562421207,
+      0.3225520141162419,
+      0.500128376866234,
+      0.3643591659504614,
+      0.5232293652748343,
+      0.3309565582747298,
+      0.16022617283158513
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.030007702611974038,
+      "slope_deg": -4.069225021486158,
+      "step_height": 0.0,
+      "friction": 0.6049257787345859,
+      "payload_kg": 0.4886738537144705,
+      "payload_offset_x": 0.029752028211981585,
+      "motor_strength": 0.9663739448798397,
+      "latency_steps": 2.0,
+      "obs_noise": 0.11289320494068465,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.4806785184947553,
+        "force": 156.9688095824503,
+        "direction_deg": -60.855639021097275,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 1.76,
+      "distance": 0.801,
+      "min_clearance": 0.2208,
+      "min_upright": 0.342,
+      "mean_speed": 0.455,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.912
+     },
+     "severity": 0.7688,
+     "score": -0.29695115502397795,
+     "cell": "low friction|3",
+     "stressor": "low friction",
+     "seed": 544832
+    }
+   },
+   "history": [
+    {
+     "generation": 0,
+     "best_score": -0.15806774985764926,
+     "fail_rate": 0.3333333333333333,
+     "atlas_cells": 4
+    },
+    {
+     "generation": 1,
+     "best_score": -0.25348906350447276,
+     "fail_rate": 0.375,
+     "atlas_cells": 5
+    },
+    {
+     "generation": 2,
+     "best_score": -0.24261434848140617,
+     "fail_rate": 0.5,
+     "atlas_cells": 6
+    },
+    {
+     "generation": 3,
+     "best_score": -0.30054059748798767,
+     "fail_rate": 0.5833333333333334,
+     "atlas_cells": 7
+    },
+    {
+     "generation": 4,
+     "best_score": -0.3991312232816436,
+     "fail_rate": 0.6666666666666666,
+     "atlas_cells": 11
+    }
+   ]
+  },
+  "card": {
+   "score": 77.3,
+   "grade": "SUPERVISED",
+   "verdict": "Cleared for supervised trials with a spotter and kill switch.",
+   "margin_index": 0.562,
+   "nominal_pass_rate": 1.0,
+   "nominal_trials": 24,
+   "nominal_failures": 0,
+   "failure_rate_upper_95": 0.1173,
+   "mild_failure_modes": 1,
+   "weakest_axes": [
+    "Push from rear-right",
+    "Push from rear",
+    "Push from right"
+   ]
+  },
+  "_dir_fixed": true
+ },
+ {
+  "label": "after",
+  "policy": "runs/hardened2/policy_hardened.npz",
+  "probe": [
+   {
+    "key": "push_rear",
+    "label": "Push from rear",
+    "unit": "N\u00b7s",
+    "breaking_point": 10.0,
+    "fraction": 0.25,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_right",
+    "label": "Push from right",
+    "unit": "N\u00b7s",
+    "breaking_point": 9.375,
+    "fraction": 0.2344,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_front",
+    "label": "Push from front",
+    "unit": "N\u00b7s",
+    "breaking_point": 19.375,
+    "fraction": 0.4844,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_left",
+    "label": "Push from left",
+    "unit": "N\u00b7s",
+    "breaking_point": 6.25,
+    "fraction": 0.1562,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_rear-right",
+    "label": "Push from rear-right",
+    "unit": "N\u00b7s",
+    "breaking_point": 10.0,
+    "fraction": 0.25,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_front-right",
+    "label": "Push from front-right",
+    "unit": "N\u00b7s",
+    "breaking_point": 18.125,
+    "fraction": 0.4531,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_front-left",
+    "label": "Push from front-left",
+    "unit": "N\u00b7s",
+    "breaking_point": 10.0,
+    "fraction": 0.25,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "push_rear-left",
+    "label": "Push from rear-left",
+    "unit": "N\u00b7s",
+    "breaking_point": 12.5,
+    "fraction": 0.3125,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "friction",
+    "label": "Low friction",
+    "unit": "\u03bc",
+    "breaking_point": 0.0945,
+    "fraction": 0.9531,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "payload_kg",
+    "label": "Payload",
+    "unit": "kg",
+    "breaking_point": 5.25,
+    "fraction": 0.6562,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "motor_strength",
+    "label": "Motor weakness",
+    "unit": "\u00d7 torque",
+    "breaking_point": 0.2125,
+    "fraction": 0.9844,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "latency_steps",
+    "label": "Action latency",
+    "unit": "\u00d720 ms",
+    "breaking_point": 1.0,
+    "fraction": 0.1667,
+    "fails_nominal": false,
+    "rollouts": 6
+   },
+   {
+    "key": "obs_noise",
+    "label": "Sensor noise",
+    "unit": "\u03c3",
+    "breaking_point": 0.5,
+    "fraction": 1.0,
+    "fails_nominal": false,
+    "rollouts": 4
+   },
+   {
+    "key": "slope_up",
+    "label": "Uphill slope",
+    "unit": "deg",
+    "breaking_point": 13.4375,
+    "fraction": 0.6719,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "slope_down",
+    "label": "Downhill slope",
+    "unit": "deg",
+    "breaking_point": 15.0,
+    "fraction": 0.75,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "step_height",
+    "label": "Stairs",
+    "unit": "m",
+    "breaking_point": 0.0609,
+    "fraction": 0.6094,
+    "fails_nominal": false,
+    "rollouts": 16
+   },
+   {
+    "key": "roughness",
+    "label": "Rough ground",
+    "unit": "m",
+    "breaking_point": 0.08,
+    "fraction": 1.0,
+    "fails_nominal": false,
+    "rollouts": 4
+   }
+  ],
+  "nominal": [
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.846,
+    "min_clearance": 0.1822,
+    "min_upright": 0.9607,
+    "mean_speed": 0.308,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.4813
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.886,
+    "min_clearance": 0.1884,
+    "min_upright": 0.9527,
+    "mean_speed": 0.314,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5227
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 2.808,
+    "min_clearance": 0.1916,
+    "min_upright": 0.9448,
+    "mean_speed": 0.468,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.544
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.77,
+    "min_clearance": 0.1804,
+    "min_upright": 0.9635,
+    "mean_speed": 0.295,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.4693
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.731,
+    "min_clearance": 0.1896,
+    "min_upright": 0.9564,
+    "mean_speed": 0.289,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5307
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.757,
+    "min_clearance": 0.1889,
+    "min_upright": 0.9696,
+    "mean_speed": 0.293,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.526
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.66,
+    "min_clearance": 0.1867,
+    "min_upright": 0.9541,
+    "mean_speed": 0.277,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5113
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.978,
+    "min_clearance": 0.1862,
+    "min_upright": 0.8943,
+    "mean_speed": 0.33,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.508
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.801,
+    "min_clearance": 0.1804,
+    "min_upright": 0.965,
+    "mean_speed": 0.3,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.4693
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 2.006,
+    "min_clearance": 0.1773,
+    "min_upright": 0.9659,
+    "mean_speed": 0.334,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.4487
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.762,
+    "min_clearance": 0.1902,
+    "min_upright": 0.9689,
+    "mean_speed": 0.294,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5347
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.483,
+    "min_clearance": 0.1802,
+    "min_upright": 0.9649,
+    "mean_speed": 0.247,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.468
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.385,
+    "min_clearance": 0.1856,
+    "min_upright": 0.9634,
+    "mean_speed": 0.231,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.504
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.955,
+    "min_clearance": 0.1899,
+    "min_upright": 0.9602,
+    "mean_speed": 0.326,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5327
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 2.459,
+    "min_clearance": 0.1926,
+    "min_upright": 0.9605,
+    "mean_speed": 0.41,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5507
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.34,
+    "min_clearance": 0.1848,
+    "min_upright": 0.9635,
+    "mean_speed": 0.223,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.4987
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 2.347,
+    "min_clearance": 0.1867,
+    "min_upright": 0.9587,
+    "mean_speed": 0.391,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5113
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.844,
+    "min_clearance": 0.191,
+    "min_upright": 0.9504,
+    "mean_speed": 0.307,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.54
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.984,
+    "min_clearance": 0.1837,
+    "min_upright": 0.8818,
+    "mean_speed": 0.331,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.4913
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.674,
+    "min_clearance": 0.1898,
+    "min_upright": 0.9451,
+    "mean_speed": 0.279,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.532
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.879,
+    "min_clearance": 0.1891,
+    "min_upright": 0.9541,
+    "mean_speed": 0.313,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.5273
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.713,
+    "min_clearance": 0.1892,
+    "min_upright": 0.9696,
+    "mean_speed": 0.286,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.528
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.903,
+    "min_clearance": 0.1886,
+    "min_upright": 0.9691,
+    "mean_speed": 0.317,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.524
+   },
+   {
+    "survived": true,
+    "fell": false,
+    "time_s": 6.0,
+    "distance": 1.54,
+    "min_clearance": 0.1763,
+    "min_upright": 0.962,
+    "mean_speed": 0.257,
+    "progress_ok": true,
+    "passed": true,
+    "margin": 0.442
+   }
+  ],
+  "hunt": {
+   "evaluations": 120,
+   "failures_found": 64,
+   "atlas": {
+    "payload|2": {
+     "x": [
+      0.0,
+      0.8210665084431792,
+      0.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.5,
+      0.5
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "flat",
+      "roughness": 0.0,
+      "slope_deg": 0.0,
+      "step_height": 0.0,
+      "friction": 1.0,
+      "payload_kg": 4.926399050659075,
+      "payload_offset_x": 0.0,
+      "motor_strength": 1.0,
+      "latency_steps": 0.0,
+      "obs_noise": 0.0,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": true,
+      "fell": false,
+      "time_s": 6.0,
+      "distance": 1.029,
+      "min_clearance": 0.1881,
+      "min_upright": 0.9769,
+      "mean_speed": 0.171,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.1
+     },
+     "severity": 0.6158,
+     "score": 0.3926399050659075,
+     "cell": "payload|2",
+     "stressor": "payload",
+     "seed": 324483
+    },
+    "low friction|4": {
+     "x": [
+      0.7633852858167562,
+      0.3907192202201403,
+      1.0,
+      0.11384217735285268,
+      0.5240853250172922,
+      0.2913482516500693,
+      0.5197453540484279,
+      0.34783659210237305,
+      0.18164056687725225,
+      0.08971497070348922,
+      1.0
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.031184721242905673,
+      "slope_deg": -4.564902236928809,
+      "step_height": 0.0,
+      "friction": 0.3129532427649193,
+      "payload_kg": 2.344315321320842,
+      "payload_offset_x": 0.12,
+      "motor_strength": 0.9260025847206458,
+      "latency_steps": 3.0,
+      "obs_noise": 0.10197188807752425,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 4.0,
+        "force": 54.49217006317568,
+        "direction_deg": -147.70261054674387,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": true,
+      "fell": false,
+      "time_s": 6.0,
+      "distance": 0.776,
+      "min_clearance": 0.1532,
+      "min_upright": 0.9034,
+      "mean_speed": 0.129,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.1
+     },
+     "severity": 1.0589,
+     "score": 0.7471484655315108,
+     "cell": "low friction|4",
+     "stressor": "low friction",
+     "seed": 804941
+    },
+    "terrain|4": {
+     "x": [
+      0.32819672066531946,
+      0.5093652745532473,
+      0.15492488185492703,
+      0.20184515578154016,
+      0.5808413874821637,
+      0.36042626132427713,
+      0.41509356291229116,
+      0.14203618225153433,
+      0.3620490142435112,
+      0.5142495780475359,
+      0.5408157920682433
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.02490561377473747,
+      "slope_deg": -10.73891453245397,
+      "step_height": 0.0,
+      "friction": 0.7046229514012124,
+      "payload_kg": 3.056191647319484,
+      "payload_offset_x": -0.08281802835481751,
+      "motor_strength": 0.8688006487419989,
+      "latency_steps": 3.0,
+      "obs_noise": 0.12614919146349698,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.62244737620473,
+        "force": 108.61470427305336,
+        "direction_deg": 5.1298480971129266,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 2.96,
+      "distance": 1.122,
+      "min_clearance": 0.1664,
+      "min_upright": 0.422,
+      "mean_speed": 0.379,
+      "progress_ok": true,
+      "passed": false,
+      "margin": -0.852
+     },
+     "severity": 1.0006,
+     "score": -0.05153350081760255,
+     "cell": "terrain|4",
+     "stressor": "terrain",
+     "seed": 446525
+    },
+    "weak motors|4": {
+     "x": [
+      0.12361826262202066,
+      0.8567322357331019,
+      0.2637836876574001,
+      0.822322483653376,
+      0.22016424584522096,
+      0.12935501229731747,
+      0.42493561146760006,
+      0.6594359254608417,
+      0.3983028730146034,
+      0.174341352762999,
+      0.0
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.025496136688056004,
+      "slope_deg": 4.783077763825251,
+      "step_height": 0.0,
+      "friction": 0.8887435636401814,
+      "payload_kg": 5.140393414398611,
+      "payload_offset_x": -0.05669191496222396,
+      "motor_strength": 0.46549038562530554,
+      "latency_steps": 1.0,
+      "obs_noise": 0.04527425430406111,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.0,
+        "force": 119.49086190438102,
+        "direction_deg": -117.23711300532037,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 1.56,
+      "distance": 0.262,
+      "min_clearance": 0.1621,
+      "min_upright": 0.4031,
+      "mean_speed": 0.168,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.922
+     },
+     "severity": 1.0523,
+     "score": -0.08013722161455161,
+     "cell": "weak motors|4",
+     "stressor": "weak motors",
+     "seed": 533883
+    },
+    "terrain|3": {
+     "x": [
+      0.023982461986830184,
+      0.15587203118595216,
+      0.30750236228815536,
+      0.3930626533885301,
+      0.36622619447066534,
+      0.12950261745492095,
+      0.17792709341370794,
+      0.10143458592916893,
+      0.470573690881346,
+      0.28944928524998514,
+      0.20241723508456394
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.010675625604822476,
+      "slope_deg": -11.956962422124931,
+      "step_height": 0.0,
+      "friction": 0.9784157842118528,
+      "payload_kg": 0.935232187115713,
+      "payload_offset_x": -0.04619943305084272,
+      "motor_strength": 0.7445092752974554,
+      "latency_steps": 2.0,
+      "obs_noise": 0.045325916109222326,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.6072517052536919,
+        "force": 141.1721072644038,
+        "direction_deg": -75.79825731000535,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 1.84,
+      "distance": 0.696,
+      "min_clearance": 0.1867,
+      "min_upright": 0.3634,
+      "mean_speed": 0.378,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.908
+     },
+     "severity": 0.8161,
+     "score": -0.2550830794854705,
+     "cell": "terrain|3",
+     "stressor": "terrain",
+     "seed": 25055
+    },
+    "latency|4": {
+     "x": [
+      0.4576015847511033,
+      0.7467372409300499,
+      0.34582559944277186,
+      0.6625519277638465,
+      0.7706794480317567,
+      0.6950496908449075,
+      0.0,
+      0.7186051157610263,
+      0.45188600247459276,
+      0.47713140585600416,
+      0.4613682253208776
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "slope",
+      "roughness": 0.0,
+      "slope_deg": 6.558153472830789,
+      "step_height": 0.0,
+      "friction": 0.588158573724007,
+      "payload_kg": 4.4804234455803,
+      "payload_offset_x": -0.03700185613373476,
+      "motor_strength": 0.5693412469534997,
+      "latency_steps": 4.0,
+      "obs_noise": 0.24326739179571763,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.3841046759626328,
+        "force": 135.5658007423778,
+        "direction_deg": -8.232693891838494,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": true,
+      "fell": false,
+      "time_s": 6.0,
+      "distance": 0.825,
+      "min_clearance": 0.1454,
+      "min_upright": 0.8134,
+      "mean_speed": 0.138,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.1
+     },
+     "severity": 1.2772,
+     "score": 0.9217233680911713,
+     "cell": "latency|4",
+     "stressor": "latency",
+     "seed": 258737
+    },
+    "low friction|2": {
+     "x": [
+      0.45077041514544475,
+      0.42188587294615665,
+      0.3126703214608418,
+      0.08757246580256822,
+      0.29246338384620046,
+      0.09765424744511728,
+      0.09335186805841361,
+      0.5033263341991908,
+      0.45969661249106136,
+      0.2380752636283236,
+      0.5630767852180885
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.005601112083504817,
+      "slope_deg": 0.09979002597572517,
+      "step_height": 0.0,
+      "friction": 0.5943066263690997,
+      "payload_kg": 2.5313152376769397,
+      "payload_offset_x": -0.04495912284939797,
+      "motor_strength": 0.9430778972283307,
+      "latency_steps": 1.0,
+      "obs_noise": 0.034178986605791044,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.6892303556542654,
+        "force": 137.9089837473184,
+        "direction_deg": -94.29290509380351,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 3.04,
+      "distance": 0.7,
+      "min_clearance": 0.1887,
+      "min_upright": 0.3916,
+      "mean_speed": 0.23,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.848
+     },
+     "severity": 0.6146,
+     "score": -0.35630484867671103,
+     "cell": "low friction|2",
+     "stressor": "low friction",
+     "seed": 295518
+    },
+    "latency|2": {
+     "x": [
+      0.0,
+      0.3705142758123303,
+      0.47879028962039677,
+      0.0,
+      0.3442530504373699,
+      0.40891356006290414,
+      0.07303264981993343,
+      0.35595307064891357,
+      0.491918481976554,
+      0.3432536659319799,
+      0.36630706748282316
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "slope",
+      "roughness": 0.0043819589891960055,
+      "slope_deg": -4.321407880532593,
+      "step_height": 0.0,
+      "friction": 1.0,
+      "payload_kg": 2.223085654873982,
+      "payload_offset_x": -0.005090330491104772,
+      "motor_strength": 1.0,
+      "latency_steps": 2.0,
+      "obs_noise": 0.14311974602201644,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.0989212024484694,
+        "force": 147.5755445929662,
+        "direction_deg": -56.42868026448723,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 2.46,
+      "distance": 0.852,
+      "min_clearance": 0.1927,
+      "min_upright": 0.3458,
+      "mean_speed": 0.346,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.877
+     },
+     "severity": 0.6168,
+     "score": -0.3835567627461274,
+     "cell": "latency|2",
+     "stressor": "latency",
+     "seed": 428901
+    },
+    "payload|3": {
+     "x": [
+      0.2909769285866857,
+      0.6793375843860134,
+      0.9015174845551785,
+      0.35992103637769607,
+      0.5950485112515274,
+      0.29414059857851194,
+      0.20642458410751313,
+      0.31545713598690833,
+      0.28759352693623835,
+      0.3130122907803473,
+      0.21344291142107435
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.012385475046450788,
+      "slope_deg": -5.53628592039275,
+      "step_height": 0.0,
+      "friction": 0.7381207642719829,
+      "payload_kg": 4.07602550631608,
+      "payload_offset_x": 0.09636419629324286,
+      "motor_strength": 0.7660513263544976,
+      "latency_steps": 3.0,
+      "obs_noise": 0.10294920950247917,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.6403287342632231,
+        "force": 86.2780580808715,
+        "direction_deg": -67.31557531907497,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 2.18,
+      "distance": 0.527,
+      "min_clearance": 0.189,
+      "min_upright": 0.3707,
+      "mean_speed": 0.242,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.891
+     },
+     "severity": 0.9137,
+     "score": -0.16007465768458595,
+     "cell": "payload|3",
+     "stressor": "payload",
+     "seed": 541607
+    },
+    "terrain|2": {
+     "x": [
+      0.0,
+      0.3881741692904963,
+      0.2999049584054599,
+      0.2283544321372124,
+      0.1931421588719137,
+      0.2825239655668754,
+      0.3710050121767929,
+      0.22544489330349374,
+      0.2941094203421054,
+      0.44214927226437506,
+      0.5367532566104549
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.02226030073060757,
+      "slope_deg": -8.236653200895187,
+      "step_height": 0.0,
+      "friction": 1.0,
+      "payload_kg": 2.329045015742978,
+      "payload_offset_x": -0.048022809982689624,
+      "motor_strength": 0.851569619110812,
+      "latency_steps": 1.0,
+      "obs_noise": 0.0988833879484064,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 2.610259769831365,
+        "force": 88.2328261026316,
+        "direction_deg": -20.82626198482498,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 3.14,
+      "distance": 1.114,
+      "min_clearance": 0.167,
+      "min_upright": 0.4035,
+      "mean_speed": 0.355,
+      "progress_ok": true,
+      "passed": false,
+      "margin": -0.843
+     },
+     "severity": 0.6743,
+     "score": -0.3035322681907404,
+     "cell": "terrain|2",
+     "stressor": "terrain",
+     "seed": 690228
+    },
+    "low friction|3": {
+     "x": [
+      0.3790289248320029,
+      0.16767068393220594,
+      0.9975153787261231,
+      0.09168606624414823,
+      0.3114478347213142,
+      0.44578960696697506,
+      0.41120437431189394,
+      0.36060082338953536,
+      0.5502003978974369,
+      0.4186426634012601,
+      0.11770175195513966
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.024672262458713637,
+      "slope_deg": -4.181975298313938,
+      "step_height": 0.0,
+      "friction": 0.6588739676511974,
+      "payload_kg": 1.0060241035932356,
+      "payload_offset_x": 0.11940369089426953,
+      "motor_strength": 0.9404040569413037,
+      "latency_steps": 2.0,
+      "obs_noise": 0.15602636243844126,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.3531052558654189,
+        "force": 165.06011936923107,
+        "direction_deg": -29.28864117554636,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 1.58,
+      "distance": 0.942,
+      "min_clearance": 0.2009,
+      "min_upright": 0.3632,
+      "mean_speed": 0.596,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.921
+     },
+     "severity": 0.7572,
+     "score": -0.31526485192391285,
+     "cell": "low friction|3",
+     "stressor": "low friction",
+     "seed": 544832
+    },
+    "sensor noise|0": {
+     "x": [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.3449234033410713,
+      0.0,
+      0.5,
+      0.0,
+      0.5,
+      0.5
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "flat",
+      "roughness": 0.0,
+      "slope_deg": 0.0,
+      "step_height": 0.0,
+      "friction": 1.0,
+      "payload_kg": 0.0,
+      "payload_offset_x": 0.0,
+      "motor_strength": 1.0,
+      "latency_steps": 0.0,
+      "obs_noise": 0.12072319116937495,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": true,
+      "fell": false,
+      "time_s": 6.0,
+      "distance": 1.034,
+      "min_clearance": 0.2176,
+      "min_upright": 0.9693,
+      "mean_speed": 0.172,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.1
+     },
+     "severity": 0.2414,
+     "score": 0.09315710587099993,
+     "cell": "sensor noise|0",
+     "stressor": "sensor noise",
+     "seed": 2632
+    },
+    "latency|3": {
+     "x": [
+      0.17681337553338639,
+      0.3327739262099,
+      0.39810351194265237,
+      0.21331076305800445,
+      0.6020681965075599,
+      0.33986721828061617,
+      0.33097212893262296,
+      0.17097370409633458,
+      0.42593017227224833,
+      0.5254152360689235,
+      0.18020569270732256
+     ],
+     "scenario": {
+      "name": "lab floor",
+      "terrain": "rough",
+      "roughness": 0.019858327735957377,
+      "slope_deg": -9.870788877109963,
+      "step_height": 0.0,
+      "friction": 0.8408679620199523,
+      "payload_kg": 1.9966435572594,
+      "payload_offset_x": -0.024455157133763436,
+      "motor_strength": 0.8613480040122972,
+      "latency_steps": 3.0,
+      "obs_noise": 0.11895352639821564,
+      "target_speed": 0.5,
+      "duration_s": 6.0,
+      "pushes": [
+       {
+        "t": 1.5406170781219677,
+        "force": 127.7790516816745,
+        "direction_deg": 9.14948498481246,
+        "duration": 0.1
+       }
+      ],
+      "notes": ""
+     },
+     "outcome": {
+      "survived": false,
+      "fell": true,
+      "time_s": 1.8,
+      "distance": 0.904,
+      "min_clearance": 0.1854,
+      "min_upright": 0.3487,
+      "mean_speed": 0.502,
+      "progress_ok": false,
+      "passed": false,
+      "margin": -0.91
+     },
+     "severity": 0.8818,
+     "score": -0.2045741809166326,
+     "cell": "latency|3",
+     "stressor": "latency",
+     "seed": 4948
+    }
+   },
+   "history": [
+    {
+     "generation": 0,
+     "best_score": -0.10627009298336376,
+     "fail_rate": 0.5,
+     "atlas_cells": 6
+    },
+    {
+     "generation": 1,
+     "best_score": -0.3855911777973384,
+     "fail_rate": 0.375,
+     "atlas_cells": 7
+    },
+    {
+     "generation": 2,
+     "best_score": -0.3035322681907404,
+     "fail_rate": 0.5833333333333334,
+     "atlas_cells": 10
+    },
+    {
+     "generation": 3,
+     "best_score": -0.333660949037234,
+     "fail_rate": 0.5,
+     "atlas_cells": 11
+    },
+    {
+     "generation": 4,
+     "best_score": -0.3835567627461274,
+     "fail_rate": 0.7083333333333334,
+     "atlas_cells": 13
+    }
+   ]
+  },
+  "card": {
+   "score": 77.8,
+   "grade": "SUPERVISED",
+   "verdict": "Cleared for supervised trials with a spotter and kill switch.",
+   "margin_index": 0.572,
+   "nominal_pass_rate": 1.0,
+   "nominal_trials": 24,
+   "nominal_failures": 0,
+   "failure_rate_upper_95": 0.1173,
+   "mild_failure_modes": 1,
+   "weakest_axes": [
+    "Push from left",
+    "Action latency",
+    "Push from right"
+   ]
+  },
+  "_dir_fixed": true
+ }
+]
