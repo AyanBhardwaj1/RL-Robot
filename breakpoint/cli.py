@@ -422,14 +422,19 @@ def cmd_episodes(a: argparse.Namespace) -> int:
 
 
 def cmd_chunking(a: argparse.Namespace) -> int:
-    from .chunking import chunking_table, to_text
+    from .chunking import chunking_table, chunking_tables, to_text
 
     try:
-        table = chunking_table(tuple(float(x) for x in a.chunks.split(",")), a.inference_ms, a.body)
+        chunks = tuple(float(x) for x in a.chunks.split(","))
+        if a.body == "all":
+            table = chunking_tables(chunks, a.inference_ms)
+            print("\n\n".join(to_text(t) for t in table["bodies"].values()))
+        else:
+            table = chunking_table(chunks, a.inference_ms, a.body)
+            print(to_text(table))
     except ValueError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
-    print(to_text(table))
     if a.out:
         Path(a.out).parent.mkdir(parents=True, exist_ok=True)
         Path(a.out).write_text(json.dumps(table, indent=1))
@@ -591,7 +596,7 @@ def main(argv: list[str] | None = None) -> int:
     ch = sub.add_parser("chunking", help="what open-loop action chunks (VLA-style policies) cost in push recovery")
     ch.add_argument("--chunks", default="0,50,100,200,400", help="chunk lengths in ms, comma-separated")
     ch.add_argument("--inference-ms", type=float, default=50.0)
-    ch.add_argument("--body", default="biped", help="biped, wheeled or wheel-legged")
+    ch.add_argument("--body", default="all", help="biped, wheeled, wheel-legged or all (default)")
     ch.add_argument("--out")
     ch.set_defaults(fn=cmd_chunking)
 

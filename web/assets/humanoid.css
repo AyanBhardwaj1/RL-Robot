@@ -96,3 +96,5 @@
 .hum-index a:focus-visible { background: var(--char-3); outline: 2px solid var(--orange); outline-offset: -2px; }
 .hum-index a[aria-current="true"] { background: var(--orange); color: var(--ink-on-orange); }
 #lab, .hum-cap h2, .hum-jobs h2, .hum-how h2 { scroll-margin-top: 70px; }
+.chunk-bodies { display: flex; flex-wrap: wrap; gap: 8px; }
+.chunk-bodies button[aria-pressed="true"] { background: var(--orange); color: var(--ink-on-orange); }

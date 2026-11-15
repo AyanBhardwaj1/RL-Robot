@@ -63,6 +63,13 @@ def chunking_table(chunks_ms=(0, 50, 100, 200, 400), inference_ms: float = 50.0,
     return {"body": body, "inference_ms": inference_ms, "no_delay": envelope_at(0.0), "rows": rows}
 
 
+def chunking_tables(chunks_ms=(0, 50, 100, 200, 400), inference_ms: float = 50.0,
+                    cond: Conditions = Conditions()) -> dict:
+    """The chunking table for every body the lab compares, keyed by body name."""
+    return {"inference_ms": inference_ms,
+            "bodies": {name: chunking_table(chunks_ms, inference_ms, name, cond) for name in BODIES}}
+
+
 def to_text(t: dict) -> str:
     nd = t["no_delay"]
     lines = [(f"Action chunking vs push recovery · {t['body']} · inference {t['inference_ms']:.0f} ms "

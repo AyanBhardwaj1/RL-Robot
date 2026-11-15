@@ -348,3 +348,13 @@ def test_zero_friction_does_not_crash_the_wheeled_bodies():
         assert recover_wheeled(0.0, 0.0, BODIES[name], Conditions(friction=0.0)).recovered  # standing still is fine
         assert not recover_wheeled(30.0, 0.0, BODIES[name], Conditions(friction=0.0)).recovered  # any shove slips
         assert breaking_point(0.0, BODIES[name], Conditions(friction=0.0)) == 0.0
+
+
+def test_chunking_tables_cover_every_body():
+    from breakpoint.chunking import chunking_tables
+    from breakpoint.humanoid import BODIES
+
+    t = chunking_tables(chunks_ms=(0, 200), inference_ms=50)
+    assert list(t["bodies"]) == list(BODIES)
+    worst = {n: b["rows"][1]["worst"]["front"] for n, b in t["bodies"].items()}  # 200 ms chunks, worst moment
+    assert worst["wheel-legged"] > worst["biped"]  # the drive corrects late; a foot must be placed in time
