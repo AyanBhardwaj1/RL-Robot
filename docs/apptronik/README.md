@@ -52,9 +52,9 @@ originals before quoting it**. Items marked *(unverified)* came from a single ag
 
 | Team | What the postings ask for | Where Breakpoint shows it |
 |---|---|---|
-| Controls / motion control and planning | Whole-body control (OSC, QP, MPC), state estimation, real-time C++ and Python, RL in sim deployed to hardware | `breakpoint/humanoid.py` (capture-point push recovery), `/humanoid` lab |
+| Controls / motion control and planning | Whole-body control (OSC, QP, MPC), state estimation, real-time C++ and Python, RL in sim deployed to hardware | `breakpoint/humanoid.py` (capture-point push recovery for a biped, a wheeled base and a wheel-legged hybrid), `cpp/capture_point.hpp` (all three, allocation-free), `/humanoid` lab |
 | Simulation | MuJoCo (the most-cited simulator), Isaac Sim/Lab, contact models, domain randomization, MJCF/URDF | `world.py`, `env.py`, the scenario schema |
-| Robot learning / foundation models | RL, imitation learning, VLAs, transformers | numpy PPO, hardening loop, honest training results |
+| Robot learning / foundation models | RL, imitation learning, VLAs, transformers | numpy PPO, hardening loop, honest training results; `breakpoint/chunking.py`: what a VLA's open-loop action chunks cost in push recovery, synchronous vs real-time chunking |
 | ML systems / ML Ops | Profiling, quantizing, distilling RL and VLA policies for onboard compute; ONNX, TensorRT | `quantize.py`: INT8 is 3.6× smaller with no readiness loss |
 | Perception | Detection, SLAM, sensor fusion, ROS 2, edge GPUs | photo-to-scenario, sensor-noise axis |
 | Embedded / firmware | Motor control (FOC), EtherCAT, CAN, embedded Linux | latency and actuator-strength axes; C++17 controller and real-time loop benchmark |
