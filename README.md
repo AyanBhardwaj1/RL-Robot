@@ -57,6 +57,8 @@ and the browser lab at `/humanoid`):
   steps up to 15 cm. It holds 95 N·s from the front and 91 from the side, and in this model it finishes
   every job except home-care routes with stairs over 15 cm. A two-wheeled self-balancing design is not
   modelled: it would need its own pendulum-on-wheels controller, not a static footprint.
+- **Reach** (`--reach`, and a slider in the lab). Holding a tote further out shifts the centre of mass
+  forward: with 20 kg, from 20 to 45 cm, front shoves get easier and rear shoves harder (87 → 71 N·s).
 - **Action chunking** (`python -m breakpoint chunking`). Physical-AI policies often run a chunk of actions
   open-loop, so a shove mid-chunk waits for the next one. With 50 ms inference, 400 ms synchronous chunks
   cut the biped's front limit from 92 to 22 N·s when the shove lands at the worst moment; real-time

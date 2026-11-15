@@ -18,8 +18,13 @@ Balance-based controllers on 12-DoF wheel-legged robots have climbed far higher 
 [arXiv:2109.09934](https://arxiv.org/pdf/2109.09934)), so 15 cm is a conservative, learned-controller figure.
 
 Not modelled yet: a two-wheeled self-balancing body (it is a pendulum on wheels with no static footprint
-fore and aft, and needs its own controller model), and mobile manipulators, where an arm's motion shifts
-the centre of mass during a task.
+fore and aft, and needs its own controller model).
+
+**Mobile manipulation, first step.** A tote held further out shifts the combined centre of mass forward
+(`python -m breakpoint humanoid --payload 20 --reach 0.45`, and the "Held this far out" slider). With
+20 kg, moving it from 20 to 45 cm makes shoves from the front easier to survive and shoves from behind
+harder (87 → 71 N·s). The model holds the body still rather than leaning back, so the reach is capped at
+45 cm, past which the standing centre of mass would leave the foot.
 
 ## Stresses that come from the AI, not the floor
 
@@ -49,5 +54,6 @@ tags recorded demonstrations whose lag or near-falls would teach a policy the wr
 ## Next
 
 - A pendulum-on-wheels model for two-wheeled self-balancing robots.
-- A centre-of-mass disturbance from arm motion, so a mobile manipulator's own reach is a stress axis.
+- Arm motion during a task (a moving centre of mass), not just a static reach, and the lean-back a real
+  controller uses to carry a load far out.
 - Chunking with the policy's own inference-time distribution (measured, not a constant).
