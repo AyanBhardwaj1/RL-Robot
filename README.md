@@ -22,6 +22,9 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
   held equal by tests: side shoves are the biped's weak spot (44 vs 92 N·s from the front); a wheeled
   base survives 2.7× more from the side but fails 45% of home-care routes; a wheel-legged hybrid climbs
   what stops the wheels.
+- What an AI policy's own action chunks cost: if a VLA-style policy closes the balance loop itself, 400 ms
+  open-loop chunks cut the biped's front limit from 92 to 19 N·s at the worst moment; real-time chunking
+  keeps 67 (`breakpoint chunking`, with sources in `docs/research/`).
 - Paired design levers with a sign test: a 15% faster swing saves 25 of 750 sampled shifts and loses
   none; 25% more ankle torque saves none.
 - Seven independent code reviews, 57 findings fixed with regression tests, several of which made the
