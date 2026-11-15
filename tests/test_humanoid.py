@@ -322,3 +322,9 @@ def test_action_chunking_costs_reaction_time_and_realtime_chunking_recovers_it()
     assert t["no_delay"]["front"] > sync0["worst"]["front"] > sync400["worst"]["front"]
     assert rt["worst"]["front"] > sync400["worst"]["front"]
     assert sync400["worst"]["side"] <= sync400["median"]["side"]
+
+
+def test_holding_a_tote_further_out_trades_rear_for_front_robustness():
+    near, far = Conditions(payload_kg=20.0, payload_reach=0.2), Conditions(payload_kg=20.0, payload_reach=0.45)
+    assert breaking_point(0.0, cond=far) < breaking_point(0.0, cond=near)  # shoved from behind: worse
+    assert breaking_point(180.0, cond=far) > breaking_point(180.0, cond=near)  # shoved from the front: better

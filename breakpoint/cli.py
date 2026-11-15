@@ -336,7 +336,7 @@ def cmd_certify(a: argparse.Namespace) -> int:
 def cmd_humanoid(a: argparse.Namespace) -> int:
     from .humanoid import BODIES, JOBS, Conditions, envelope, job_risk
 
-    cond = Conditions(payload_kg=a.payload, friction=a.friction, latency_s=a.latency_ms / 1000.0)
+    cond = Conditions(payload_kg=a.payload, payload_reach=a.reach, friction=a.friction, latency_s=a.latency_ms / 1000.0)
     bodies = BODIES
     out = {"conditions": cond.to_dict(), "envelope": {}, "jobs": {}}
     print(f"Push-recovery envelope (largest survivable shove, N·s) · payload {a.payload} kg, μ {a.friction}, "
@@ -599,6 +599,7 @@ def main(argv: list[str] | None = None) -> int:
 
     hu = sub.add_parser("humanoid", help="humanoid push recovery: biped vs wheeled envelopes and job odds")
     hu.add_argument("--payload", type=float, default=0.0, help="tote held in front (kg)")
+    hu.add_argument("--reach", type=float, default=0.35, help="how far in front of the body the tote is held (m)")
     hu.add_argument("--friction", type=float, default=0.8)
     hu.add_argument("--latency-ms", type=float, default=0.0)
     hu.add_argument("--trials", type=int, default=200)
