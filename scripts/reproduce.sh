@@ -41,3 +41,4 @@ python -m breakpoint hazards  --out runs/humanoid/hazards.md
 python -m breakpoint design   --trials 150 --out runs/humanoid/levers.json
 python -m breakpoint fleet    --log runs/fleet/tote-handling.jsonl --out runs/fleet/tote-handling.json
 python -m breakpoint episodes --demo 200 --write-demo runs/episodes/teleop-demo.jsonl --out runs/episodes/teleop-demo.json
+python -m breakpoint chunking --out runs/humanoid/chunking.json

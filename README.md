@@ -57,6 +57,10 @@ and the browser lab at `/humanoid`):
   steps up to 15 cm. It holds 95 N·s from the front and 91 from the side, and in this model it finishes
   every job except home-care routes with stairs over 15 cm. A two-wheeled self-balancing design is not
   modelled: it would need its own pendulum-on-wheels controller, not a static footprint.
+- **Action chunking** (`python -m breakpoint chunking`). Physical-AI policies often run a chunk of actions
+  open-loop, so a shove mid-chunk waits for the next one. With 50 ms inference, 400 ms synchronous chunks
+  cut the biped's front limit from 92 to 22 N·s when the shove lands at the worst moment; real-time
+  chunking (arXiv:2506.07339) keeps it at 67. Notes and sources: `docs/research/physical-ai-and-morphologies.md`.
 - **Odds by job** (150 sampled shifts each):
 
   | Job | Biped | Wheeled | Wheel-legged |
@@ -184,7 +188,7 @@ hand-written backprop, and that backprop is checked against finite differences i
 | `episodes.py` | Teleop demonstration filter: replays each recorded contact through the humanoid model at the latency measured at that moment and tags the episode clean, lag (a stall or a blind link), near-fall (25% harder would fall) or fall. |
 | `hazards.py` | Hazard log with measured frequencies, 95% bounds, a risk matrix, mitigations and verify commands. |
 | `quantize.py` | FP16 and INT8 policy compression, profiled and re-audited for robustness. |
-| `cli.py` | 17 commands: `compile`, `run`, `train`, `audit`, `harden`, `regress`, `deploy`, `redteam`, `leaderboard`, `serve`, `certify`, `quantize`, and for the humanoid lab `humanoid`, `hazards`, `design`, `fleet` and `episodes`. `certify` writes a traceable readiness certificate (policy SHA-256, toolchain versions, git commit, scorecard, margins, deployment risk, search budget) and exits non-zero below `--min-score`. |
+| `cli.py` | 18 commands: `compile`, `run`, `train`, `audit`, `harden`, `regress`, `deploy`, `redteam`, `leaderboard`, `serve`, `certify`, `quantize`, and for the humanoid lab `humanoid`, `hazards`, `design`, `fleet`, `episodes` and `chunking`. `certify` writes a traceable readiness certificate (policy SHA-256, toolchain versions, git commit, scorecard, margins, deployment risk, search budget) and exits non-zero below `--min-score`. |
 | `server.py`, `static/` | FastAPI and a three.js playground. You can compile a scenario, watch the replay, or use **Shove mode**, where you push the robot live over a WebSocket and score how much impulse it absorbs before it falls. A **ghost** mode replays a second policy as a translucent overlay in the same world. |
 
 ## Quick start
@@ -205,6 +209,7 @@ python -m breakpoint humanoid --latency-ms 150     # humanoid: biped vs wheeled 
 python -m breakpoint design                        # which spec change buys the most robustness (paired)
 python -m breakpoint hazards                       # hazard log with measured frequencies
 python -m breakpoint episodes --demo 200           # tag teleop demonstrations: clean, lag, near-fall, fall
+python -m breakpoint chunking                      # what open-loop action chunks cost in push recovery
 python -m breakpoint fleet --demo "tote handling"  # fit a site profile from shift telemetry, re-run odds
 python -m breakpoint quantize --policy runs/v2field/policy_v2field.npz --gated   # INT8 with a robustness check
 cmake -S cpp -B build-cpp && cmake --build build-cpp && ./build-cpp/breakpoint_cp bench 2   # C++ controller

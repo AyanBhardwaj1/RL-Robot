@@ -308,3 +308,17 @@ def test_wheel_legged_climbs_what_the_wheeled_base_cannot():
     # smaller and lighter than the wheeled base, but far steadier sideways than the biped
     side = {n: breaking_point(-90.0, b) for n, b in BODIES.items()}
     assert side["biped"] < side["wheel-legged"] < side["wheeled"]
+
+
+def test_action_chunking_costs_reaction_time_and_realtime_chunking_recovers_it():
+    from breakpoint.chunking import chunking_table, reaction_delay_ms
+
+    assert reaction_delay_ms(200, 50, 0.5, realtime=False) == 150
+    assert reaction_delay_ms(200, 50, 0.5, realtime=True) == 75  # re-plans every inference, not every chunk
+    with pytest.raises(ValueError):
+        reaction_delay_ms(-1, 50, 0.5, False)
+    t = chunking_table(chunks_ms=(0, 400), inference_ms=50)
+    sync0, sync400, rt = t["rows"]
+    assert t["no_delay"]["front"] > sync0["worst"]["front"] > sync400["worst"]["front"]
+    assert rt["worst"]["front"] > sync400["worst"]["front"]
+    assert sync400["worst"]["side"] <= sync400["median"]["side"]

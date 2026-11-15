@@ -1,0 +1,94 @@
+{
+ "body": "biped",
+ "inference_ms": 50.0,
+ "no_delay": {
+  "front": 92.38,
+  "side": 44.34
+ },
+ "rows": [
+  {
+   "scheme": "synchronous",
+   "chunk_ms": 0.0,
+   "median": {
+    "delay_ms": 50.0,
+    "front": 78.66,
+    "side": 37.74
+   },
+   "worst": {
+    "delay_ms": 50.0,
+    "front": 78.66,
+    "side": 37.74
+   }
+  },
+  {
+   "scheme": "synchronous",
+   "chunk_ms": 50.0,
+   "median": {
+    "delay_ms": 75.0,
+    "front": 72.36,
+    "side": 34.72
+   },
+   "worst": {
+    "delay_ms": 100.0,
+    "front": 66.99,
+    "side": 32.13
+   }
+  },
+  {
+   "scheme": "synchronous",
+   "chunk_ms": 100.0,
+   "median": {
+    "delay_ms": 100.0,
+    "front": 66.99,
+    "side": 32.13
+   },
+   "worst": {
+    "delay_ms": 150.0,
+    "front": 57.03,
+    "side": 27.34
+   }
+  },
+  {
+   "scheme": "synchronous",
+   "chunk_ms": 200.0,
+   "median": {
+    "delay_ms": 150.0,
+    "front": 57.03,
+    "side": 27.34
+   },
+   "worst": {
+    "delay_ms": 250.0,
+    "front": 41.36,
+    "side": 19.82
+   }
+  },
+  {
+   "scheme": "synchronous",
+   "chunk_ms": 400.0,
+   "median": {
+    "delay_ms": 250.0,
+    "front": 41.36,
+    "side": 19.82
+   },
+   "worst": {
+    "delay_ms": 450.0,
+    "front": 21.73,
+    "side": 10.4
+   }
+  },
+  {
+   "scheme": "real-time",
+   "chunk_ms": null,
+   "median": {
+    "delay_ms": 75.0,
+    "front": 72.36,
+    "side": 34.72
+   },
+   "worst": {
+    "delay_ms": 100.0,
+    "front": 66.99,
+    "side": 32.13
+   }
+  }
+ ]
+}
