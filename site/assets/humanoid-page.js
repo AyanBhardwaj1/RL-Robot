@@ -13,7 +13,7 @@
   const fitScale = () => { SCALE = canvas.clientWidth && canvas.clientWidth < 600 ? 380 : 260; };
   fitScale();
   window.addEventListener("resize", () => { fitScale(); if (last.result) play(last.result); });
-  const COLORS = { ground: "#17161b", grid: "#221f27", foot: "#5d5866", footNew: "#8a8494", com: "#f3eee8", cp: "#f47b25", push: "#f99a55", base: "#3a3641" };
+  const COLORS = { ground: "#17161b", grid: "#221f27", foot: "#5d5866", footNew: "#8a8494", com: "#f3eee8", cp: "#f47b25", push: "#f99a55", base: "#3a3641", wheel: "#8a8494" };
   let anim = null;
   let shownCom = null; // screen position of the drawn centre of mass, for click-to-shove
   let last = { dir: -90, result: null };
@@ -56,8 +56,18 @@
       const W = bodyKind() === "wheel-legged" ? H.WHEEL_LEGGED : H.WHEELED;
       const b = res.footsteps.length ? res.footsteps[Math.max(0, Math.min(k, res.footsteps.length - 1))] : [0, 0, 0];
       const [cx, cy] = toScreen(b[1], b[2], origin);
+      const hw = W.half_width * SCALE, hl = W.half_length * SCALE, legged = W === H.WHEEL_LEGGED;
+      const wr = Math.max(7, 0.045 * SCALE); // wheel half-length on screen
+      // wheels (or wheel-feet) at the four corners; the hybrid's legs reach out to them
+      const wheels = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => [cx + sx * (hw + (legged ? 10 : 0)), cy + sy * (hl + (legged ? 6 : 0))]);
+      if (legged) {
+        ctx.strokeStyle = COLORS.wheel; ctx.lineWidth = 5; ctx.lineCap = "round";
+        wheels.forEach(([wx, wy]) => { ctx.beginPath(); ctx.moveTo(cx + Math.sign(wx - cx) * hw * 0.6, cy + Math.sign(wy - cy) * hl * 0.6); ctx.lineTo(wx, wy); ctx.stroke(); });
+      }
       ctx.fillStyle = COLORS.base;
-      ctx.fillRect(cx - W.half_width * SCALE, cy - W.half_length * SCALE, 2 * W.half_width * SCALE, 2 * W.half_length * SCALE);
+      ctx.fillRect(cx - hw, cy - hl, 2 * hw, 2 * hl);
+      ctx.fillStyle = COLORS.wheel;
+      wheels.forEach(([wx, wy]) => ctx.fillRect(wx - 5, wy - wr, 10, 2 * wr));
     } else {
       // starting stance: two feet
       const bp = biped(); // drawn with the design levers applied, so a longer foot shows
@@ -68,15 +78,26 @@
       }
       res.footsteps.filter((f) => f[0] <= t + 1e-9).forEach((f, i) => {
         const [fx, fy] = toScreen(f[1], f[2], origin);
+        const since = t - f[0]; // a touchdown ripple for the first 0.35 s after the foot lands
+        if (since < 0.35) {
+          const u = since / 0.35, grow = 4 + 26 * (1 - (1 - u) ** 3);
+          ctx.strokeStyle = `rgba(244,123,37,${(1 - u).toFixed(3)})`; ctx.lineWidth = 3;
+          ctx.strokeRect(fx - fw - grow, fy - fl - grow, 2 * (fw + grow), 2 * (fl + grow));
+        }
         ctx.fillStyle = COLORS.footNew; ctx.fillRect(fx - fw, fy - fl, 2 * fw, 2 * fl);
         ctx.fillStyle = COLORS.ground; ctx.font = "800 18px Schibsted Grotesk, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(String(i + 1), fx, fy);
       });
     }
-    // centre-of-mass trail
-    ctx.strokeStyle = COLORS.com; ctx.lineWidth = 3; ctx.beginPath();
-    res.com.slice(0, k + 1).forEach((p, i) => { const [sx, sy] = toScreen(p[1], p[2], origin); if (i) ctx.lineTo(sx, sy); else ctx.moveTo(sx, sy); });
-    ctx.stroke();
+    // centre-of-mass trail: recent path bright, older path fading out
+    const trail = res.com.slice(0, k + 1);
+    ctx.lineWidth = 3; ctx.lineCap = "butt"; // butt caps: no beads where translucent segments overlap
+    for (let i = 1; i < trail.length; i++) {
+      const age = t - trail[i][0];
+      ctx.strokeStyle = `rgba(243,238,232,${Math.max(0.18, 1 - age / 1.2).toFixed(3)})`;
+      const [ax, ay] = toScreen(trail[i - 1][1], trail[i - 1][2], origin), [bx, by] = toScreen(trail[i][1], trail[i][2], origin);
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    }
     if (res.com.length) {
       const c = res.com[Math.min(k, res.com.length - 1)];
       const [sx, sy] = toScreen(c[1], c[2], origin);
@@ -84,7 +105,12 @@
       ctx.fillStyle = COLORS.com; ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.fill();
       const cp = res.capture[Math.min(k, res.capture.length - 1)];
       const [px, py] = toScreen(cp[1], cp[2], origin);
+      // tether: the capture point leads the centre of mass; the stepping chases it
+      ctx.strokeStyle = COLORS.cp; ctx.lineWidth = 2; ctx.setLineDash([6, 5]);
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(px, py); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = COLORS.cp; ctx.beginPath(); ctx.arc(px, py, 9, 0, Math.PI * 2); ctx.fill();
+      // redraw the body on top of the tether
+      ctx.fillStyle = COLORS.com; ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.fill();
     } else {
       const [sx, sy] = toScreen(0, 0, origin);
       shownCom = [sx, sy];
@@ -95,12 +121,16 @@
       const a = last.dir * Math.PI / 180;
       const [ex, ey] = toScreen(0, 0, origin);
       const len = 70 + Math.min(1, +$("#imp").value / 200) * 110;
-      const sx = ex - (-Math.sin(a)) * (len + 30), sy = ey - (-Math.cos(a)) * (len + 30);
-      const tx = ex - (-Math.sin(a)) * 30, ty = ey - (-Math.cos(a)) * 30;
+      // ease in over the first 0.12 s (the arrow strikes), then fade out by 0.4 s
+      const strike = 1 - (1 - Math.min(1, t / 0.12)) ** 3, gap = 30 + (1 - strike) * 60;
+      ctx.globalAlpha = t < 0.12 ? 1 : Math.max(0, 1 - (t - 0.12) / 0.28);
+      const sx = ex - (-Math.sin(a)) * (len + gap), sy = ey - (-Math.cos(a)) * (len + gap);
+      const tx = ex - (-Math.sin(a)) * gap, ty = ey - (-Math.cos(a)) * gap;
       ctx.strokeStyle = COLORS.push; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(tx, ty); ctx.stroke();
       const hd = Math.atan2(ty - sy, tx - sx);
       ctx.fillStyle = COLORS.push; ctx.beginPath(); ctx.moveTo(tx + Math.cos(hd) * 6, ty + Math.sin(hd) * 6);
       ctx.lineTo(tx - Math.cos(hd - 0.5) * 26, ty - Math.sin(hd - 0.5) * 26); ctx.lineTo(tx - Math.cos(hd + 0.5) * 26, ty - Math.sin(hd + 0.5) * 26); ctx.fill();
+      ctx.globalAlpha = 1;
     }
     ctx.fillStyle = COLORS.com; ctx.font = "600 20px Schibsted Grotesk, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "top";
     ctx.fillText(`t ${t.toFixed(2)} s`, 18, 16);
