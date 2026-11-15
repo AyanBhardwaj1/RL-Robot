@@ -355,6 +355,11 @@
       });
     }, { rootMargin: "-80px 0px -60% 0px" });
     byId.forEach((_, id) => { const el = document.getElementById(id); if (el) io.observe(id === "lab" ? el : el.closest("section") || el); });
+    // above the lab (back at the intro), nothing is current
+    const lab = document.getElementById("lab");
+    window.addEventListener("scroll", () => {
+      if (lab && lab.getBoundingClientRect().top > 140) indexLinks.forEach((l) => l.removeAttribute("aria-current"));
+    }, { passive: true });
   }
 
   // ---------- shareable scenario links: the controls live in the query string ----------

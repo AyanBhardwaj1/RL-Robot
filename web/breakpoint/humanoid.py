@@ -358,7 +358,8 @@ def recover_wheeled(impulse: float, direction_deg: float, base: WheeledBase = Wh
             rec.capture.append((round(t, 3), round(float(xi[0]), 4), round(float(xi[1]), 4)))
             rec.footsteps.append((round(t, 3), round(float(b[0]), 4), round(float(b[1]), 4), 2))
         xi_rel = x + v / w + bias - b
-        if np.any(np.abs(xi_rel) > half + base.max_speed ** 2 / (2 * accel) + 0.25):
+        # with no traction (friction 0) the drive cannot brake at all: no finite stopping room, no tip check
+        if accel > 0 and np.any(np.abs(xi_rel) > half + base.max_speed ** 2 / (2 * accel) + 0.25):
             rec.reason = "tipped over: the base could not drive under the capture point"
             break
         if float(np.linalg.norm(v)) < 0.02 and float(np.linalg.norm(bv)) < 0.02 and np.all(np.abs(xi_rel) <= half) and t > 0.3:

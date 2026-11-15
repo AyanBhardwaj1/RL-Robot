@@ -92,6 +92,7 @@
 .hum-index::-webkit-scrollbar { display: none; }
 .hum-index a { flex: 0 0 auto; padding: 8px 12px; background: var(--char-2); color: var(--ink-on-dark); text-decoration: none;
   font: 600 var(--step-small) "Schibsted Grotesk", sans-serif; white-space: nowrap; }
-.hum-index a:hover, .hum-index a:focus-visible { background: var(--char-3); outline: none; }
+.hum-index a:hover { background: var(--char-3); }
+.hum-index a:focus-visible { background: var(--char-3); outline: 2px solid var(--orange); outline-offset: -2px; }
 .hum-index a[aria-current="true"] { background: var(--orange); color: var(--ink-on-orange); }
 #lab, .hum-cap h2, .hum-jobs h2, .hum-how h2 { scroll-margin-top: 70px; }

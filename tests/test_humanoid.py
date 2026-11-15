@@ -338,3 +338,13 @@ def test_slider_corner_stands_without_stepping_and_cli_refuses_impossible_reach(
     corner = recover(0.0, 0.0, Humanoid(), Conditions(payload_kg=25.0, payload_reach=0.4))
     assert corner.recovered and corner.steps == 0
     assert main(["humanoid", "--payload", "25", "--reach", "0.45", "--trials", "1"]) == 2
+
+
+def test_zero_friction_does_not_crash_the_wheeled_bodies():
+    """Regression: with no traction the tip-over threshold divided by zero (review finding)."""
+    from breakpoint.humanoid import BODIES
+
+    for name in ("wheeled", "wheel-legged"):
+        assert recover_wheeled(0.0, 0.0, BODIES[name], Conditions(friction=0.0)).recovered  # standing still is fine
+        assert not recover_wheeled(30.0, 0.0, BODIES[name], Conditions(friction=0.0)).recovered  # any shove slips
+        assert breaking_point(0.0, BODIES[name], Conditions(friction=0.0)) == 0.0

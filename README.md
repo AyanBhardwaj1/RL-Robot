@@ -27,7 +27,7 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
   keeps 67 (`breakpoint chunking`, with sources in `docs/research/`).
 - Paired design levers with a sign test: a 15% faster swing saves 25 of 750 sampled shifts and loses
   none; 25% more ankle torque saves none.
-- Seven independent code reviews, 57 findings fixed with regression tests, several of which made the
+- Eight independent code reviews, 62 findings fixed with regression tests, several of which made the
   results less flattering. They are written up below.
 
 ![playground](docs/playground.png)

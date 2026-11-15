@@ -152,7 +152,8 @@
     const delay = ticks(cond.latency_s + base.reaction_s);
     const hist = [];
     let t = 0, i = 0;
-    const tipX = hx + base.max_speed ** 2 / (2 * accel) + 0.25, tipY = hy + base.max_speed ** 2 / (2 * accel) + 0.25;
+    // with no traction (friction 0) there is no finite stopping room: no tip check (as in humanoid.py)
+    const tipX = accel > 0 ? hx + base.max_speed ** 2 / (2 * accel) + 0.25 : Infinity, tipY = accel > 0 ? hy + base.max_speed ** 2 / (2 * accel) + 0.25 : Infinity;
     while (t < horizon) {
       const xix = x + vx / w + biasX, xiy = y + vy / w;
       hist.push([xix - bx, xiy - by]);

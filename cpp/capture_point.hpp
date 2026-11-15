@@ -226,7 +226,8 @@ class WheeledController {
     const double a = direction_deg * kPi / 180.0;
     v_ = Vec2{std::cos(a), std::sin(a)} * (impulse / m);
     half_ = {base.half_length, base.half_width};
-    const double room = base.max_speed * base.max_speed / (2.0 * accel_) + 0.25;
+    // with no traction (friction 0) there is no finite stopping room: no tip check (as in humanoid.py)
+    const double room = accel_ > 0 ? base.max_speed * base.max_speed / (2.0 * accel_) + 0.25 : 1e300;
     tip_ = {half_.x + room, half_.y + room};
     delay_ = static_cast<std::size_t>(std::max(0.0, std::floor((c.latency_s + base.reaction_s) / kDt + 0.5)));
     ring_.assign(delay_ + 1, Vec2{});

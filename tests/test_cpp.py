@@ -75,3 +75,10 @@ def test_cpp_wheeled_bodies_match_python(binary, body, imp, deg, lat, payload, m
     assert got["recovered"] == py.recovered, (got, py.reason)
     assert got["reason"].split()[0].rstrip(":") == py.reason.split()[0].rstrip(":")  # came / tipped / slipped / still: same outcome
     assert got["time_s"] == pytest.approx(py.time_s, abs=0.003)
+
+
+def test_cpp_cli_rejects_bad_bench_and_body_arguments(binary):
+    for args in (["bench", "0"], ["bench", "wheeled"], ["bench", "1", "bogus"], ["recover-wheeled", "10", "0", "0", "0", "0.8", "bogus"]):
+        assert subprocess.run([str(binary), *args], capture_output=True, text=True, timeout=30, check=False).returncode == 2, args
+    got = run(binary, "recover-wheeled", 0, 0, 0, 0, 0.0, "wheeled")  # zero friction: no division by zero
+    assert got["recovered"] is True

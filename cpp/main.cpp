@@ -37,7 +37,12 @@ int main(int argc, char** argv) {
   }
   if (!std::strcmp(argv[1], "recover-wheeled") && argc >= 4) {
     // recover-wheeled <impulse> <direction_deg> [latency_s] [payload_kg] [friction] [wheeled|wheel-legged]
-    const WheeledBase base = (argc > 7 && !std::strcmp(argv[7], "wheel-legged")) ? wheel_legged() : WheeledBase{};
+    const char* name = argc > 7 ? argv[7] : "wheeled";
+    if (std::strcmp(name, "wheeled") && std::strcmp(name, "wheel-legged")) {
+      std::fprintf(stderr, "unknown body %s: use wheeled or wheel-legged\n", name);
+      return 2;
+    }
+    const WheeledBase base = !std::strcmp(name, "wheel-legged") ? wheel_legged() : WheeledBase{};
     const Result r = recover_wheeled(std::atof(argv[2]), std::atof(argv[3]), base, cond_from(argc, argv, 4));
     std::printf("{\"recovered\": %s, \"steps\": %d, \"reason\": \"%s\", \"time_s\": %.3f}\n",
                 r.recovered ? "true" : "false", r.steps, r.reason.c_str(), r.time_s);
@@ -60,6 +65,14 @@ int main(int argc, char** argv) {
     std::vector<double> step_us, jitter_us;
     // bench [seconds] [biped|wheeled|wheel-legged]: the same 60 N·s shove from the left on the chosen body
     const char* body = argc > 3 ? argv[3] : "biped";
+    if (std::strcmp(body, "biped") && std::strcmp(body, "wheeled") && std::strcmp(body, "wheel-legged")) {
+      std::fprintf(stderr, "unknown body %s: use biped, wheeled or wheel-legged\n", body);
+      return 2;
+    }
+    if (!(seconds > 0)) {
+      std::fprintf(stderr, "bench needs a positive number of seconds, e.g. bench 2 %s\n", body);
+      return 2;
+    }
     const bool wheels = !std::strcmp(body, "wheeled") || !std::strcmp(body, "wheel-legged");
     const WheeledBase base = !std::strcmp(body, "wheel-legged") ? wheel_legged() : WheeledBase{};
     CapturePointController ctl(60.0, -90.0);
