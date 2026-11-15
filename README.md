@@ -18,8 +18,8 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
 
 - A latency gate, not more training, took the best quadruped policy from 10% to 0 of 60 falls under
   teleoperation lag (readiness 84.1, up from 66.8 for its bare gait).
-- A full-size humanoid lab in Python, the browser and allocation-free C++17, held equal by tests,
-  comparing three bodies: side shoves are the biped's weak spot (44 vs 92 N·s from the front); a wheeled
+- A full-size humanoid lab comparing three bodies, in Python and the browser (the biped also in
+  allocation-free C++17), held equal by tests: side shoves are the biped's weak spot (44 vs 92 N·s from the front); a wheeled
   base survives 2.7× more from the side but fails 45% of home-care routes; a wheel-legged hybrid climbs
   what stops the wheels.
 - Paired design levers with a sign test: a 15% faster swing saves 25 of 750 sampled shifts and loses
@@ -58,11 +58,12 @@ and the browser lab at `/humanoid`):
   every job except home-care routes with stairs over 15 cm. A two-wheeled self-balancing design is not
   modelled: it would need its own pendulum-on-wheels controller, not a static footprint.
 - **Reach** (`--reach`, and a slider in the lab). Holding a tote further out shifts the centre of mass
-  forward: with 20 kg, from 20 to 45 cm, front shoves get easier and rear shoves harder (87 → 71 N·s).
+  forward: with 20 kg, from 20 to 40 cm, front shoves get easier and rear shoves harder (87 → 74 N·s).
 - **Action chunking** (`python -m breakpoint chunking`). Physical-AI policies often run a chunk of actions
-  open-loop, so a shove mid-chunk waits for the next one. With 50 ms inference, 400 ms synchronous chunks
-  cut the biped's front limit from 92 to 22 N·s when the shove lands at the worst moment; real-time
-  chunking (arXiv:2506.07339) keeps it at 67. Notes and sources: `docs/research/physical-ai-and-morphologies.md`.
+  open-loop, so a shove mid-chunk waits for the next one. If the chunked policy closes the balance loop
+  itself (real stacks usually keep a fast balance controller underneath), 400 ms synchronous chunks with
+  50 ms inference cut the biped's front limit from 92 to 19 N·s when the shove lands at the worst moment;
+  real-time chunking (arXiv:2506.07339) keeps it at 67. This measures the delay to the first reaction only. Notes and sources: `docs/research/physical-ai-and-morphologies.md`.
 - **Odds by job** (150 sampled shifts each):
 
   | Job | Biped | Wheeled | Wheel-legged |

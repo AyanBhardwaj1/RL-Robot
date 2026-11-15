@@ -10,20 +10,6 @@
    "scheme": "synchronous",
    "chunk_ms": 0.0,
    "median": {
-    "delay_ms": 50.0,
-    "front": 78.66,
-    "side": 37.74
-   },
-   "worst": {
-    "delay_ms": 50.0,
-    "front": 78.66,
-    "side": 37.74
-   }
-  },
-  {
-   "scheme": "synchronous",
-   "chunk_ms": 50.0,
-   "median": {
     "delay_ms": 75.0,
     "front": 72.36,
     "side": 34.72
@@ -36,7 +22,7 @@
   },
   {
    "scheme": "synchronous",
-   "chunk_ms": 100.0,
+   "chunk_ms": 50.0,
    "median": {
     "delay_ms": 100.0,
     "front": 66.99,
@@ -50,30 +36,44 @@
   },
   {
    "scheme": "synchronous",
-   "chunk_ms": 200.0,
+   "chunk_ms": 100.0,
    "median": {
-    "delay_ms": 150.0,
-    "front": 57.03,
-    "side": 27.34
+    "delay_ms": 125.0,
+    "front": 61.62,
+    "side": 29.54
    },
    "worst": {
-    "delay_ms": 250.0,
-    "front": 41.36,
-    "side": 19.82
+    "delay_ms": 200.0,
+    "front": 48.54,
+    "side": 23.29
+   }
+  },
+  {
+   "scheme": "synchronous",
+   "chunk_ms": 200.0,
+   "median": {
+    "delay_ms": 175.0,
+    "front": 52.78,
+    "side": 25.34
+   },
+   "worst": {
+    "delay_ms": 300.0,
+    "front": 35.21,
+    "side": 16.89
    }
   },
   {
    "scheme": "synchronous",
    "chunk_ms": 400.0,
    "median": {
-    "delay_ms": 250.0,
-    "front": 41.36,
-    "side": 19.82
+    "delay_ms": 275.0,
+    "front": 38.04,
+    "side": 18.21
    },
    "worst": {
-    "delay_ms": 450.0,
-    "front": 21.73,
-    "side": 10.4
+    "delay_ms": 500.0,
+    "front": 18.51,
+    "side": 8.84
    }
   },
   {

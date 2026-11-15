@@ -59,7 +59,7 @@
       const hw = W.half_width * SCALE, hl = W.half_length * SCALE, legged = W === H.WHEEL_LEGGED;
       const wr = Math.max(7, 0.045 * SCALE); // wheel half-length on screen
       // wheels (or wheel-feet) at the four corners; the hybrid's legs reach out to them
-      const wheels = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => [cx + sx * (hw + (legged ? 10 : 0)), cy + sy * (hl + (legged ? 6 : 0))]);
+      const wheels = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => [cx + sx * (hw + (legged ? 22 : 0)), cy + sy * (hl + (legged ? 14 : 0))]);
       if (legged) {
         ctx.strokeStyle = COLORS.wheel; ctx.lineWidth = 5; ctx.lineCap = "round";
         wheels.forEach(([wx, wy]) => { ctx.beginPath(); ctx.moveTo(cx + Math.sign(wx - cx) * hw * 0.6, cy + Math.sign(wy - cy) * hl * 0.6); ctx.lineTo(wx, wy); ctx.stroke(); });
@@ -79,7 +79,7 @@
       res.footsteps.filter((f) => f[0] <= t + 1e-9).forEach((f, i) => {
         const [fx, fy] = toScreen(f[1], f[2], origin);
         const since = t - f[0]; // a touchdown ripple for the first 0.35 s after the foot lands
-        if (since < 0.35) {
+        if (since < 0.35 && !reduced) {
           const u = since / 0.35, grow = 4 + 26 * (1 - (1 - u) ** 3);
           ctx.strokeStyle = `rgba(244,123,37,${(1 - u).toFixed(3)})`; ctx.lineWidth = 3;
           ctx.strokeRect(fx - fw - grow, fy - fl - grow, 2 * (fw + grow), 2 * (fl + grow));
@@ -117,7 +117,7 @@
       ctx.fillStyle = COLORS.com; ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.fill();
     }
     // the shove: an arrow arriving from the side it came from, for the first 0.4 s
-    if (t < 0.4 && last.result) {
+    if (t < 0.4 && last.result && !reduced) {
       const a = last.dir * Math.PI / 180;
       const [ex, ey] = toScreen(0, 0, origin);
       const len = 70 + Math.min(1, +$("#imp").value / 200) * 110;

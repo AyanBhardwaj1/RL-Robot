@@ -75,7 +75,7 @@
         <li>PPO with hand-written backprop in numpy (checked against finite differences), trained on one CPU core in about 4 minutes.</li>
         <li>Hardening loop: failures are found, shrunk to minimal tests, replayed in training; a checkpoint ships only if it beats the start.</li>
         <li>Honest results: one round took readiness 76.5 → 82.6; a second round overfit; latency could not be trained away, so a latency gate took teleop failures from 10% to 0%.</li>
-        <li><code>breakpoint/chunking.py</code>: what action chunking costs a VLA-style policy that gets shoved. With 50 ms inference, 400 ms synchronous chunks cut the biped’s front limit from 92 to 22 N·s at the worst moment; real-time chunking keeps it at 67.</li>
+        <li><code>breakpoint/chunking.py</code>: what action chunking costs a VLA-style policy that gets shoved. If the chunked policy closes the balance loop itself, 400 ms synchronous chunks with 50 ms inference cut the biped’s front limit from 92 to 19 N·s at the worst moment; real-time chunking keeps it at 67.</li>
       </ul>
       <h3>Next I’d build</h3>
       <p>Use the same audit as an evaluation harness for a learned manipulation policy: grasp success versus tote mass, friction and sensor delay.</p>

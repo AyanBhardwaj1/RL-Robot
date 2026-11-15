@@ -22,9 +22,10 @@ fore and aft, and needs its own controller model).
 
 **Mobile manipulation, first step.** A tote held further out shifts the combined centre of mass forward
 (`python -m breakpoint humanoid --payload 20 --reach 0.45`, and the "Held this far out" slider). With
-20 kg, moving it from 20 to 45 cm makes shoves from the front easier to survive and shoves from behind
-harder (87 → 71 N·s). The model holds the body still rather than leaning back, so the reach is capped at
-45 cm, past which the standing centre of mass would leave the foot.
+20 kg, moving it from 20 to 40 cm makes shoves from the front easier to survive and shoves from behind
+harder (87 → 74 N·s). The model holds the body still rather than leaning back, so the slider stops at
+40 cm (safe up to the 25 kg maximum), and the CLI refuses a load and reach that would put the standing
+centre of mass past the foot.
 
 ## Stresses that come from the AI, not the floor
 
@@ -35,16 +36,20 @@ current one runs and switches as soon as it is ready, which keeps the robot reac
 ([Black, Galliker and Levine, NeurIPS 2025, arXiv:2506.07339](https://arxiv.org/abs/2506.07339)).
 
 `python -m breakpoint chunking` turns each scheme into a reaction delay and reads the cost off the push
-envelope (biped, 50 ms inference):
+envelope (biped, 50 ms inference). A synchronous loop observes, infers for 50 ms and runs the chunk, so a
+shove at the worst moment waits a whole cycle plus inference. Read the table as *if the chunked policy
+closes the balance loop itself*: real humanoid stacks usually keep a fast balance controller underneath,
+which a chunk does not delay. It measures the first reaction only; afterwards the model re-plans every tick
+(optimistic) and has no joint stiffness while it waits (pessimistic).
 
 | Scheme | Wait for a shove at the worst moment | Front / side shove survived |
 |---|---|---|
 | No delay at all | 0 ms | 92 / 44 N·s |
-| Synchronous, 100 ms chunks | 150 ms | 57 / 27 N·s |
-| Synchronous, 400 ms chunks | 450 ms | 22 / 10 N·s |
+| Synchronous, 100 ms chunks | 200 ms | 49 / 23 N·s |
+| Synchronous, 400 ms chunks | 500 ms | 19 / 9 N·s |
 | Real-time chunking | 100 ms | 67 / 32 N·s |
 
-The wheel-legged hybrid loses far less (95 → 46 N·s from the front at 400 ms chunks), because its drive
+The wheel-legged hybrid loses far less (95 → 44 N·s from the front at 400 ms chunks), because its drive
 can correct late without needing a foot placed in time. The model measures reaction delay only; it says
 nothing about the smoothness at chunk boundaries that real-time chunking also fixes.
 

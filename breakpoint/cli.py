@@ -337,6 +337,11 @@ def cmd_humanoid(a: argparse.Namespace) -> int:
     from .humanoid import BODIES, JOBS, Conditions, envelope, job_risk
 
     cond = Conditions(payload_kg=a.payload, payload_reach=a.reach, friction=a.friction, latency_s=a.latency_ms / 1000.0)
+    biped = BODIES["biped"]
+    if a.payload > 0 and a.payload * a.reach / (biped.mass_kg + a.payload) > biped.foot_half_length:
+        print(f"error: {a.payload:g} kg held {a.reach:g} m out puts the standing centre of mass past the foot; the model "
+              "does not lean back to compensate, so pick a shorter reach or a lighter load", file=sys.stderr)
+        return 2
     bodies = BODIES
     out = {"conditions": cond.to_dict(), "envelope": {}, "jobs": {}}
     print(f"Push-recovery envelope (largest survivable shove, N·s) · payload {a.payload} kg, μ {a.friction}, "
@@ -462,7 +467,7 @@ def cmd_fleet(a: argparse.Namespace) -> int:
         print(f"  {k:<13} {p[k][0]:g} … {p[k][1]:g}")
     print(f"  contact rate  {p['push_prob']:.0%} of shifts · steps on {p['step_prob']:.0%} of routes")
     for body, r in res["odds"].items():
-        print(f"  {body:<8} fails {r['failure_rate']:.1%} (≤ {r['failure_rate_upper_95']:.1%})  causes {r['causes']}")
+        print(f"  {body:<12} fails {r['failure_rate']:.1%} (≤ {r['failure_rate_upper_95']:.1%})  causes {r['causes']}")
     if a.out:
         Path(a.out).parent.mkdir(parents=True, exist_ok=True)
         Path(a.out).write_text(json.dumps(res, indent=1))
@@ -597,7 +602,7 @@ def main(argv: list[str] | None = None) -> int:
     hz.add_argument("--fail-on-high", action="store_true", help="exit 1 if any hazard rates high")
     hz.set_defaults(fn=cmd_hazards)
 
-    hu = sub.add_parser("humanoid", help="humanoid push recovery: biped vs wheeled envelopes and job odds")
+    hu = sub.add_parser("humanoid", help="humanoid push recovery: biped, wheeled and wheel-legged envelopes and job odds")
     hu.add_argument("--payload", type=float, default=0.0, help="tote held in front (kg)")
     hu.add_argument("--reach", type=float, default=0.35, help="how far in front of the body the tote is held (m)")
     hu.add_argument("--friction", type=float, default=0.8)

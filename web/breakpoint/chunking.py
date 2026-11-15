@@ -4,16 +4,20 @@ Physical-AI policies (vision-language-action models and diffusion or flow polici
 of future actions and execute it open-loop. That buys smooth, temporally consistent motion, but a shove that
 lands in the middle of a chunk cannot be answered until the policy acts on a new observation:
 
-* **synchronous chunking**: the robot finishes the chunk (length H), then waits for inference (d) on the
-  next one. A shove at a uniformly random moment waits ``phase * H + d``, with ``phase`` in [0, 1).
+* **synchronous chunking**: observe, infer for d, execute the chunk (length H), repeat. A shove at a
+  uniformly random moment in that H + d cycle is first seen at the next observation and answered d later:
+  it waits ``phase * (H + d) + d``, with ``phase`` in [0, 1].
 * **real-time chunking**: the next chunk is generated while the current one runs and the robot switches
   as soon as it is ready (Black, Galliker and Levine, "Real-Time Execution of Action Chunking Flow
   Policies", NeurIPS 2025, arXiv:2506.07339). The policy re-plans every ``d``, so the wait is
   ``phase * d + d``.
 
 Here that wait is fed to the humanoid push-recovery model as control latency, so the cost of a chunking
-scheme is read straight off the push envelope. The model says nothing about the smoothness at chunk
-boundaries that real-time chunking also fixes; it only measures reaction delay.
+scheme is read straight off the push envelope. Read it as: *if the chunked policy closes the balance loop
+itself*, this is what the delay to its first reaction costs. Real humanoid stacks usually keep a fast
+low-level balance controller under the policy, which a chunk does not delay. After that first reaction
+the model re-plans every tick (optimistic), and while waiting it has no joint stiffness (pessimistic). It
+says nothing about the smoothness at chunk boundaries that real-time chunking also fixes.
 """
 
 from __future__ import annotations
@@ -29,8 +33,8 @@ def reaction_delay_ms(chunk_ms: float, inference_ms: float, phase: float, realti
     """Time from a shove to the first action that can respond to it."""
     if chunk_ms < 0 or inference_ms < 0 or not 0.0 <= phase <= 1.0:
         raise ValueError("chunk_ms and inference_ms must be ≥ 0 and phase in [0, 1]")
-    interval = inference_ms if realtime else chunk_ms
-    return phase * interval + inference_ms
+    cycle = inference_ms if realtime else chunk_ms + inference_ms
+    return phase * cycle + inference_ms
 
 
 def chunking_table(chunks_ms=(0, 50, 100, 200, 400), inference_ms: float = 50.0, body: str = "biped",

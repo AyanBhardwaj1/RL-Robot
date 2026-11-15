@@ -313,7 +313,8 @@ def test_wheel_legged_climbs_what_the_wheeled_base_cannot():
 def test_action_chunking_costs_reaction_time_and_realtime_chunking_recovers_it():
     from breakpoint.chunking import chunking_table, reaction_delay_ms
 
-    assert reaction_delay_ms(200, 50, 0.5, realtime=False) == 150
+    assert reaction_delay_ms(200, 50, 0.5, realtime=False) == 175  # half of the 250 ms cycle, then inference
+    assert reaction_delay_ms(400, 50, 1.0, realtime=False) == 500
     assert reaction_delay_ms(200, 50, 0.5, realtime=True) == 75  # re-plans every inference, not every chunk
     with pytest.raises(ValueError):
         reaction_delay_ms(-1, 50, 0.5, False)
@@ -325,6 +326,15 @@ def test_action_chunking_costs_reaction_time_and_realtime_chunking_recovers_it()
 
 
 def test_holding_a_tote_further_out_trades_rear_for_front_robustness():
-    near, far = Conditions(payload_kg=20.0, payload_reach=0.2), Conditions(payload_kg=20.0, payload_reach=0.45)
+    near, far = Conditions(payload_kg=20.0, payload_reach=0.2), Conditions(payload_kg=20.0, payload_reach=0.4)
     assert breaking_point(0.0, cond=far) < breaking_point(0.0, cond=near)  # shoved from behind: worse
     assert breaking_point(180.0, cond=far) > breaking_point(180.0, cond=near)  # shoved from the front: better
+
+
+def test_slider_corner_stands_without_stepping_and_cli_refuses_impossible_reach():
+    """Regression: at the page's maxima (25 kg, 40 cm) the robot must stand still; past the foot the CLI says no."""
+    from breakpoint.cli import main
+
+    corner = recover(0.0, 0.0, Humanoid(), Conditions(payload_kg=25.0, payload_reach=0.4))
+    assert corner.recovered and corner.steps == 0
+    assert main(["humanoid", "--payload", "25", "--reach", "0.45", "--trials", "1"]) == 2

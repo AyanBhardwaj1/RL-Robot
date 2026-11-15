@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Humanoid push lab · Breakpoint</title>
-<meta name="description" content="Shove a full-size humanoid in your browser and watch capture-point stepping save it, or not. Compare a walking biped with a wheeled base under payload, friction, latency and floor steps.">
+<meta name="description" content="Shove a full-size humanoid in your browser and watch capture-point stepping save it, or not. Compare a walking biped, a wheeled base and a wheel-legged hybrid under payload, friction, latency and floor steps.">
 <meta name="theme-color" content="#17161b">
 <meta property="og:title" content="Humanoid push lab">
-<meta property="og:description" content="Capture-point push recovery for a full-size humanoid: biped vs wheeled base, live in the browser.">
+<meta property="og:description" content="Capture-point push recovery for a full-size humanoid: biped, wheeled base and wheel-legged hybrid, live in the browser.">
 <meta property="og:image" content="/assets/og-humanoid.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -44,14 +44,14 @@
       <div class="slider"><label for="payload">Tote held in front <output id="payload-out">0 kg</output></label>
         <input id="payload" name="payload" type="range" min="0" max="25" step="1" value="0" autocomplete="off"></div>
       <div class="slider"><label for="reach">Held this far out <output id="reach-out">35 cm</output></label>
-        <input id="reach" name="reach" type="range" min="0.2" max="0.45" step="0.05" value="0.35" autocomplete="off"></div>
+        <input id="reach" name="reach" type="range" min="0.2" max="0.4" step="0.05" value="0.35" autocomplete="off"></div>
       <div class="slider"><label for="friction">Floor friction <output id="friction-out">μ 0.80</output></label>
         <input id="friction" name="friction" type="range" min="0.1" max="1" step="0.05" value="0.8" autocomplete="off"></div>
       <div class="slider"><label for="latency">Control latency <output id="latency-out">0 ms</output></label>
         <input id="latency" name="latency" type="range" min="0" max="250" step="10" value="0" autocomplete="off"></div>
       <div class="slider"><label for="chunk">Action chunk, open-loop <output id="chunk-out">none</output></label>
         <input id="chunk" name="chunk" type="range" min="0" max="400" step="25" value="0" autocomplete="off" aria-describedby="chunk-help"></div>
-      <p class="slider-help" id="chunk-help">A policy that runs its actions in chunks answers a shove only at the next chunk. Shown at the worst moment: the full chunk adds to the latency.</p>
+      <p class="slider-help" id="chunk-help">A policy that runs its actions in chunks answers a shove only at the next chunk. Shown at the worst moment: the full chunk adds to the latency. Set Control latency to the policy’s inference time (50 ms matches <code>breakpoint chunking</code>) to include it.</p>
       <div class="slider"><label for="strength">Actuator strength <output id="strength-out">100%</output></label>
         <input id="strength" name="strength" type="range" min="0.5" max="1" step="0.05" value="1" autocomplete="off"></div>
       <div class="slider"><label for="step">Curb or stair on the route <output id="step-out">0 cm</output></label>

@@ -168,9 +168,10 @@ Short answers, each backed by a file you can open on the spot.
   are run from the Python tests (Node and g++) on fixed cases, including outcome, steps and time to rest.
   A reviewer fuzzed 400 random cases with zero mismatches. (`tests/test_humanoid_js.py`, `tests/test_cpp.py`)
 - **What does action chunking cost a VLA policy on a humanoid?** A chunk runs open-loop, so a shove that
-  lands mid-chunk waits for the next one. `breakpoint chunking` feeds that wait into the push model: with
-  50 ms inference, 400 ms synchronous chunks cut the biped's front limit from 92 to 22 N·s at the worst
-  moment, and real-time chunking (re-plan as soon as the next chunk is ready, arXiv:2506.07339) keeps
+  lands mid-chunk waits for the next one. `breakpoint chunking` feeds that wait into the push model. If the
+  chunked policy closes the balance loop itself (usually a fast balance controller sits underneath, which
+  a chunk does not delay), 400 ms synchronous chunks with 50 ms inference cut the biped's front limit from
+  92 to 19 N·s at the worst moment, and real-time chunking (re-plan as soon as the next chunk is ready, arXiv:2506.07339) keeps
   67. The lab page has an "Action chunk" slider that shows it live. (`breakpoint/chunking.py`)
 - **What would you do about bad teleop data?** `breakpoint episodes` tags each demonstration: it replays
   every recorded contact through the humanoid model at the latency measured at that second. Falls are

@@ -53,7 +53,7 @@ pytest -q</code></pre>
         <tr><td><code>redteam --policy p</code></td><td>Compound-stress pairs and realistic multi-stressor attacks.</td></tr>
         <tr><td><code>leaderboard cpg a.npz b.npz</code></td><td>Up to 4 policies audited side by side with identical seeds.</td></tr>
         <tr><td><code>certify --policy p --min-score 80</code></td><td>Readiness certificate with policy hash and toolchain versions.</td></tr>
-        <tr><td><code>humanoid --latency-ms 150</code></td><td>Humanoid push envelopes for a walking biped and a wheeled base, plus failure odds by job.</td></tr>
+        <tr><td><code>humanoid --latency-ms 150</code></td><td>Push envelopes for a walking biped, a wheeled base and a wheel-legged hybrid, plus failure odds by job. <code>--payload 20 --reach 0.4</code> holds a tote further out.</td></tr>
         <tr><td><code>fleet --log shifts.jsonl</code></td><td>Fit a site profile from per-shift telemetry (robust quantiles) and re-run humanoid odds for both bodies. <code>--demo "tote handling"</code> generates a synthetic log.</td></tr>
         <tr><td><code>design</code></td><td>Which spec change buys the most robustness: every job re-run on the same sampled shifts with one change, shifts fixed vs broken, sign test.</td></tr>
         <tr><td><code>episodes --log eps.jsonl</code></td><td>Tag teleoperated demonstrations before training: each recorded contact is replayed at the latency measured at that moment; episodes come back clean, lag, near-fall or fall. <code>--demo 200</code> generates a sample log.</td></tr>
