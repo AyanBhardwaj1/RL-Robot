@@ -18,9 +18,10 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
 
 - A latency gate, not more training, took the best quadruped policy from 10% to 0 of 60 falls under
   teleoperation lag (readiness 84.1, up from 66.8 for its bare gait).
-- A full-size humanoid lab in Python, the browser and allocation-free C++17, held equal by tests: side
-  shoves are the biped's weak spot (44 vs 92 N·s from the front), and a wheeled base survives 2.7× more
-  from the side but fails 45% of home-care routes.
+- A full-size humanoid lab in Python, the browser and allocation-free C++17, held equal by tests,
+  comparing three bodies: side shoves are the biped's weak spot (44 vs 92 N·s from the front); a wheeled
+  base survives 2.7× more from the side but fails 45% of home-care routes; a wheel-legged hybrid climbs
+  what stops the wheels.
 - Paired design levers with a sign test: a 15% faster swing saves 25 of 750 sampled shifts and loses
   none; 25% more ankle torque saves none.
 - Six independent code reviews, 48 findings fixed with regression tests, several of which made the
@@ -51,15 +52,20 @@ and the browser lab at `/humanoid`):
   capture point. It survives about 1.5× bigger shoves from the front (137 vs 92 N·s) and 2.7× from the side
   (120 vs 44 N·s), but it cannot climb anything taller than a 2.5 cm threshold. Side shoves are the biped's
   weak spot: the leg that must step cannot cross the leg that carries the weight.
+- **Wheel-legged hybrid.** Four short legs with a wheel at each foot: it drives under the capture point
+  like the wheeled base, with a smaller, lighter body and a quicker drive, and its legs lift it onto
+  steps up to 15 cm. It holds 95 N·s from the front and 91 from the side, and in this model it finishes
+  every job except home-care routes with stairs over 15 cm. A two-wheeled self-balancing design is not
+  modelled: it would need its own pendulum-on-wheels controller, not a static footprint.
 - **Odds by job** (150 sampled shifts each):
 
-  | Job | Biped | Wheeled |
-  |---|---|---|
-  | Line-side kitting | 2.0% (hard side shoves) | 0% |
-  | Tote handling | 6.0% (hard side shoves) | 0% |
-  | Trailer unloading | 17.3% (heavy cases, ramps) | 24.7% (blocked) |
-  | Home care | 0% | 45.3% |
-  | Teleoperated data collection | 7.3% (shoves under lag) | 0% |
+  | Job | Biped | Wheeled | Wheel-legged |
+  |---|---|---|---|
+  | Line-side kitting | 2.0% (hard side shoves) | 0% | 0% |
+  | Tote handling | 6.0% (hard side shoves) | 0% | 0% |
+  | Trailer unloading | 17.3% (heavy cases, ramps) | 24.7% (blocked) | 0% |
+  | Home care | 0% | 45.3% | 9.3% (stairs over 15 cm) |
+  | Teleoperated data collection | 7.3% (shoves under lag) | 0% | 0% |
 
   Each job draws from its own random stream; with 150 shifts a rate is good to a few points, so the
   95% upper bounds in `runs/humanoid/baseline.json` are the numbers to plan with.

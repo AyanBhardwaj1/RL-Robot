@@ -98,6 +98,8 @@ deep dive on past robotics projects, and 4–5 technical rounds for full-time ro
 2. **The product question (60 s).**
    - Shove from the side: the biped holds only 44 N·s, half its front limit, because the stepping leg
      cannot cross the loaded one. Switch to the wheeled base: 120 N·s from the side, 137 from the front.
+     Then the wheel-legged hybrid: raise the curb to 12 cm and only it, of the two wheeled bodies, keeps
+     going.
    - Raise the curb slider to 10 cm and it is blocked.
    - Scroll to “Legs or wheels, by job”. Home care: wheeled fails 45%, biped 0%. Trailer
      unloading: wheeled fails 25% (blocked), biped 17% (heavy cases on ramps).
