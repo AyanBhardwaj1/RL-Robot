@@ -84,3 +84,4 @@
 #eps-table td.bad { color: #ffb08a; }
 .k-hybrid { background: #8fd9b6; }
 #h-polar .hybrid { fill: rgba(143, 217, 182, .10); stroke: #8fd9b6; stroke-width: 2; stroke-dasharray: 5 3; }
+.slider-help { font-size: var(--step-small); line-height: 1.4; margin: -4px 0 4px; opacity: .85; }

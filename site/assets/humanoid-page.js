@@ -34,7 +34,7 @@
   const onWheels = () => bodyKind() !== "biped"; // wheeled base or wheel-legged hybrid: drives instead of stepping
   function body() { return onWheels() ? bodyKind() : biped(); }
   function cond() {
-    return { payload_kg: +$("#payload").value, friction: +$("#friction").value, latency_s: +$("#latency").value / 1000,
+    return { payload_kg: +$("#payload").value, friction: +$("#friction").value, latency_s: (+$("#latency").value + +$("#chunk").value) / 1000, // a shove at the worst moment waits a whole chunk
       actuator_strength: +$("#strength").value, floor_step_m: +$("#step").value };
   }
 
@@ -305,7 +305,7 @@
   }).catch(() => { $("#levers-table tbody").innerHTML = "<tr><td colspan=5>Run python -m breakpoint design to produce this table.</td></tr>"; });
 
   // ---------- wire up ----------
-  const outs = { imp: (v) => `${v} N·s`, payload: (v) => `${v} kg`, friction: (v) => `μ ${(+v).toFixed(2)}`, latency: (v) => `${v} ms`,
+  const outs = { imp: (v) => `${v} N·s`, payload: (v) => `${v} kg`, friction: (v) => `μ ${(+v).toFixed(2)}`, latency: (v) => `${v} ms`, chunk: (v) => (+v ? `${v} ms` : "none"),
     strength: (v) => `${Math.round(v * 100)}%`, step: (v) => `${Math.round(v * 100)} cm` };
   Object.keys(outs).forEach((id) => {
     const el = $("#" + id);
@@ -329,7 +329,7 @@
     if (e.key in map) { e.preventDefault(); shove(map[e.key]); }
   });
   // ---------- shareable scenario links: the controls live in the query string ----------
-  const SLIDERS = ["imp", "payload", "friction", "latency", "strength", "step"];
+  const SLIDERS = ["imp", "payload", "friction", "latency", "chunk", "strength", "step"];
   let urlReady = false; // do not rewrite the address until the link's own state has been applied
   function readUrl() {
     const q = new URLSearchParams(location.search);
