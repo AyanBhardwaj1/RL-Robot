@@ -3,7 +3,7 @@
 //   breakpoint_cp recover <impulse> <direction_deg> [latency_s] [payload_kg] [friction]
 //   breakpoint_cp recover-wheeled <impulse> <direction_deg> [latency_s] [payload_kg] [friction] [wheeled|wheel-legged]
 //   breakpoint_cp envelope [latency_s]
-//   breakpoint_cp bench [seconds]        # 500 Hz fixed-rate loop: step cost and wake-up jitter
+//   breakpoint_cp bench [seconds] [biped|wheeled|wheel-legged]   # 500 Hz loop: step cost and wake-up jitter
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -58,13 +58,20 @@ int main(int argc, char** argv) {
     using clock = std::chrono::steady_clock;
     const auto period = std::chrono::microseconds(2000);
     std::vector<double> step_us, jitter_us;
+    // bench [seconds] [biped|wheeled|wheel-legged]: the same 60 N·s shove from the left on the chosen body
+    const char* body = argc > 3 ? argv[3] : "biped";
+    const bool wheels = !std::strcmp(body, "wheeled") || !std::strcmp(body, "wheel-legged");
+    const WheeledBase base = !std::strcmp(body, "wheel-legged") ? wheel_legged() : WheeledBase{};
     CapturePointController ctl(60.0, -90.0);
+    WheeledController wctl(60.0, -90.0, base);
     auto next = clock::now() + period;
     const auto end = clock::now() + std::chrono::duration_cast<clock::duration>(std::chrono::duration<double>(seconds));
     while (clock::now() < end) {
-      if (ctl.done()) ctl = CapturePointController(60.0, -90.0);  // restart the push scenario (allocates; not timed)
+      // restart the push scenario when it ends (allocates, so it is outside the timed region)
+      if (!wheels && ctl.done()) ctl = CapturePointController(60.0, -90.0);
+      if (wheels && wctl.done()) wctl = WheeledController(60.0, -90.0, base);
       const auto t0 = clock::now();
-      ctl.step();
+      if (wheels) wctl.step(); else ctl.step();
       step_us.push_back(std::chrono::duration<double, std::micro>(clock::now() - t0).count());
       std::this_thread::sleep_until(next);
       jitter_us.push_back(std::chrono::duration<double, std::micro>(clock::now() - next).count());

@@ -49,8 +49,9 @@ def test_cpp_envelope_matches_python(binary):
             assert got[k] == pytest.approx(py[k], abs=0.02), k
 
 
-def test_cpp_realtime_step_is_fast(binary):
-    b = run(binary, "bench", 0.3)
+@pytest.mark.parametrize("body", ["biped", "wheeled", "wheel-legged"])
+def test_cpp_realtime_step_is_fast(binary, body):
+    b = run(binary, "bench", 0.3, body)
     assert b["ticks"] > 50
     assert b["step_us_p99"] < 200  # the control step itself, not the OS wake-up jitter
 

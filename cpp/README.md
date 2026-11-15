@@ -22,6 +22,7 @@ cmake -S cpp -B build-cpp && cmake --build build-cpp
 ./build-cpp/breakpoint_cp recover-wheeled 90 45 0 0 0.8 wheel-legged   # the hybrid, shoved from the rear-right
 ./build-cpp/breakpoint_cp envelope 0.2          # breaking points with 200 ms of latency
 ./build-cpp/breakpoint_cp bench 2               # 500 Hz loop: step cost and wake-up jitter
+./build-cpp/breakpoint_cp bench 2 wheel-legged  # the same for a wheeled body (all three step in under 1 µs at p50)
 ```
 
 ## What the benchmark shows
