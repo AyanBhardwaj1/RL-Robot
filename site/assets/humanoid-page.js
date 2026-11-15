@@ -342,6 +342,21 @@
     const map = { ArrowLeft: 90, ArrowRight: -90, ArrowUp: 0, ArrowDown: 180 }; // arrow = way the robot is pushed
     if (e.key in map) { e.preventDefault(); shove(map[e.key]); }
   });
+  // ---------- in-page index: highlight the section in view ----------
+  const indexLinks = [...document.querySelectorAll(".hum-index a")];
+  if ("IntersectionObserver" in window && indexLinks.length) {
+    const byId = new Map(indexLinks.map((l) => [l.getAttribute("href").slice(1), l]));
+    const io = new IntersectionObserver((entries) => {
+      entries.filter((e) => e.isIntersecting).forEach((e) => {
+        const id = e.target.id || (e.target.querySelector("h2") || {}).id;
+        if (!byId.has(id)) return;
+        indexLinks.forEach((l) => l.removeAttribute("aria-current"));
+        byId.get(id).setAttribute("aria-current", "true");
+      });
+    }, { rootMargin: "-80px 0px -60% 0px" });
+    byId.forEach((_, id) => { const el = document.getElementById(id); if (el) io.observe(id === "lab" ? el : el.closest("section") || el); });
+  }
+
   // ---------- shareable scenario links: the controls live in the query string ----------
   const SLIDERS = ["imp", "payload", "reach", "friction", "latency", "chunk", "strength", "step"];
   let urlReady = false; // do not rewrite the address until the link's own state has been applied

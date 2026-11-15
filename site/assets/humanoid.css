@@ -86,3 +86,12 @@
 #h-polar .hybrid { fill: rgba(143, 217, 182, .10); stroke: #8fd9b6; stroke-width: 2; stroke-dasharray: 5 3; }
 .slider-help { font-size: var(--step-small); line-height: 1.4; margin: -4px 0 4px; opacity: .85; }
 #chunk-table td.bad { color: #ffb08a; }
+/* in-page index: sticky under the app bar, scrolls sideways on phones */
+.hum-index { position: sticky; top: 0; z-index: 4; display: flex; gap: 6px; overflow-x: auto; padding: 10px var(--margin);
+  background: var(--char); border-bottom: 1px solid var(--char-3); scrollbar-width: none; }
+.hum-index::-webkit-scrollbar { display: none; }
+.hum-index a { flex: 0 0 auto; padding: 8px 12px; background: var(--char-2); color: var(--ink-on-dark); text-decoration: none;
+  font: 600 var(--step-small) "Schibsted Grotesk", sans-serif; white-space: nowrap; }
+.hum-index a:hover, .hum-index a:focus-visible { background: var(--char-3); outline: none; }
+.hum-index a[aria-current="true"] { background: var(--orange); color: var(--ink-on-orange); }
+#lab, .hum-cap h2, .hum-jobs h2, .hum-how h2 { scroll-margin-top: 70px; }
