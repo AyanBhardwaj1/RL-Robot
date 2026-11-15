@@ -119,6 +119,13 @@
     <p class="lever-note" id="levers-note"></p>
   </section>
 
+  <section class="hum-jobs hum-chunking" aria-labelledby="chunk-title">
+    <h2 id="chunk-title">What an AI policy’s action chunks cost</h2>
+    <p>Vision-language-action and diffusion policies often run a chunk of actions open-loop, so a shove that lands mid-chunk waits for the next one. Real-time chunking generates the next chunk while the current one runs (Black, Galliker and Levine, NeurIPS 2025). Read this as the cost of the delay to the first reaction <em>if the chunked policy closes the balance loop itself</em>; real stacks usually keep a fast balance controller underneath. (<code>python -m breakpoint chunking</code>; the “Action chunk” slider above shows it live.)</p>
+    <div class="tablewrap"><table id="chunk-table"><thead><tr><th scope="col">Scheme</th><th scope="col">Typical wait</th><th scope="col">Front / side shove survived</th><th scope="col">Worst-moment wait</th><th scope="col">Front / side shove survived</th></tr></thead><tbody></tbody></table></div>
+    <p class="lever-note" id="chunk-note"></p>
+  </section>
+
   <section class="hum-jobs hum-episodes" aria-labelledby="eps-title">
     <h2 id="eps-title">Which demonstrations to learn from</h2>
     <p>Teleoperated demonstrations train robot foundation models, and two things quietly poison them: a link that stalls, so the recorded action answers a stale picture, and a shove the robot barely survived. Each recorded contact is replayed through this model at the latency measured at that second. Falls are dropped; stalls, a blind link and near-falls are flagged. Everything runs in this page; nothing is uploaded. (<code>python -m breakpoint episodes</code> does the same from the command line.)</p>

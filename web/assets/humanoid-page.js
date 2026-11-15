@@ -265,6 +265,20 @@
     });
   }).catch(() => { $("#jobs-table tbody").innerHTML = "<tr><td colspan=5>Run python -m breakpoint humanoid to produce this table.</td></tr>"; });
 
+  // ---------- action chunking (from python -m breakpoint chunking) ----------
+  fetch("/assets/data/chunking.json").then((r) => r.json()).then((d) => {
+    const tb = $("#chunk-table tbody"), nd = d.no_delay;
+    d.rows.forEach((r) => {
+      const tr = document.createElement("tr");
+      const td = (txt, cls) => { const c = document.createElement("td"); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const label = r.scheme === "real-time" ? "Real-time chunking" : r.chunk_ms ? `Synchronous, ${n0.format(r.chunk_ms)} ms chunks` : "No chunking (re-plan every inference)";
+      const env = (e) => td(`${n0.format(e.front)} / ${n0.format(e.side)} N·s`, "num" + (e.front < nd.front * 0.5 ? " bad" : ""));
+      tr.append(td(label), td(`${n0.format(r.median.delay_ms)} ms`), env(r.median), td(`${n0.format(r.worst.delay_ms)} ms`), env(r.worst));
+      tb.appendChild(tr);
+    });
+    $("#chunk-note").textContent = `${d.body === "biped" ? "Walking biped" : d.body}, ${n0.format(d.inference_ms)} ms inference. With no delay at all it survives ${n0.format(nd.front)} N·s from the front and ${n0.format(nd.side)} from the side.`;
+  }).catch(() => { $("#chunk-table tbody").innerHTML = "<tr><td colspan=5>Run python -m breakpoint chunking --out runs/humanoid/chunking.json to produce this table.</td></tr>"; });
+
   // ---------- design levers (from python -m breakpoint design) ----------
   fetch("/assets/data/levers.json").then((r) => r.json()).then((d) => {
     const tb = $("#levers-table tbody");

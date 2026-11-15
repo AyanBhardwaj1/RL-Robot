@@ -120,6 +120,9 @@ def main(out: Path | None = None, replays: bool = True) -> int:
     episodes = ROOT / "runs" / "episodes" / "teleop-demo.jsonl"
     if episodes.is_file():
         shutil.copy2(episodes, data / "teleop-episodes.jsonl")
+    chunking = ROOT / "runs" / "humanoid" / "chunking.json"
+    if chunking.is_file():
+        shutil.copy2(chunking, data / "chunking.json")
     levers = ROOT / "runs" / "humanoid" / "levers.json"
     if levers.is_file():
         shutil.copy2(levers, data / "levers.json")

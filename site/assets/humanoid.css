@@ -45,9 +45,9 @@
 .hum-jobs h2, .hum-how h2 { font-size: var(--step-lead); letter-spacing: -0.02em; }
 .hum-jobs p { max-width: 80ch; }
 .tablewrap { overflow-x: auto; }
-#jobs-table, #levers-table { width: 100%; border-collapse: collapse; font-size: var(--step-small); }
-#jobs-table th, #jobs-table td, #levers-table th, #levers-table td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--char-3); vertical-align: top; }
-#jobs-table td.num, #levers-table td.num { font-weight: 800; font-size: var(--step-body); white-space: nowrap; }
+#jobs-table, #levers-table, #chunk-table { width: 100%; border-collapse: collapse; font-size: var(--step-small); }
+#jobs-table th, #jobs-table td, #levers-table th, #levers-table td, #chunk-table th, #chunk-table td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--char-3); vertical-align: top; }
+#jobs-table td.num, #levers-table td.num, #chunk-table td.num { font-weight: 800; font-size: var(--step-body); white-space: nowrap; }
 #jobs-table td.bad { color: #ffb08a; }
 .how-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); }
 .how-cols p { line-height: 1.55; }
@@ -85,3 +85,4 @@
 .k-hybrid { background: #8fd9b6; }
 #h-polar .hybrid { fill: rgba(143, 217, 182, .10); stroke: #8fd9b6; stroke-width: 2; stroke-dasharray: 5 3; }
 .slider-help { font-size: var(--step-small); line-height: 1.4; margin: -4px 0 4px; opacity: .85; }
+#chunk-table td.bad { color: #ffb08a; }
