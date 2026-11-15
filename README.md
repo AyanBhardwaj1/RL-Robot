@@ -18,8 +18,8 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
 
 - A latency gate, not more training, took the best quadruped policy from 10% to 0 of 60 falls under
   teleoperation lag (readiness 84.1, up from 66.8 for its bare gait).
-- A full-size humanoid lab comparing three bodies, in Python and the browser (the biped also in
-  allocation-free C++17), held equal by tests: side shoves are the biped's weak spot (44 vs 92 N·s from the front); a wheeled
+- A full-size humanoid lab comparing three bodies, in Python, the browser and allocation-free C++17,
+  held equal by tests: side shoves are the biped's weak spot (44 vs 92 N·s from the front); a wheeled
   base survives 2.7× more from the side but fails 45% of home-care routes; a wheel-legged hybrid climbs
   what stops the wheels.
 - Paired design levers with a sign test: a 15% faster swing saves 25 of 750 sampled shifts and loses

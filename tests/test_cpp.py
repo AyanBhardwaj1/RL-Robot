@@ -59,3 +59,18 @@ def test_cpp_negative_latency_is_treated_as_none(binary):
     got = run(binary, "recover", 40, 0, -0.5, 0, 0.8)
     py = recover(40, 0, cond=Conditions())
     assert got["recovered"] == py.recovered and got["steps"] == py.steps
+
+
+@pytest.mark.parametrize("body", ["wheeled", "wheel-legged"])
+@pytest.mark.parametrize("imp,deg,lat,payload,mu", [
+    (0, 0, 0, 0, 0.8), (100, -90, 0, 0, 0.8), (130, 180, 0, 0, 0.8), (90, 45, 0.15, 10, 0.8),
+    (70, 0, 0.3, 20, 0.4), (60, 135, 0, 0, 0.15), (150, -135, 0.05, 5, 0.9),
+])
+def test_cpp_wheeled_bodies_match_python(binary, body, imp, deg, lat, payload, mu):
+    from breakpoint.humanoid import BODIES, recover_wheeled
+
+    got = run(binary, "recover-wheeled", imp, deg, lat, payload, mu, body)
+    py = recover_wheeled(imp, deg, BODIES[body], Conditions(latency_s=lat, payload_kg=payload, friction=mu))
+    assert got["recovered"] == py.recovered, (got, py.reason)
+    assert got["reason"].split()[0].rstrip(":") == py.reason.split()[0].rstrip(":")  # came / tipped / slipped / still: same outcome
+    assert got["time_s"] == pytest.approx(py.time_s, abs=0.003)

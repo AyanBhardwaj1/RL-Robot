@@ -190,6 +190,110 @@ class CapturePointController {
   Result result_;
 };
 
+// ---------------------------------------------------------------------------------------------------
+// Wheeled bodies: the support is the base footprint and the base drives to catch the capture point.
+// Mirrors recover_wheeled() in breakpoint/humanoid.py (a statically stable wheeled base, or the
+// wheel-legged hybrid: four short legs with a wheel at each foot). Allocation-free in step().
+struct WheeledBase {
+  double mass_kg = 90.0, com_height = 1.0, half_length = 0.30, half_width = 0.24;
+  double max_accel = 2.5, max_speed = 1.5, reaction_s = 0.05, max_step_up = 0.025;
+};
+
+inline WheeledBase wheel_legged() {
+  WheeledBase b;
+  b.mass_kg = 60.0; b.com_height = 0.85; b.half_length = 0.20; b.half_width = 0.18;
+  b.max_accel = 4.0; b.max_speed = 2.5; b.reaction_s = 0.04; b.max_step_up = 0.15;
+  return b;
+}
+
+class WheeledController {
+ public:
+  WheeledController(double impulse, double direction_deg, const WheeledBase& base = {}, const Conditions& c = {})
+      : b_(base), c_(c) {
+    if (c.floor_step_m > base.max_step_up) {
+      result_ = {false, 0, "blocked", 0};
+      done_ = true;
+      return;
+    }
+    const double m = base.mass_kg + c.payload_kg;
+    z_ = (base.mass_kg * base.com_height + c.payload_kg * c.payload_height) / m;
+    w_ = std::sqrt(kG / z_);
+    accel_ = base.max_accel * std::max(c.actuator_strength, 0.05) * std::min(1.0, 2.0 * c.friction);
+    slope_acc_ = kG * std::sin(c.floor_slope_deg * kPi / 180.0);
+    bias_ = {slope_acc_ / (w_ * w_), 0.0};
+    x_ = {c.payload_kg * c.payload_reach / m, 0.0};
+    pre_push_ = x_ + bias_;
+    const double a = direction_deg * kPi / 180.0;
+    v_ = Vec2{std::cos(a), std::sin(a)} * (impulse / m);
+    half_ = {base.half_length, base.half_width};
+    const double room = base.max_speed * base.max_speed / (2.0 * accel_) + 0.25;
+    tip_ = {half_.x + room, half_.y + room};
+    delay_ = static_cast<std::size_t>(std::max(0.0, std::floor((c.latency_s + base.reaction_s) / kDt + 0.5)));
+    ring_.assign(delay_ + 1, Vec2{});
+  }
+
+  bool done() const { return done_; }
+  const Result& result() const { return result_; }
+
+  void step() {
+    if (done_) return;
+    const Vec2 xi = x_ + v_ * (1.0 / w_) + bias_;
+    ring_[head_] = xi - base_;  // the drive acts on where the capture point is relative to the base
+    ++count_;
+    const Vec2 seen = count_ > delay_ ? ring_[(head_ + 1) % ring_.size()] : pre_push_;
+    head_ = (head_ + 1) % ring_.size();
+    const Vec2 p{std::clamp(xi.x, base_.x - half_.x, base_.x + half_.x), std::clamp(xi.y, base_.y - half_.y, base_.y + half_.y)};
+    if ((x_ - p).norm() > c_.friction * z_) return finish(false, "slipped");
+    // chase the part of the capture point outside the inner half of the footprint, then settle
+    const Vec2 err{seen.x - std::clamp(seen.x, -half_.x * 0.5, half_.x * 0.5), seen.y - std::clamp(seen.y, -half_.y * 0.5, half_.y * 0.5)};
+    Vec2 desired{};
+    if (std::abs(err.x) > 1e-6 || std::abs(err.y) > 1e-6)
+      desired = {std::clamp(err.x * 4.0, -b_.max_speed, b_.max_speed), std::clamp(err.y * 4.0, -b_.max_speed, b_.max_speed)};
+    Vec2 dv = desired - bv_;
+    const double n = dv.norm();
+    if (n > accel_ * kDt) dv = dv * (accel_ * kDt / n);
+    bv_ = bv_ + dv;
+    base_ = base_ + bv_ * kDt;
+    const Vec2 acc = (x_ - p) * (w_ * w_) + Vec2{slope_acc_, 0};
+    v_ = v_ + acc * kDt;
+    x_ = x_ + v_ * kDt;
+    t_ += kDt;
+    const Vec2 rel = x_ + v_ * (1.0 / w_) + bias_ - base_;
+    if (std::abs(rel.x) > tip_.x || std::abs(rel.y) > tip_.y) return finish(false, "tipped over");
+    if (v_.norm() < 0.02 && bv_.norm() < 0.02 && std::abs(rel.x) <= half_.x && std::abs(rel.y) <= half_.y && t_ > 0.3)
+      return finish(true, "came to rest");
+  }
+
+  Result run(double horizon_s = 5.0) {
+    while (!done_ && t_ < horizon_s) step();
+    if (!done_) {
+      const Vec2 rel = x_ + v_ * (1.0 / w_) + bias_ - base_;
+      const bool ok = std::abs(rel.x) <= half_.x && std::abs(rel.y) <= half_.y;
+      finish(ok, ok ? "came to rest" : "still moving");
+    }
+    return result_;
+  }
+
+ private:
+  void finish(bool ok, const char* why) {
+    result_ = {ok, 0, why, t_};
+    done_ = true;
+  }
+
+  WheeledBase b_;
+  Conditions c_;
+  double z_ = 0, w_ = 1, accel_ = 1, slope_acc_ = 0, t_ = 0;
+  Vec2 x_, v_, bias_, pre_push_, half_, tip_, base_, bv_;
+  bool done_ = false;
+  std::size_t delay_ = 0, head_ = 0, count_ = 0;
+  std::vector<Vec2> ring_;  // sized once in the constructor; never grows in step()
+  Result result_;
+};
+
+inline Result recover_wheeled(double impulse, double direction_deg, const WheeledBase& b = {}, const Conditions& c = {}) {
+  return WheeledController(impulse, direction_deg, b, c).run();
+}
+
 inline Result recover(double impulse, double direction_deg, const Humanoid& r = {}, const Conditions& c = {}) {
   return CapturePointController(impulse, direction_deg, r, c).run();
 }

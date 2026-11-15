@@ -1,6 +1,7 @@
 // breakpoint_cp: command-line front end and real-time loop benchmark for capture_point.hpp.
 //
 //   breakpoint_cp recover <impulse> <direction_deg> [latency_s] [payload_kg] [friction]
+//   breakpoint_cp recover-wheeled <impulse> <direction_deg> [latency_s] [payload_kg] [friction] [wheeled|wheel-legged]
 //   breakpoint_cp envelope [latency_s]
 //   breakpoint_cp bench [seconds]        # 500 Hz fixed-rate loop: step cost and wake-up jitter
 #include <chrono>
@@ -30,6 +31,14 @@ int main(int argc, char** argv) {
   }
   if (!std::strcmp(argv[1], "recover") && argc >= 4) {
     const Result r = recover(std::atof(argv[2]), std::atof(argv[3]), Humanoid{}, cond_from(argc, argv, 4));
+    std::printf("{\"recovered\": %s, \"steps\": %d, \"reason\": \"%s\", \"time_s\": %.3f}\n",
+                r.recovered ? "true" : "false", r.steps, r.reason.c_str(), r.time_s);
+    return 0;
+  }
+  if (!std::strcmp(argv[1], "recover-wheeled") && argc >= 4) {
+    // recover-wheeled <impulse> <direction_deg> [latency_s] [payload_kg] [friction] [wheeled|wheel-legged]
+    const WheeledBase base = (argc > 7 && !std::strcmp(argv[7], "wheel-legged")) ? wheel_legged() : WheeledBase{};
+    const Result r = recover_wheeled(std::atof(argv[2]), std::atof(argv[3]), base, cond_from(argc, argv, 4));
     std::printf("{\"recovered\": %s, \"steps\": %d, \"reason\": \"%s\", \"time_s\": %.3f}\n",
                 r.recovered ? "true" : "false", r.steps, r.reason.c_str(), r.time_s);
     return 0;
