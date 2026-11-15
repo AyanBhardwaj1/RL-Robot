@@ -24,7 +24,7 @@ validated physics scenario and runs a quadruped through it in MuJoCo. It then:
   what stops the wheels.
 - Paired design levers with a sign test: a 15% faster swing saves 25 of 750 sampled shifts and loses
   none; 25% more ankle torque saves none.
-- Six independent code reviews, 48 findings fixed with regression tests, several of which made the
+- Seven independent code reviews, 57 findings fixed with regression tests, several of which made the
   results less flattering. They are written up below.
 
 ![playground](docs/playground.png)
