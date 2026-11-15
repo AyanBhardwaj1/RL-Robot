@@ -141,8 +141,9 @@ INT8 is 3.6× smaller at no measured robustness cost. The FP16 row also shows th
 ## Product site
 
 `web/` is the deployable site: a landing page, the hosted quadruped lab (`/app`), the humanoid lab
-(`/humanoid`: shove the robot, legs vs wheels by job, live design-lever toggles, the capturability map,
-the teleop episode filter, and a shareable link for every scenario), a roles page mapping each team to
+(`/humanoid`: shove one of three bodies, legs vs wheels by job, live design-lever toggles, the
+capturability map, what an AI policy's action chunks cost, the teleop episode filter, a sticky section
+index, and a shareable link for every scenario; result tables link straight to the scenario they measure), a roles page mapping each team to
 the code (`/roles`), docs, readiness reports, and a Python serverless API that runs the same simulator.
 A test keeps the committed `web/` build in sync with `site/`. It is built from `site/` by
 `python scripts/build_site.py`. Preview it locally with `python scripts/serve_site.py`
