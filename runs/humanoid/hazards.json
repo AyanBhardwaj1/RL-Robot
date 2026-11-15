@@ -112,6 +112,22 @@
   "verify": "python -m breakpoint humanoid  # push envelope per direction"
  },
  {
+  "hazard": "H4",
+  "title": "Route blocked by a curb, threshold or stair",
+  "job": "home care",
+  "body": "wheel-legged",
+  "events": 14,
+  "trials": 150,
+  "rate": 0.09333333333333334,
+  "rate_upper_95": 0.1399,
+  "severity": 2,
+  "likelihood": "occasional",
+  "risk": "medium",
+  "harm": "Mission failure; tipping if the base tries to climb",
+  "mitigation": "Route survey and ramps, or a legged platform where steps exist",
+  "verify": "python -m breakpoint humanoid  # job table: trailer unloading, home care"
+ },
+ {
   "hazard": "H1",
   "title": "Fall after a shove the robot cannot step out of",
   "job": "tote handling",

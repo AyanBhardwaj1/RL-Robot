@@ -52,6 +52,14 @@
    "failure_rate": 0.0,
    "failure_rate_upper_95": 0.0198,
    "causes": {}
+  },
+  "wheel-legged": {
+   "job": "__fleet__tote-handling",
+   "trials": 150,
+   "failures": 0,
+   "failure_rate": 0.0,
+   "failure_rate_upper_95": 0.0198,
+   "causes": {}
   }
  }
 }

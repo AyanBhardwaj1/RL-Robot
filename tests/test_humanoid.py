@@ -126,7 +126,7 @@ def test_fleet_fit_recovers_profile_and_ignores_glitches(tmp_path):
     path.write_text("\n".join(_json.dumps(r) for r in recs[:50]) + "\n")
     assert len(read_log(path)) == 50
     res = site_odds(read_log(path), "t", trials=20)
-    assert set(res["odds"]) == {"biped", "wheeled"} and "__fleet__t" not in JOBS
+    assert set(res["odds"]) == {"biped", "wheeled", "wheel-legged"} and "__fleet__t" not in JOBS
     bad = tmp_path / "bad.jsonl"
     bad.write_text("{not json}\n")
     with pytest.raises(ValueError):
@@ -295,3 +295,16 @@ def test_episode_filter_keeps_latency_timing_across_gaps_and_rejects_bad_records
     log = tmp_path / "bad.jsonl"
     log.write_text('{"episode": "a", "contacts": [{"t_s": 1, "impulse_ns": null}]}\n')
     assert main(["episodes", "--log", str(log)]) == 2
+
+
+def test_wheel_legged_climbs_what_the_wheeled_base_cannot():
+    from breakpoint.humanoid import BODIES, WHEEL_LEGGED, breaking_point
+
+    assert list(BODIES) == ["biped", "wheeled", "wheel-legged"]
+    curb = Conditions(floor_step_m=0.10)
+    assert recover_wheeled(0.0, 0.0, WheeledBase(), curb).reason.startswith("blocked")
+    assert recover_wheeled(0.0, 0.0, WHEEL_LEGGED, curb).recovered
+    assert recover_wheeled(0.0, 0.0, WHEEL_LEGGED, Conditions(floor_step_m=0.16)).reason.startswith("blocked")
+    # smaller and lighter than the wheeled base, but far steadier sideways than the biped
+    side = {n: breaking_point(-90.0, b) for n, b in BODIES.items()}
+    assert side["biped"] < side["wheel-legged"] < side["wheeled"]

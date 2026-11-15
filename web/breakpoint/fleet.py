@@ -19,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .humanoid import JOBS, Humanoid, Job, WheeledBase, job_risk
+from .humanoid import BODIES, JOBS, Job, job_risk
 
 FIELDS = ("payload_kg", "friction", "latency_ms", "slope_deg", "floor_step_m")
 LOW_Q, HIGH_Q = 0.05, 0.95
@@ -114,7 +114,7 @@ def site_odds(records: list[dict], name: str = "fitted site", trials: int = 150,
     JOBS[key] = profile
     try:
         odds = {body: job_risk(key, robot, trials=trials, seed=seed)
-                for body, robot in (("biped", Humanoid()), ("wheeled", WheeledBase()))}
+                for body, robot in BODIES.items()}
     finally:
         JOBS.pop(key, None)
     return {"profile": profile.__dict__, "odds": odds}

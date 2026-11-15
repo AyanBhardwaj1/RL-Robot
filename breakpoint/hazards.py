@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .evaluate import failure_upper_bound
-from .humanoid import JOBS, Humanoid, WheeledBase, job_risk
+from .humanoid import BODIES, JOBS, job_risk
 
 
 @dataclass(frozen=True)
@@ -82,7 +82,7 @@ def classify(reason: str) -> HazardClass | None:
 
 def hazard_log(trials: int = 150, seed: int = 0) -> list[dict]:
     rows = []
-    bodies = {"biped": Humanoid(), "wheeled": WheeledBase()}
+    bodies = BODIES
     for job in JOBS:
         for body_name, body in bodies.items():
             r = job_risk(job, body, trials=trials, seed=seed)

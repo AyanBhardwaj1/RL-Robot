@@ -37,6 +37,7 @@
         <legend class="block-title">Body</legend>
         <label><input type="radio" name="body" value="biped" checked> Walking biped</label>
         <label><input type="radio" name="body" value="wheeled"> Wheeled base</label>
+        <label><input type="radio" name="body" value="wheel-legged"> Wheel-legged</label>
       </fieldset>
       <div class="slider"><label for="imp">Shove <output id="imp-out">40 N·s</output></label>
         <input id="imp" name="imp" type="range" min="0" max="200" step="1" value="40" autocomplete="off"></div>
@@ -75,8 +76,8 @@
       <p class="verdict-word" id="h-verdict">Ready</p>
       <p class="verdict-why" id="h-why">Click around the robot, or use the side buttons, to shove it.</p>
       <h2 class="block-title">Push envelope, live</h2>
-      <svg id="h-polar" viewBox="-110 -110 220 220" role="img" aria-label="Largest survivable shove in 8 directions for the biped and the wheeled base"></svg>
-      <p class="hum-legend"><span class="k k-biped"></span>Biped <span class="k k-wheel"></span>Wheeled · N·s, robot faces up</p>
+      <svg id="h-polar" viewBox="-110 -110 220 220" role="img" aria-label="Largest survivable shove in 8 directions for the biped, the wheeled base and the wheel-legged hybrid"></svg>
+      <p class="hum-legend"><span class="k k-biped"></span>Biped <span class="k k-wheel"></span>Wheeled <span class="k k-hybrid"></span>Wheel-legged · N·s, robot faces up</p>
       <dl class="metrics" id="h-env"></dl>
     </section>
   </div>
@@ -102,8 +103,8 @@
 
   <section class="hum-jobs" aria-labelledby="jobs-title">
     <h2 id="jobs-title">Legs or wheels, by job</h2>
-    <p>Failure rate over 150 sampled shifts per job from the Python lab (<code>python -m breakpoint humanoid</code>). The wheeled base shrugs off bigger shoves; it cannot climb a curb, a trailer lip or a stair.</p>
-    <div class="tablewrap"><table id="jobs-table"><thead><tr><th scope="col">Job</th><th scope="col">Walking biped</th><th scope="col">Wheeled base</th><th scope="col">What sets the odds</th></tr></thead><tbody></tbody></table></div>
+    <p>Failure rate over 150 sampled shifts per job from the Python lab (<code>python -m breakpoint humanoid</code>). The wheeled base shrugs off bigger shoves but cannot climb a curb, a trailer lip or a stair; the wheel-legged hybrid (four legs with a wheel at each foot) drives like it and lifts onto steps up to 15 cm.</p>
+    <div class="tablewrap"><table id="jobs-table"><thead><tr><th scope="col">Job</th><th scope="col">Walking biped</th><th scope="col">Wheeled base</th><th scope="col">Wheel-legged</th><th scope="col">What sets the odds</th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <section class="hum-jobs hum-levers" aria-labelledby="levers-title">

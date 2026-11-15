@@ -31,7 +31,8 @@
     return on.reduce((r, k) => Object.assign(r, LEVERS[k](r)), Object.assign({}, H.BIPED, { kind: "biped" }));
   }
   function bodyKind() { return document.querySelector('input[name="body"]:checked').value; }
-  function body() { return bodyKind() === "wheeled" ? "wheeled" : biped(); }
+  const onWheels = () => bodyKind() !== "biped"; // wheeled base or wheel-legged hybrid: drives instead of stepping
+  function body() { return onWheels() ? bodyKind() : biped(); }
   function cond() {
     return { payload_kg: +$("#payload").value, friction: +$("#friction").value, latency_s: +$("#latency").value / 1000,
       actuator_strength: +$("#strength").value, floor_step_m: +$("#step").value };
@@ -50,12 +51,13 @@
     for (let gy = -10; gy <= 10; gy++) { const [, sy] = toScreen(gy * 0.25, 0, origin); ctx.fillRect(0, sy, W, 1); }
     k = Math.max(0, k);
     const t = res.com.length ? res.com[Math.min(k, res.com.length - 1)][0] : 0;
-    const wheeled = bodyKind() === "wheeled";
+    const wheeled = onWheels();
     if (wheeled) {
+      const W = bodyKind() === "wheel-legged" ? H.WHEEL_LEGGED : H.WHEELED;
       const b = res.footsteps.length ? res.footsteps[Math.max(0, Math.min(k, res.footsteps.length - 1))] : [0, 0, 0];
       const [cx, cy] = toScreen(b[1], b[2], origin);
       ctx.fillStyle = COLORS.base;
-      ctx.fillRect(cx - H.WHEELED.half_width * SCALE, cy - H.WHEELED.half_length * SCALE, 2 * H.WHEELED.half_width * SCALE, 2 * H.WHEELED.half_length * SCALE);
+      ctx.fillRect(cx - W.half_width * SCALE, cy - W.half_length * SCALE, 2 * W.half_width * SCALE, 2 * W.half_length * SCALE);
     } else {
       // starting stance: two feet
       const bp = biped(); // drawn with the design levers applied, so a longer foot shows
@@ -136,7 +138,7 @@
   function describe(r, dir, imp) {
     const gap = (d) => Math.abs(((dir - d + 540) % 360) - 180);
     const side = Object.entries(H.DIRECTIONS).reduce((best, e) => (gap(e[1]) < gap(best[1]) ? e : best))[0];
-    if (r.recovered) return [r.steps ? `Saved in ${r.steps} step${r.steps > 1 ? "s" : ""}` : "Held", `${n0.format(imp)} N·s from the ${side}: ${bodyKind() === "wheeled" ? "the base drove under the capture point" : r.steps ? "it stepped where the capture point was heading" : "ankles alone kept the capture point inside the support"}.`];
+    if (r.recovered) return [r.steps ? `Saved in ${r.steps} step${r.steps > 1 ? "s" : ""}` : "Held", `${n0.format(imp)} N·s from the ${side}: ${onWheels() ? "the base drove under the capture point" : r.steps ? "it stepped where the capture point was heading" : "ankles alone kept the capture point inside the support"}.`];
     const reason = r.reason.charAt(0).toUpperCase() + r.reason.slice(1);
     return [r.reason.startsWith("blocked") ? "Blocked" : "Fell", `${n0.format(imp)} N·s from the ${side}. ${reason}.`];
   }
@@ -156,10 +158,10 @@
 
   // ---------- live envelopes ----------
   let envTimer = null;
-  function polar(biped, wheel) {
+  function polar(biped, wheel, hybrid) {
     const svg = $("#h-polar");
     const order = ["front", "front-right", "right", "rear-right", "rear", "rear-left", "left", "front-left"];
-    const max = Math.max(60, ...Object.values(biped), ...Object.values(wheel));
+    const max = Math.max(60, ...Object.values(biped), ...Object.values(wheel), ...Object.values(hybrid));
     const R = 88;
     const pt = (name, v) => { const a = H.DIRECTIONS[name] * Math.PI / 180; const r = R * Math.min(1, v / max); return `${(Math.sin(a) * r).toFixed(1)},${(Math.cos(a) * r).toFixed(1)}`; };
     let out = "";
@@ -170,12 +172,13 @@
     }
     out += `<text class="lbl" x="${(R * 0.5 * 0.71 + 3).toFixed(1)}" y="${(-R * 0.5 * 0.71).toFixed(1)}">${n0.format(max / 2)}</text><text class="lbl" x="${(R * 0.71 + 3).toFixed(1)}" y="${(-R * 0.71).toFixed(1)}">${n0.format(max)}</text>`;
     out += `<polygon class="wheel" points="${order.map((n) => pt(n, wheel[n])).join(" ")}"></polygon>`;
+    out += `<polygon class="hybrid" points="${order.map((n) => pt(n, hybrid[n])).join(" ")}"></polygon>`;
     out += `<polygon class="biped" points="${order.map((n) => pt(n, biped[n])).join(" ")}"></polygon>`;
     svg.innerHTML = out;
     const dl = $("#h-env"); dl.replaceChildren();
     for (const [k, label] of [["front", "From the front"], ["rear", "From the rear"], ["left", "From the left"], ["right", "From the right"]]) {
       const dt = document.createElement("dt"); dt.textContent = label;
-      const dd = document.createElement("dd"); dd.textContent = `${n0.format(biped[k])} / ${n0.format(wheel[k])} N·s`;
+      const dd = document.createElement("dd"); dd.textContent = `${n0.format(biped[k])} / ${n0.format(wheel[k])} / ${n0.format(hybrid[k])} N·s`;
       dl.append(dt, dd);
     }
   }
@@ -202,14 +205,14 @@
     c2.fillText("forward", cv.width / 2, 18); c2.fillText("backward", cv.width / 2, cv.height - 8);
     c2.textAlign = "left"; c2.fillText("left", 8, cv.height / 2 - 8); c2.textAlign = "right"; c2.fillText("right", cv.width - 8, cv.height / 2 - 8);
     const total = CAP_N * CAP_N, ok = total - counts["-1"];
-    $("#cap-stats").textContent = bodyKind() === "wheeled"
+    $("#cap-stats").textContent = onWheels()
       ? `${pct.format(ok / total)} of shoves up to 1.6 m/s are recoverable by driving under the capture point (the base takes no steps).`
       : `${pct.format(ok / total)} of shoves up to 1.6 m/s are recoverable: ${counts[0]} with ankles only, ${counts[1]} with 1 step, ${counts[2]} with 2, ${counts[3]} with 3.`;
   }
 
   function refreshEnvelope() {
     clearTimeout(envTimer);
-    envTimer = setTimeout(() => { polar(H.envelope(biped(), cond(), 9), H.envelope("wheeled", cond(), 9)); drawCapMap(); }, 60);
+    envTimer = setTimeout(() => { polar(H.envelope(biped(), cond(), 9), H.envelope("wheeled", cond(), 9), H.envelope("wheel-legged", cond(), 9)); drawCapMap(); }, 60);
   }
 
   // ---------- jobs table (from the Python run) ----------
@@ -225,13 +228,12 @@
     Object.entries(d.jobs).forEach(([job, row]) => {
       const tr = document.createElement("tr");
       const cell = (txt, cls) => { const td = document.createElement("td"); td.textContent = txt; if (cls) td.className = cls; return td; };
-      const b = row.biped, w = row.wheeled;
-      const fmt = (r) => `${pct.format(r.failure_rate)} (≤ ${pct.format(r.failure_rate_upper_95)})`;
-      tr.append(cell(job.charAt(0).toUpperCase() + job.slice(1)), cell(fmt(b), "num" + (b.failure_rate > 0.05 ? " bad" : "")),
-        cell(fmt(w), "num" + (w.failure_rate > 0.05 ? " bad" : "")), cell(WHY[job] || ""));
+      const fmt = (r) => (r ? `${pct.format(r.failure_rate)} (≤ ${pct.format(r.failure_rate_upper_95)})` : "–");
+      const odds = (r) => cell(fmt(r), "num" + (r && r.failure_rate > 0.05 ? " bad" : ""));
+      tr.append(cell(job.charAt(0).toUpperCase() + job.slice(1)), odds(row.biped), odds(row.wheeled), odds(row["wheel-legged"]), cell(WHY[job] || ""));
       tb.appendChild(tr);
     });
-  }).catch(() => { $("#jobs-table tbody").innerHTML = "<tr><td colspan=4>Run python -m breakpoint humanoid to produce this table.</td></tr>"; });
+  }).catch(() => { $("#jobs-table tbody").innerHTML = "<tr><td colspan=5>Run python -m breakpoint humanoid to produce this table.</td></tr>"; });
 
   // ---------- design levers (from python -m breakpoint design) ----------
   fetch("/assets/data/levers.json").then((r) => r.json()).then((d) => {
@@ -279,7 +281,7 @@
     const el = $("#" + id);
     el.addEventListener("input", () => { $(`#${id}-out`).textContent = outs[id](el.value); if (id !== "imp") refreshEnvelope(); });
   });
-  const syncLevers = () => document.querySelectorAll('input[name="lever"]').forEach((c) => { c.disabled = bodyKind() === "wheeled"; });
+  const syncLevers = () => document.querySelectorAll('input[name="lever"]').forEach((c) => { c.disabled = onWheels(); });
   document.querySelectorAll('input[name="body"]').forEach((r) => r.addEventListener("change", () => { syncLevers(); shove(last.dir); drawCapMap(); }));
   document.querySelectorAll('input[name="lever"]').forEach((c) => c.addEventListener("change", () => { refreshEnvelope(); shove(last.dir); }));
   document.querySelectorAll(".dir-pad button").forEach((b) => b.addEventListener("click", () => shove(+b.dataset.d)));
@@ -308,7 +310,8 @@
         $(`#${id}-out`).textContent = outs[id](el.value);
       }
     });
-    if (q.get("body") === "wheeled") document.querySelector('input[name="body"][value="wheeled"]').checked = true;
+    const b = q.get("body");
+    if (b === "wheeled" || b === "wheel-legged") document.querySelector(`input[name="body"][value="${b}"]`).checked = true;
     const on = (q.get("levers") || "").split(",");
     document.querySelectorAll('input[name="lever"]').forEach((c) => { c.checked = on.includes(c.value); });
     const d = Number(q.get("dir"));
@@ -320,7 +323,7 @@
     if (!urlReady) return;
     const q = new URLSearchParams();
     SLIDERS.forEach((id) => { const el = $("#" + id); if (el.value !== el.defaultValue) q.set(id, el.value); });
-    if (bodyKind() === "wheeled") q.set("body", "wheeled");
+    if (onWheels()) q.set("body", bodyKind());
     const on = [...document.querySelectorAll('input[name="lever"]:checked')].map((i) => i.value);
     if (on.length) q.set("levers", on.join(","));
     if (last.dir !== -90) q.set("dir", String(last.dir));

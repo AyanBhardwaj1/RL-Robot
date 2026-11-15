@@ -29,6 +29,16 @@
    "rear-right": 156.98,
    "right": 120.07,
    "front-right": 156.98
+  },
+  "wheel-legged": {
+   "front": 95.36,
+   "front-left": 112.06,
+   "left": 91.26,
+   "rear-left": 112.06,
+   "rear": 95.36,
+   "rear-right": 112.06,
+   "right": 91.26,
+   "front-right": 112.06
   }
  },
  "jobs": {
@@ -51,6 +61,14 @@
     "failure_rate": 0.0,
     "failure_rate_upper_95": 0.0198,
     "causes": {}
+   },
+   "wheel-legged": {
+    "job": "line-side kitting",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
    }
   },
   "tote handling": {
@@ -66,6 +84,14 @@
     }
    },
    "wheeled": {
+    "job": "tote handling",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   },
+   "wheel-legged": {
     "job": "tote handling",
     "trials": 150,
     "failures": 0,
@@ -95,6 +121,14 @@
     "causes": {
      "blocked": 37
     }
+   },
+   "wheel-legged": {
+    "job": "trailer unloading",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
    }
   },
   "home care": {
@@ -115,6 +149,16 @@
     "causes": {
      "blocked": 68
     }
+   },
+   "wheel-legged": {
+    "job": "home care",
+    "trials": 150,
+    "failures": 14,
+    "failure_rate": 0.09333333333333334,
+    "failure_rate_upper_95": 0.1399,
+    "causes": {
+     "blocked": 14
+    }
    }
   },
   "teleoperated data collection": {
@@ -130,6 +174,14 @@
     }
    },
    "wheeled": {
+    "job": "teleoperated data collection",
+    "trials": 150,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "failure_rate_upper_95": 0.0198,
+    "causes": {}
+   },
+   "wheel-legged": {
     "job": "teleoperated data collection",
     "trials": 150,
     "failures": 0,

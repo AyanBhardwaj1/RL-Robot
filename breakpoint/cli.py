@@ -334,17 +334,17 @@ def cmd_certify(a: argparse.Namespace) -> int:
 
 
 def cmd_humanoid(a: argparse.Namespace) -> int:
-    from .humanoid import JOBS, Conditions, Humanoid, WheeledBase, envelope, job_risk
+    from .humanoid import BODIES, JOBS, Conditions, envelope, job_risk
 
     cond = Conditions(payload_kg=a.payload, friction=a.friction, latency_s=a.latency_ms / 1000.0)
-    bodies = {"biped": Humanoid(), "wheeled": WheeledBase()}
+    bodies = BODIES
     out = {"conditions": cond.to_dict(), "envelope": {}, "jobs": {}}
     print(f"Push-recovery envelope (largest survivable shove, N·s) · payload {a.payload} kg, μ {a.friction}, "
           f"latency {a.latency_ms:.0f} ms")
     for name, body in bodies.items():
         env = envelope(body, cond)
         out["envelope"][name] = env
-        print(f"  {name:>8}: " + "  ".join(f"{k} {v:.0f}" for k, v in env.items()))
+        print(f"  {name:>12}: " + "  ".join(f"{k} {v:.0f}" for k, v in env.items()))
     print(f"\nFailure odds by job ({a.trials} sampled shifts each, 95% upper bound in brackets)")
     for job in JOBS:
         row = {n: job_risk(job, b, trials=a.trials, seed=a.seed) for n, b in bodies.items()}

@@ -19,6 +19,8 @@ CASES = [
     ("biped", 45.0, 90.0, {}), ("biped", 61.0, 103.0, {"friction": 0.5, "floor_slope_deg": -2.7, "payload_kg": 15.0}),
     ("biped", 60.0, 180.0, {"friction": 0.1}),
     ("biped", 64.1, 38.3, {"friction": 0.5, "payload_kg": 16.3, "floor_slope_deg": 2.5, "latency_s": 0.023, "actuator_strength": 0.83}), ("biped", 40.0, 180.0, {"friction": 0.35}), ("biped", 30.0, -90.0, {}), ("biped", 35.0, 180.0, {"actuator_strength": 0.6}),
+    ("wheel-legged", 80.0, -90.0, {}), ("wheel-legged", 0.0, 0.0, {"floor_step_m": 0.12}),
+    ("wheel-legged", 0.0, 0.0, {"floor_step_m": 0.17}), ("wheel-legged", 90.0, 135.0, {"latency_s": 0.1, "friction": 0.4}),
     ("wheeled", 100.0, -90.0, {}), ("wheeled", 90.0, 0.0, {"latency_s": 0.025}), ("wheeled", 0.0, 0.0, {"floor_step_m": 0.10}), ("wheeled", 80.0, 135.0, {"friction": 0.3}),
 ]
 
@@ -36,8 +38,10 @@ def test_js_recovery_matches_python():
     calls = ",".join(f"H.recover({json.dumps(b)}, {j}, {d}, {json.dumps(c)}, false)" for b, j, d, c in CASES)
     js = run_js(f"[{calls}]")
     for (body, imp, deg, c), got in zip(CASES, js):
-        py = (recover_wheeled(imp, deg, WheeledBase(), Conditions(**c)) if body == "wheeled"
-              else recover(imp, deg, Humanoid(), Conditions(**c)))
+        from breakpoint.humanoid import BODIES
+
+        py = (recover(imp, deg, Humanoid(), Conditions(**c)) if body == "biped"
+              else recover_wheeled(imp, deg, BODIES[body], Conditions(**c)))
         assert got["recovered"] == py.recovered, (body, imp, deg, c, got["reason"], py.reason)
         assert got["steps"] == py.steps
         assert got["reason"].split(":")[0] == py.reason.split(":")[0]

@@ -82,3 +82,5 @@
 #eps-table th, #eps-table td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--char-3); vertical-align: top; }
 #eps-table td.num { font-weight: 800; white-space: nowrap; }
 #eps-table td.bad { color: #ffb08a; }
+.k-hybrid { background: #8fd9b6; }
+#h-polar .hybrid { fill: rgba(143, 217, 182, .10); stroke: #8fd9b6; stroke-width: 2; stroke-dasharray: 5 3; }

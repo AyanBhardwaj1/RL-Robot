@@ -13,6 +13,8 @@
     max_step_up: 0.18, ankle_torque: 150, swing_load_factor: 0.6 };
   const WHEELED = { kind: "wheeled", mass_kg: 90, com_height: 1.0, half_length: 0.30, half_width: 0.24,
     max_accel: 2.5, max_speed: 1.5, reaction_s: 0.05, max_step_up: 0.025 };
+  const WHEEL_LEGGED = Object.assign({}, WHEELED, { kind: "wheel-legged", mass_kg: 60, com_height: 0.85, half_length: 0.20,
+    half_width: 0.18, max_accel: 4.0, max_speed: 2.5, reaction_s: 0.04, max_step_up: 0.15 }); // humanoid.py WHEEL_LEGGED
   const CONDITIONS = { payload_kg: 0, payload_reach: 0.35, payload_height: 1.05, friction: 0.8, latency_s: 0,
     actuator_strength: 1, floor_slope_deg: 0, floor_step_m: 0 };
 
@@ -186,8 +188,10 @@
   const kindOf = (body) => (typeof body === "string" ? body : body.kind);
   const overridesOf = (body) => (typeof body === "string" ? {} : body);
   function recover(body, impulse, dirDeg, cond, record) {
-    return kindOf(body) === "wheeled" ? recoverWheeled(impulse, dirDeg, overridesOf(body), cond, record)
-      : recoverBiped(impulse, dirDeg, overridesOf(body), cond, record);
+    const kind = kindOf(body);
+    if (kind === "wheeled") return recoverWheeled(impulse, dirDeg, overridesOf(body), cond, record);
+    if (kind === "wheel-legged") return recoverWheeled(impulse, dirDeg, Object.assign({}, WHEEL_LEGGED, overridesOf(body)), cond, record);
+    return recoverBiped(impulse, dirDeg, overridesOf(body), cond, record);
   }
 
   function breakingPoint(body, dirDeg, cond, maxImpulse, iters) {
@@ -210,7 +214,8 @@
   // Row 0 = +vMax forward, column 0 = +vMax toward the robot's left (mirrors capturability_map in Python).
   function capturabilityMap(body, cond, n, vMax) {
     n = n || 41; vMax = vMax || 2;
-    const robot = Object.assign({}, kindOf(body) === "wheeled" ? WHEELED : BIPED, overridesOf(body));
+    const base = { wheeled: WHEELED, "wheel-legged": WHEEL_LEGGED }[kindOf(body)] || BIPED;
+    const robot = Object.assign({}, base, overridesOf(body));
     const m = robot.mass_kg + Object.assign({}, CONDITIONS, cond).payload_kg;
     const grid = [];
     for (let i = 0; i < n; i++) {
@@ -227,6 +232,6 @@
     return grid;
   }
 
-  const api = { capturabilityMap, DIRECTIONS, BIPED, WHEELED, CONDITIONS, recover, recoverBiped, recoverWheeled, breakingPoint, envelope, effective };
+  const api = { capturabilityMap, DIRECTIONS, BIPED, WHEELED, WHEEL_LEGGED, CONDITIONS, recover, recoverBiped, recoverWheeled, breakingPoint, envelope, effective };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Humanoid = api;
 })(typeof window !== "undefined" ? window : globalThis);

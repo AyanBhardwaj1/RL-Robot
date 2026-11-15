@@ -292,6 +292,17 @@ class WheeledBase:
     max_step_up: float = 0.025  # m: wheels roll over a threshold, not a curb or stair
 
 
+# A wheel-legged hybrid: four short legs with a wheel at each foot, so it stands statically stable (a
+# two-wheeled self-balancing design would need its own pendulum model). It balances and recovers like the wheeled base
+# (drive under the capture point), with a smaller, lighter body and a more agile drive, and its legs let it
+# lift onto curbs and stairs that stop a plain wheeled base. Generic numbers, not a model of any product.
+WHEEL_LEGGED = WheeledBase(mass_kg=60.0, com_height=0.85, half_length=0.20, half_width=0.18, max_accel=4.0,
+                           max_speed=2.5, reaction_s=0.04, max_step_up=0.15)
+
+# Every body the lab compares, by name (the CLI, hazard log, fleet fit and the site all use this order).
+BODIES = {"biped": Humanoid(), "wheeled": WheeledBase(), "wheel-legged": WHEEL_LEGGED}
+
+
 def recover_wheeled(impulse: float, direction_deg: float, base: WheeledBase = WheeledBase(),
                     cond: Conditions = Conditions(), record: bool = False, horizon_s: float = 5.0) -> Recovery:
     """Same push, but the support polygon is the base footprint and the base drives to catch the capture point.
