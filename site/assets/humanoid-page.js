@@ -301,6 +301,19 @@
   }).catch(() => { $("#chunk-table tbody").innerHTML = "<tr><td colspan=5>Run python -m breakpoint chunking --out runs/humanoid/chunking.json to produce this table.</td></tr>"; });
 
   // ---------- design levers (from python -m breakpoint design) ----------
+  // design.py lever keys -> the lab's lever toggles (only some levers have a toggle on the page)
+  const LEVER_TOGGLES = { swing_time: ["swing"], lateral_reach: ["lateral"], foot_length: ["foot"], step_reach: ["reach"],
+    ankle_torque: ["ankle"], swing_and_lateral: ["swing", "lateral"] };
+  function leverLink(l) {
+    const cell = document.createElement("td"), keys = LEVER_TOGGLES[l.key];
+    if (!keys) return cell;
+    const a = document.createElement("a");
+    a.textContent = "Try it";
+    a.href = `?levers=${keys.join(",")}&dir=-90#lab`; // shoved from the side, where the levers matter most
+    a.setAttribute("aria-label", `Open the lab with ${l.title.toLowerCase()}, shoved from the side`);
+    cell.appendChild(a);
+    return cell;
+  }
   fetch("/assets/data/levers.json").then((r) => r.json()).then((d) => {
     const tb = $("#levers-table tbody");
     const most = Math.max(1, ...d.levers.map((l) => l.fixed + l.broken));
@@ -317,7 +330,7 @@
       const env = l.envelope, base = d.baseline.envelope;
       const delta = (k) => (n(env[k]) === n(base[k]) ? `${n(env[k])}` : `${n(env[k])} (${env[k] > base[k] ? "+" : "−"}${Math.abs(n(env[k]) - n(base[k]))})`);
       tr.append(td(l.title), td(l.owner), flips, td(l.p_value < 0.001 ? "< 0.001" : l.p_value.toFixed(3), "num" + (l.p_value < 0.05 ? " good" : "")),
-        td(`${delta("left")} / ${delta("front")} N·s`, "num"));
+        td(`${delta("left")} / ${delta("front")} N·s`, "num"), leverLink(l));
       tb.appendChild(tr);
     });
     const singles = d.levers.filter((l) => !l.key.includes("_and_"));
