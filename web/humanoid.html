@@ -55,7 +55,7 @@
         <input id="latency" name="latency" type="range" min="0" max="250" step="10" value="0" autocomplete="off"></div>
       <div class="slider"><label for="chunk">Action chunk, open-loop <output id="chunk-out">none</output></label>
         <input id="chunk" name="chunk" type="range" min="0" max="400" step="25" value="0" autocomplete="off" aria-describedby="chunk-help"></div>
-      <p class="slider-help" id="chunk-help">A policy that runs its actions in chunks answers a shove only at the next chunk. Shown at the worst moment: the full chunk adds to the latency. Set Control latency to the policy’s inference time (50 ms matches <code>breakpoint chunking</code>) to include it.</p>
+      <p class="slider-help" id="chunk-help">A policy that runs its actions in chunks answers a shove only at the next chunk. Shown at the worst moment: the full chunk adds to the latency. To include inference, set Control latency to twice the inference time: a shove just after an observation waits the chunk, that inference, and the next one (100 ms matches <code>breakpoint chunking</code> at 50 ms).</p>
       <div class="slider"><label for="strength">Actuator strength <output id="strength-out">100%</output></label>
         <input id="strength" name="strength" type="range" min="0.5" max="1" step="0.05" value="1" autocomplete="off"></div>
       <div class="slider"><label for="step">Curb or stair on the route <output id="step-out">0 cm</output></label>
@@ -127,7 +127,7 @@
     <h2 id="chunk-title">What an AI policy’s action chunks cost</h2>
     <p>Vision-language-action and diffusion policies often run a chunk of actions open-loop, so a shove that lands mid-chunk waits for the next one. Real-time chunking generates the next chunk while the current one runs (Black, Galliker and Levine, NeurIPS 2025). Read this as the cost of the delay to the first reaction <em>if the chunked policy closes the balance loop itself</em>; real stacks usually keep a fast balance controller underneath. (<code>python -m breakpoint chunking</code>; the “Action chunk” slider above shows it live.)</p>
     <div class="row chunk-bodies" role="group" aria-label="Body for the chunking table"></div>
-    <div class="tablewrap"><table id="chunk-table"><thead><tr><th scope="col">Scheme</th><th scope="col">Typical wait</th><th scope="col">Front / side shove survived</th><th scope="col">Worst-moment wait</th><th scope="col">Front / side shove survived</th></tr></thead><tbody></tbody></table></div>
+    <div class="tablewrap"><table id="chunk-table"><thead><tr><th scope="col">Scheme</th><th scope="col">Typical wait</th><th scope="col">Front / side shove survived</th><th scope="col">Worst-moment wait</th><th scope="col">Front / side shove survived</th><th scope="col"><span class="sr-only">Open in the lab</span></th></tr></thead><tbody></tbody></table></div>
     <p class="lever-note" id="chunk-note"></p>
   </section>
 

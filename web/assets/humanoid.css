@@ -98,3 +98,5 @@
 #lab, .hum-cap h2, .hum-jobs h2, .hum-how h2 { scroll-margin-top: 70px; }
 .chunk-bodies { display: flex; flex-wrap: wrap; gap: 8px; }
 .chunk-bodies button[aria-pressed="true"] { background: var(--orange); color: var(--ink-on-orange); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+#chunk-table td a { font-weight: 600; white-space: nowrap; }

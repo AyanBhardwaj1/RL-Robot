@@ -279,7 +279,13 @@
         const td = (txt, cls) => { const c = document.createElement("td"); c.textContent = txt; if (cls) c.className = cls; return c; };
         const label = r.scheme === "real-time" ? "Real-time chunking" : r.chunk_ms ? `Synchronous, ${n0.format(r.chunk_ms)} ms chunks` : "No chunking (re-plan every inference)";
         const env = (e) => td(`${n0.format(e.front)} / ${n0.format(e.side)} N·s`, "num" + (e.front < nd.front * 0.5 ? " bad" : ""));
-        tr.append(td(label), td(`${n0.format(r.median.delay_ms)} ms`), env(r.median), td(`${n0.format(r.worst.delay_ms)} ms`), env(r.worst));
+        // the lab adds the chunk to latency; the worst wait is chunk + 2 x inference, so latency = 2 x inference
+        const link = document.createElement("a");
+        link.textContent = "Try it";
+        link.href = `?body=${encodeURIComponent(name)}&chunk=${r.scheme === "real-time" ? 0 : r.chunk_ms}&latency=${Math.min(250, 2 * d.inference_ms)}&dir=180#lab`;
+        link.setAttribute("aria-label", `Open ${label.toLowerCase()} in the lab, shoved from the front at the worst moment`);
+        const go = td(""); go.appendChild(link);
+        tr.append(td(label), td(`${n0.format(r.median.delay_ms)} ms`), env(r.median), td(`${n0.format(r.worst.delay_ms)} ms`), env(r.worst), go);
         tb.appendChild(tr);
       });
       $("#chunk-note").textContent = `${NAMES[name] || name}, ${n0.format(d.inference_ms)} ms inference. With no delay at all it survives ${n0.format(nd.front)} N·s from the front and ${n0.format(nd.side)} from the side.`;
